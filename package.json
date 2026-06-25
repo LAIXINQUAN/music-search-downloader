@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node index.js",
     "electron": "electron .",
-    "build": "electron-builder --win"
+    "build": "electron-builder --win",
+    "postinstall": "echo 'Dependencies installed. Skipping electron download for web deployment.'"
   },
   "build": {
     "appId": "com.laixingquan.musicdownloader",
