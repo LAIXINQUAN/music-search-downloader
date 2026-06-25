@@ -1,0 +1,11 @@
+/**
+ * 音乐搜索路由
+ * GET /api/search?keyword=xxx
+ */
+const express = require('express');
+const router = express.Router();
+const { search } = require('../controllers/searchController');
+
+router.get('/', search);
+
+module.exports = router;

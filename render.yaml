@@ -1,0 +1,14 @@
+# Render 部署配置文件
+# 文档: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: music-search-downloader
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    healthCheckPath: /api
+    envVars:
+      - key: NODE_ENV
+        value: production

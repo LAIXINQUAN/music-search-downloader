@@ -1,0 +1,58 @@
+{
+  "name": "music-downloader",
+  "version": "2.1.2",
+  "description": "音乐搜索与下载平台 - 基于 Electron + Express 的 Windows 桌面客户端",
+  "author": "LAIXINGQUAN (https://github.com/LAIXINGQUAN)",
+  "main": "main.js",
+  "scripts": {
+    "start": "node index.js",
+    "electron": "electron .",
+    "build": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.laixingquan.musicdownloader",
+    "productName": "音乐搜索与下载",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.js",
+      "Music_31107.ico",
+      "public/**/*",
+      "routes/**/*",
+      "controllers/**/*",
+      "services/**/*",
+      "utils/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "Music_31107.ico",
+      "artifactName": "音乐搜索与下载-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "uninstallDisplayName": "音乐搜索与下载",
+      "shortcutName": "音乐搜索与下载"
+    }
+  },
+  "keywords": [],
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.18.0",
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "electron": "^42.4.1",
+    "electron-builder": "^26.15.3"
+  }
+}

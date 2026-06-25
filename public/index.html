@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QB音乐 - GitHub: LAIXINGQUAN</title>
+    <link rel="icon" type="image/x-icon" href="/Music_31107.ico">
+    <style>
+        /* ========== 亮色主题（豆包风格） ========== */
+        :root {
+            --bg: #F7F7F8;
+            --bg-sidebar: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --bg-hover: #F0F0F2;
+            --bg-input: #F0F0F2;
+            --bg-modal: rgba(0,0,0,0.45);
+            --bg-lyrics: #F7F7F8;
+            --text: #1A1A1A;
+            --text-secondary: #6B6B70;
+            --text-muted: #A0A0A6;
+            --border: #EDEEF0;
+            --accent: #4D6BFE;
+            --accent-2: #7B5CFF;
+            --accent-hover: #3D5BF0;
+            --accent-light: #EEF2FF;
+            --accent-gradient: linear-gradient(135deg, #4D6BFE 0%, #7B5CFF 100%);
+            --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+            --shadow-lg: 0 16px 48px rgba(0,0,0,0.10);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 8px;
+            --sidebar-w: 230px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ========== 暗色主题（豆包风格） ========== */
+        [data-theme="dark"] {
+            --bg: #131314;
+            --bg-sidebar: #1A1A1B;
+            --bg-card: #1E1E1F;
+            --bg-hover: #2A2A2C;
+            --bg-input: #2A2A2C;
+            --bg-modal: rgba(0,0,0,0.7);
+            --bg-lyrics: #1E1E1F;
+            --text: #ECECED;
+            --text-secondary: #9A9AA0;
+            --text-muted: #5A5A60;
+            --border: #2A2A2C;
+            --accent: #5B7CFA;
+            --accent-2: #9075FF;
+            --accent-hover: #4A6BE8;
+            --accent-light: #1A2238;
+            --accent-gradient: linear-gradient(135deg, #5B7CFA 0%, #9075FF 100%);
+            --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+            --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            transition: background var(--transition), color var(--transition);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ========== 整体布局 ========== */
+        .app {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* ========== 左侧边栏 ========== */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 16px 12px;
+            flex-shrink: 0;
+            transition: background var(--transition), border var(--transition);
+            -webkit-app-region: drag;
+        }
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px 20px;
+        }
+        .sidebar-logo .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(77,107,254,0.3);
+        }
+        .sidebar-logo .logo-text {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.3px;
+        }
+        .sidebar-section {
+            margin-bottom: 8px;
+        }
+        .sidebar-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 8px 12px 4px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-xs);
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition);
+            -webkit-app-region: no-drag;
+        }
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+        .nav-item.active {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .nav-item .nav-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .sidebar-spacer { flex: 1; }
+        .sidebar-footer {
+            padding: 8px 4px;
+            -webkit-app-region: no-drag;
+        }
+        .theme-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: var(--radius-xs);
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition);
+            border: none;
+            background: none;
+            width: 100%;
+        }
+        .theme-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text);
+        }
+        .author-tag {
+            text-align: center;
+            padding: 12px 8px 4px;
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        .author-tag a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color var(--transition);
+        }
+        .author-tag a:hover { color: var(--accent); }
+
+        /* ========== 主内容区 ========== */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        /* ========== 顶部搜索栏 ========== */
+        .topbar {
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+        .search-wrapper {
+            flex: 1;
+            max-width: 640px;
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: 999px;
+            padding: 0 6px 0 20px;
+            transition: all var(--transition);
+            box-shadow: var(--shadow);
+        }
+        .search-wrapper:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+        .search-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            margin-right: 8px;
+        }
+        .search-input {
+            flex: 1;
+            padding: 12px 0;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+        }
+        .search-input::placeholder { color: var(--text-muted); }
+        .search-btn {
+            padding: 9px 22px;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+        }
+        .search-btn:hover {
+            opacity: 0.92;
+            box-shadow: 0 2px 12px rgba(77,107,254,0.35);
+        }
+        .search-btn:active { transform: scale(0.97); }
+
+        /* ========== 内容滚动区 ========== */
+        .content-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 32px 24px;
+        }
+
+        /* ========== 区块标题 ========== */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0 16px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.3px;
+        }
+        .section-icon {
+            font-size: 20px;
+        }
+
+        /* ========== 标签切换 ========== */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            width: fit-content;
+            border: 1px solid var(--border);
+        }
+        .tab-btn {
+            padding: 7px 18px;
+            border-radius: var(--radius-xs);
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .tab-btn.active {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: 0 2px 8px rgba(77,107,254,0.25);
+        }
+        .tab-btn:hover:not(.active) {
+            color: var(--text);
+            background: var(--bg-hover);
+        }
+
+        /* ========== 歌曲列表 ========== */
+        .song-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .song-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition);
+            gap: 14px;
+        }
+        .song-item:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        .song-index {
+            width: 24px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+        .song-cover {
+            width: 46px;
+            height: 46px;
+            border-radius: var(--radius-xs);
+            background: var(--bg-hover);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .song-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .song-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .song-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .song-singer {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .song-actions .action-btn {
+            padding: 7px 16px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border: none;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .song-actions .action-btn:hover {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        /* ========== 状态提示 ========== */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 14px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .empty-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* ========== 弹窗 ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--bg-modal);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal.show { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            max-width: 520px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 32px;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        @keyframes slideUp {
+            from { transform: translateY(24px) scale(0.97); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-hover);
+            cursor: pointer;
+            font-size: 18px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+        }
+        .modal-close:hover {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .detail-cover {
+            width: 140px;
+            height: 140px;
+            border-radius: var(--radius-sm);
+            margin: 0 auto 18px;
+            overflow: hidden;
+            background: var(--bg-hover);
+            box-shadow: var(--shadow-md);
+        }
+        .detail-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .detail-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+            letter-spacing: -0.3px;
+        }
+        .detail-singer {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+        }
+        .detail-section { margin-bottom: 20px; }
+        .detail-section h3 {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+        }
+        .player-box {
+            background: var(--bg-hover);
+            border-radius: var(--radius-xs);
+            padding: 10px 14px;
+        }
+        .audio-player {
+            width: 100%;
+            height: 36px;
+            border-radius: var(--radius-xs);
+        }
+        .download-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .download-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 14px;
+            background: var(--bg-hover);
+            border-radius: var(--radius-xs);
+            text-decoration: none;
+            color: var(--text);
+            transition: all var(--transition);
+            gap: 12px;
+            border: 1.5px solid transparent;
+        }
+        .download-option:hover {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+        .download-option-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+            background: var(--accent-gradient);
+            color: white;
+        }
+        .download-option-info { flex: 1; min-width: 0; }
+        .download-option-type { font-size: 13px; font-weight: 600; }
+        .download-option-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 1px;
+        }
+        .lyrics-box {
+            background: var(--bg-lyrics);
+            border-radius: var(--radius-xs);
+            padding: 16px 18px;
+            font-size: 13px;
+            line-height: 1.9;
+            white-space: pre-wrap;
+            max-height: 220px;
+            overflow-y: auto;
+            color: var(--text);
+        }
+
+        /* ========== Toast ========== */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text);
+            color: var(--bg);
+            padding: 11px 28px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 2000;
+            animation: toastIn 0.3s ease;
+            box-shadow: var(--shadow-lg);
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* ========== 欢迎页 ========== */
+        .welcome {
+            text-align: center;
+            padding: 80px 20px 40px;
+        }
+        .welcome-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            background: var(--accent-gradient);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(77,107,254,0.25);
+        }
+        .welcome-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        .welcome-subtitle {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        /* ========== 设置弹窗 ========== */
+        .settings-section { margin-bottom: 24px; }
+        .settings-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+        }
+        .settings-options { display: flex; flex-direction: column; gap: 8px; }
+        .radio-card {
+            position: relative;
+            cursor: pointer;
+        }
+        .radio-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .radio-card-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: var(--bg-hover);
+            border-radius: var(--radius-xs);
+            border: 1.5px solid transparent;
+            transition: all var(--transition);
+        }
+        .radio-card input:checked + .radio-card-content {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+        .radio-card:hover .radio-card-content {
+            border-color: var(--border);
+        }
+        .radio-card-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            flex-shrink: 0;
+            background: var(--accent-gradient);
+            color: white;
+        }
+        .radio-card-text { flex: 1; min-width: 0; }
+        .radio-card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+        .radio-card-desc { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+
+        /* ========== 关于区块 ========== */
+        .about-box {
+            background: var(--bg-hover);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            text-align: center;
+        }
+        .about-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .about-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            box-shadow: 0 4px 16px rgba(77,107,254,0.25);
+        }
+        .about-name { font-size: 18px; font-weight: 700; color: var(--text); text-align: left; }
+        .about-version { font-size: 12px; color: var(--text-secondary); text-align: left; }
+        .about-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 14px;
+        }
+        .about-author { font-size: 12px; color: var(--text-muted); }
+        .about-author a { color: var(--accent); text-decoration: none; }
+
+        /* ========== 响应式 ========== */
+        @media (max-width: 768px) {
+            .sidebar { width: 64px; }
+            .sidebar-logo .logo-text,
+            .nav-item span:not(.nav-icon),
+            .sidebar-label,
+            .theme-btn span:not(.nav-icon),
+            .author-tag { display: none; }
+            .nav-item { justify-content: center; }
+            .topbar { padding: 12px 16px; }
+            .content-scroll { padding: 0 16px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- 左侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-icon">&#9835;</div>
+                <div class="logo-text">QB音乐</div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-label">功能</div>
+                <div class="nav-item active" id="navSearch" onclick="switchTab('search')">
+                    <span class="nav-icon">&#128269;</span>
+                    <span>搜索结果</span>
+                </div>
+                <div class="nav-item" id="navHot" onclick="switchTab('hot')">
+                    <span class="nav-icon">&#128293;</span>
+                    <span>热门推荐</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-label">系统</div>
+                <div class="nav-item" id="navSettings" onclick="openSettings()">
+                    <span class="nav-icon">&#9881;</span>
+                    <span>设置</span>
+                </div>
+            </div>
+
+            <div class="sidebar-spacer"></div>
+
+            <div class="sidebar-footer">
+                <button class="theme-btn" id="themeToggle" onclick="toggleTheme()">
+                    <span class="nav-icon" id="themeIcon">&#9728;</span>
+                    <span id="themeText">深色模式</span>
+                </button>
+                <div class="author-tag">
+                    Made with &#9835; · GitHub:<br>
+                    <a href="https://github.com/LAIXINGQUAN" target="_blank">LAIXINGQUAN</a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main">
+            <!-- 顶部搜索栏 -->
+            <div class="topbar">
+                <form class="search-wrapper" onsubmit="handleSearch(event)">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索歌曲、歌手..." autocomplete="off">
+                    <button type="submit" class="search-btn">搜索</button>
+                </form>
+            </div>
+
+            <!-- 内容滚动区 -->
+            <div class="content-scroll">
+                <!-- 搜索结果 -->
+                <div id="searchPanel">
+                    <div class="welcome" id="welcomeBox">
+                        <div class="welcome-icon">&#9835;</div>
+                        <div class="welcome-title">QB音乐</div>
+                        <div class="welcome-subtitle">搜索你喜欢的音乐，一键下载</div>
+                    </div>
+                    <div class="song-list" id="searchResults" style="display:none;"></div>
+                </div>
+
+                <!-- 热门推荐 -->
+                <div id="hotPanel" style="display:none;">
+                    <div class="section-header">
+                        <span class="section-icon">&#128293;</span>
+                        <span class="section-title">热门推荐</span>
+                    </div>
+                    <div class="song-list" id="hotResults"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- 设置弹窗 -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeSettings()">&times;</button>
+            <h2 style="font-size:20px;font-weight:700;margin-bottom:24px;display:flex;align-items:center;gap:8px;">
+                <span style="font-size:22px;">&#9881;</span> 设置
+            </h2>
+
+            <!-- 音源选择 -->
+            <div class="settings-section">
+                <h3 class="settings-label">音源选择</h3>
+                <div class="settings-options">
+                    <label class="radio-card">
+                        <input type="radio" name="source" value="all" checked>
+                        <span class="radio-card-content">
+                            <span class="radio-card-icon">&#127925;</span>
+                            <span class="radio-card-text">
+                                <span class="radio-card-title">全部音源</span>
+                                <span class="radio-card-desc">搜索所有站点，结果最全</span>
+                            </span>
+                        </span>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" name="source" value="gequbao">
+                        <span class="radio-card-content">
+                            <span class="radio-card-icon">&#128269;</span>
+                            <span class="radio-card-text">
+                                <span class="radio-card-title">歌宝库</span>
+                                <span class="radio-card-desc">gequbao.com + .net</span>
+                            </span>
+                        </span>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" name="source" value="toomic">
+                        <span class="radio-card-content">
+                            <span class="radio-card-icon">&#128181;</span>
+                            <span class="radio-card-text">
+                                <span class="radio-card-title">Toomic (酷我)</span>
+                                <span class="radio-card-desc">直接播放下载，速度快</span>
+                            </span>
+                        </span>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" name="source" value="kuwo">
+                        <span class="radio-card-content">
+                            <span class="radio-card-icon">&#127908;</span>
+                            <span class="radio-card-text">
+                                <span class="radio-card-title">酷我音乐</span>
+                                <span class="radio-card-desc">直连酷我API，播放稳定</span>
+                            </span>
+                        </span>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" name="source" value="kugou">
+                        <span class="radio-card-content">
+                            <span class="radio-card-icon">&#127932;</span>
+                            <span class="radio-card-text">
+                                <span class="radio-card-title">酷狗音乐</span>
+                                <span class="radio-card-desc">曲库丰富，部分需VIP</span>
+                            </span>
+                        </span>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" name="source" value="qq">
+                        <span class="radio-card-content">
+                            <span class="radio-card-icon">&#127925;</span>
+                            <span class="radio-card-text">
+                                <span class="radio-card-title">QQ音乐</span>
+                                <span class="radio-card-desc">主流音源，封面丰富</span>
+                            </span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 关闭行为 -->
+            <div class="settings-section">
+                <h3 class="settings-label">关闭行为</h3>
+                <div class="settings-options">
+                    <label class="radio-card">
+                        <input type="radio" name="closeBehavior" value="close" checked>
+                        <span class="radio-card-content">
+                            <span class="radio-card-icon">&#10006;</span>
+                            <span class="radio-card-text">
+                                <span class="radio-card-title">直接关闭</span>
+                                <span class="radio-card-desc">点击关闭按钮退出应用</span>
+                            </span>
+                        </span>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" name="closeBehavior" value="minimize">
+                        <span class="radio-card-content">
+                            <span class="radio-card-icon">&#8212;</span>
+                            <span class="radio-card-text">
+                                <span class="radio-card-title">最小化到托盘</span>
+                                <span class="radio-card-desc">关闭时隐藏到系统托盘</span>
+                            </span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 关于 -->
+            <div class="settings-section">
+                <h3 class="settings-label">关于</h3>
+                <div class="about-box">
+                    <div class="about-logo">
+                        <div class="about-icon">&#9835;</div>
+                        <div>
+                            <div class="about-name">QB音乐</div>
+                            <div class="about-version">版本 2.1.2</div>
+                        </div>
+                    </div>
+                    <div class="about-desc">
+                        基于多源聚合的音乐搜索与下载桌面客户端<br>
+                        支持歌宝库、Toomic(酷我)、网易云等音源<br>
+                        暗亮双主题 · 永久免费
+                    </div>
+                    <div class="about-author">
+                        Made with &#9835; · GitHub:
+                        <a href="https://github.com/LAIXINGQUAN" target="_blank">LAIXINGQUAN</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
+        let currentTab = 'search';
+        let hasSearched = false;
+        // 全局歌曲信息缓存：搜索/热门结果中以 id 为键存储 name/singer/cover，
+        // 用于详情接口返回空字段时回填（kw_/kg_/qq_ 源详情接口返回的 name/singer/cover 为空）
+        const songCache = new Map();
+
+        // ========== 主题管理 ==========
+        /**
+         * 初始化主题，从 localStorage 读取偏好
+         */
+        function initTheme() {
+            const saved = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', saved);
+            updateThemeIcon(saved);
+        }
+        /**
+         * 切换亮/暗主题
+         */
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateThemeIcon(next);
+        }
+        /**
+         * 更新主题图标和文字
+         */
+        function updateThemeIcon(theme) {
+            document.getElementById('themeIcon').innerHTML = theme === 'dark' ? '&#9790;' : '&#9728;';
+            document.getElementById('themeText').textContent = theme === 'dark' ? '浅色模式' : '深色模式';
+        }
+
+        // ========== 初始化 ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initSettings();
+            loadHotSongs();
+        });
+
+        // ========== 设置管理 ==========
+        /**
+         * 初始化设置：从 localStorage 读取音源和关闭行为偏好
+         */
+        function initSettings() {
+            // 音源选择
+            const savedSource = localStorage.getItem('source') || 'all';
+            const sourceRadio = document.querySelector(`input[name="source"][value="${savedSource}"]`);
+            if (sourceRadio) sourceRadio.checked = true;
+
+            // 关闭行为
+            const savedCloseBehavior = localStorage.getItem('closeBehavior') || 'close';
+            const closeRadio = document.querySelector(`input[name="closeBehavior"][value="${savedCloseBehavior}"]`);
+            if (closeRadio) closeRadio.checked = true;
+            // 同步到 Electron 主进程
+            if (window.electronAPI) {
+                window.electronAPI.setCloseBehavior(savedCloseBehavior);
+            }
+
+            // 监听音源选择变化
+            document.querySelectorAll('input[name="source"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    localStorage.setItem('source', e.target.value);
+                    showToast(`音源已切换为：${e.target.parentElement.querySelector('.radio-card-title').textContent}`);
+                });
+            });
+
+            // 监听关闭行为变化
+            document.querySelectorAll('input[name="closeBehavior"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    localStorage.setItem('closeBehavior', e.target.value);
+                    if (window.electronAPI) {
+                        window.electronAPI.setCloseBehavior(e.target.value);
+                    }
+                    showToast(e.target.value === 'minimize' ? '已开启最小化到托盘' : '已设置为直接关闭');
+                });
+            });
+        }
+
+        /**
+         * 打开设置弹窗
+         */
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('show');
+        }
+
+        /**
+         * 关闭设置弹窗
+         */
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('show');
+        }
+
+        // ========== 搜索 ==========
+        /**
+         * 处理搜索表单提交
+         */
+        async function handleSearch(e) {
+            e.preventDefault();
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) { showToast('请输入搜索关键词'); return; }
+            switchTab('search');
+            hasSearched = true;
+            document.getElementById('welcomeBox').style.display = 'none';
+            document.getElementById('searchResults').style.display = '';
+            showLoading('searchResults');
+            try {
+                const source = localStorage.getItem('source') || 'all';
+                const res = await fetch(`${API_BASE}/api/search?keyword=${encodeURIComponent(keyword)}&source=${source}`);
+                const data = await res.json();
+                if (data.success) renderSongList('searchResults', data.data);
+                else showError('searchResults', data.error || '搜索失败');
+            } catch { showError('searchResults', '网络请求失败'); }
+        }
+
+        // ========== 热门 ==========
+        /**
+         * 加载热门歌曲列表
+         */
+        async function loadHotSongs() {
+            showLoading('hotResults');
+            try {
+                const res = await fetch(`${API_BASE}/api/hot`);
+                const data = await res.json();
+                if (data.success) renderSongList('hotResults', data.data);
+                else showError('hotResults', data.error || '加载失败');
+            } catch { showError('hotResults', '网络请求失败'); }
+        }
+
+        // ========== 标签切换 ==========
+        /**
+         * 切换搜索结果/热门推荐标签
+         */
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('navSearch').classList.toggle('active', tab === 'search');
+            document.getElementById('navHot').classList.toggle('active', tab === 'hot');
+            document.getElementById('searchPanel').style.display = tab === 'search' ? '' : 'none';
+            document.getElementById('hotPanel').style.display = tab === 'hot' ? '' : 'none';
+            if (tab === 'hot' && !document.getElementById('hotResults').innerHTML.trim()) loadHotSongs();
+        }
+
+        // ========== 渲染歌曲列表 ==========
+        /**
+         * 渲染歌曲列表到指定容器
+         */
+        function renderSongList(containerId, songs) {
+            const container = document.getElementById(containerId);
+            if (!songs || songs.length === 0) {
+                container.innerHTML = '<div class="empty-message">暂无歌曲</div>';
+                return;
+            }
+            // 缓存每首歌曲的基础信息，供详情页回填空字段使用
+            songs.forEach(s => {
+                if (s && s.id) {
+                    songCache.set(s.id, {
+                        name: s.name || '',
+                        singer: s.singer || '',
+                        cover: s.cover || ''
+                    });
+                }
+            });
+            container.innerHTML = songs.map((s, i) => `
+                <div class="song-item" id="song-${s.id}" onclick="showDetail('${s.id}')">
+                    <div class="song-index">${i + 1}</div>
+                    <div class="song-cover" id="cover-${s.id}">
+                        ${s.cover ? `<img src="${s.cover}" alt="">` : '&#9835;'}
+                    </div>
+                    <div class="song-info">
+                        <div class="song-name">${esc(s.name)}</div>
+                        <div class="song-singer">${esc(s.singer) || '未知歌手'}</div>
+                    </div>
+                    <div class="song-actions">
+                        <button class="action-btn" onclick="event.stopPropagation();showDetail('${s.id}')">详情</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ========== 歌曲详情 ==========
+        /**
+         * 获取并展示歌曲详情
+         * 调用详情接口，并把搜索结果中的 name/singer 作为 query 参数传给后端，
+         * 后端在主播放源为空时使用这些参数搜索网易云作为后备播放源。
+         */
+        async function showDetail(id) {
+            const modal = document.getElementById('detailModal');
+            const body = document.getElementById('modalBody');
+            modal.classList.add('show');
+            body.innerHTML = '<div class="loading"><div class="loading-spinner"></div>加载中</div>';
+            try {
+                // 从缓存中取出搜索结果里的 name/singer，透传给后端用于网易云后备搜索
+                const cached = songCache.get(id) || {};
+                const qs = new URLSearchParams({
+                    name: cached.name || '',
+                    singer: cached.singer || ''
+                }).toString();
+                const res = await fetch(`${API_BASE}/api/music/${id}?${qs}`);
+                const data = await res.json();
+                if (data.success) {
+                    const song = data.data;
+                    // 后端返回空字段时，从搜索结果缓存中回填（解决 kw_/kg_/qq_ 源显示空白问题）
+                    if (cached) {
+                        if (!song.name) song.name = cached.name || '';
+                        if (!song.singer) song.singer = cached.singer || '';
+                        if (!song.cover) song.cover = cached.cover || '';
+                    }
+                    renderDetail(song);
+                    if (song.cover) {
+                        const coverEl = document.getElementById(`cover-${id}`);
+                        if (coverEl && !coverEl.querySelector('img')) {
+                            coverEl.innerHTML = `<img src="${song.cover}" alt="">`;
+                        }
+                    }
+                } else {
+                    body.innerHTML = `<div class="empty-message">${data.error || '加载失败'}</div>`;
+                }
+            } catch { body.innerHTML = '<div class="empty-message">网络请求失败</div>'; }
+        }
+
+        /**
+         * 渲染详情弹窗内容
+         */
+        function renderDetail(song) {
+            const body = document.getElementById('modalBody');
+            let html = `
+                <div class="detail-cover">${song.cover ? `<img src="${song.cover}" alt="">` : ''}</div>
+                <div class="detail-title">${esc(song.name)}</div>
+                <div class="detail-singer">${esc(song.singer) || '未知歌手'}</div>
+            `;
+            if (song.playUrl) {
+                html += `<div class="detail-section">
+                    <h3>在线播放</h3>
+                    <div class="player-box"><audio class="audio-player" controls src="${song.playUrl}"></audio></div>
+                </div>`;
+            }
+            if (song.neteaseId) {
+                html += `<div class="detail-section">
+                    <h3>网易云音乐播放器</h3>
+                    <div class="player-box">
+                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:12px;color:var(--accent);font-weight:600;">&#127925; 网易云后备播放源</div>
+                        <audio class="audio-player" controls src="${API_BASE}/api/netease-play?id=${song.neteaseId}"></audio>
+                    </div>
+                </div>`;
+            }
+            html += `<div class="detail-section"><h3>下载选项</h3><div class="download-options">`;
+            if (song.downloadUrl) {
+                html += `<a class="download-option" href="${API_BASE}/api/download?url=${encodeURIComponent(song.downloadUrl)}&name=${encodeURIComponent(song.name)}" download>
+                    <div class="download-option-icon">&#8595;</div>
+                    <div class="download-option-info"><div class="download-option-type">直接下载 MP3</div><div class="download-option-desc">点击下载到本地</div></div>
+                </a>`;
+            }
+            if (song.extraUrls && song.extraUrls.length) {
+                song.extraUrls.forEach(e => {
+                    html += `<a class="download-option" href="${e.url}" target="_blank">
+                        <div class="download-option-icon">&#9729;</div>
+                        <div class="download-option-info"><div class="download-option-type">${esc(e.type)}</div><div class="download-option-desc">网盘下载，音质更好</div></div>
+                    </a>`;
+                });
+            }
+            html += `</div></div>`;
+            if (song.lyrics) {
+                html += `<div class="detail-section"><h3>歌词</h3><div class="lyrics-box">${esc(song.lyrics)}</div></div>`;
+            }
+            body.innerHTML = html;
+        }
+
+        /**
+         * 关闭详情弹窗
+         */
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('show');
+            const a = document.querySelector('.audio-player');
+            if (a) a.pause();
+        }
+
+        // ========== 工具函数 ==========
+        function showLoading(id) { document.getElementById(id).innerHTML = '<div class="loading"><div class="loading-spinner"></div>加载中</div>'; }
+        function showError(id, msg) { document.getElementById(id).innerHTML = `<div class="empty-message">${msg}</div>`; }
+        function showToast(msg) {
+            const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+            document.body.appendChild(t); setTimeout(() => t.remove(), 2800);
+        }
+        function esc(s) {
+            const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+        }
+
+        // 弹窗交互
+        document.getElementById('detailModal').addEventListener('click', e => { if (e.target.id === 'detailModal') closeModal(); });
+        document.getElementById('settingsModal').addEventListener('click', e => { if (e.target.id === 'settingsModal') closeSettings(); });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { closeModal(); closeSettings(); }
+        });
+    </script>
+</body>
+</html>
