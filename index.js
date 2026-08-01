@@ -11,6 +11,10 @@ const searchRoutes = require('./routes/search');
 const musicRoutes = require('./routes/music');
 const downloadRoutes = require('./routes/download');
 const hotRoutes = require('./routes/hot');
+const wallpaperRoutes = require('./routes/wallpaper');
+const cardKeyRoutes = require('./routes/cardKey');
+const proxyPlayRoutes = require('./routes/proxyPlay');
+const localFileRoutes = require('./routes/localFile');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,6 +38,10 @@ app.use('/api/search', searchRoutes);
 app.use('/api/music', musicRoutes);
 app.use('/api/download', downloadRoutes);
 app.use('/api/hot', hotRoutes);
+app.use('/api/wallpapers', wallpaperRoutes);
+app.use('/api/cardkey', cardKeyRoutes);
+app.use('/api/proxy-play', proxyPlayRoutes);
+app.use('/api/local-file', localFileRoutes);
 
 // 服务根目录图标（让 Electron 浏览器标签页也显示 favicon）
 app.get('/Music_31107.ico', (_req, res) => {
@@ -87,8 +95,20 @@ app.use((_req, res) => {
 app.use(errorHandler);
 
 // 启动服务
-app.listen(PORT, () => {
-  console.log(`音乐搜索与下载平台服务已启动: http://localhost:${PORT}`);
+/**
+ * 导出 serverReady Promise
+ * 在 app.listen 成功时 resolve(port)，失败时 reject(error)
+ * 供 Electron 主进程直接 await，无需 HTTP 轮询
+ */
+const serverReady = new Promise((resolve, reject) => {
+  const server = app.listen(PORT, () => {
+    console.log(`音乐搜索与下载平台服务已启动: http://localhost:${PORT}`);
+    resolve(PORT);
+  });
+  server.on('error', (err) => {
+    console.error('Express 服务启动失败:', err.message);
+    reject(err);
+  });
 });
 
-module.exports = app;
+module.exports = { app, serverReady };

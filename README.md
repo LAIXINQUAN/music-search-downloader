@@ -1,6 +1,18 @@
-# QB音乐 - 音乐搜索与下载平台
+# QB音乐 - 音乐搜索与下载平台 v3.6.3
+
+[![最新版本](https://img.shields.io/badge/版本-3.6.3-blue)]()
+[![下载](https://img.shields.io/badge/下载-Windows安装包-brightgreen)]()
 
 一款基于 Electron + Express 的 Windows 桌面音乐搜索与下载客户端，支持多平台音乐源搜索、在线播放和下载。
+
+## 下载安装
+
+| 版本 | 下载链接 | 说明 |
+|------|---------|------|
+| **v3.6.3** | [QB音乐-Setup-3.6.3.exe](https://github.com/LAIXINGQUAN/music-search-downloader/releases/latest) | Windows 安装包（推荐） |
+| 源代码 | [GitHub 仓库](https://github.com/LAIXINGQUAN/music-search-downloader) | 克隆后自行构建 |
+
+> 安装包约 90~100MB，包含完整 Electron 运行时，下载后双击即可安装。
 
 ## 功能特性
 
@@ -39,7 +51,9 @@ music-search-downloader/
 │   ├── search.js
 │   ├── music.js
 │   ├── download.js
-│   └── hot.js
+│   ├── hot.js
+│   └── wallpaper.js
+├── 授权书.txt            # 软件授权协议
 ├── services/            # 服务层
 │   └── scraper.js       # 多源音乐爬虫服务
 ├── utils/               # 工具类
@@ -79,7 +93,7 @@ npm run electron
 npm run build
 ```
 
-打包后的安装程序位于 `dist/` 目录下。
+打包后的安装程序位于 `dist14/` 目录下。
 
 ## API 接口
 
@@ -89,6 +103,9 @@ npm run build
 | `/api/music/:id` | GET | 获取音乐详情与播放链接 |
 | `/api/download?url=xxx` | GET | 下载音乐文件 |
 | `/api/hot` | GET | 获取热门歌曲 |
+| `/api/wallpapers` | GET | 获取动态壁纸列表 |
+| `/api/wallpapers/video?name=xxx` | GET | 获取壁纸视频流 |
+| `/api/wallpapers/thumbnail?name=xxx` | GET | 获取壁纸缩略图 |
 | `/api/netease-play?id=xxx` | GET | 网易云音乐音频代理（解决跨域） |
 
 ## 支持的音乐源

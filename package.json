@@ -1,20 +1,20 @@
 {
   "name": "music-downloader",
-  "version": "2.1.2",
+  "version": "3.6.3",
   "description": "音乐搜索与下载平台 - 基于 Electron + Express 的 Windows 桌面客户端",
   "author": "LAIXINGQUAN (https://github.com/LAIXINGQUAN)",
   "main": "main.js",
   "scripts": {
     "start": "node index.js",
     "electron": "electron .",
-    "build": "electron-builder --win",
-    "postinstall": "echo 'Dependencies installed. Skipping electron download for web deployment.'"
+    "build": "electron-builder --win"
   },
   "build": {
     "appId": "com.laixingquan.musicdownloader",
-    "productName": "音乐搜索与下载",
+    "productName": "QB音乐",
+    "publish": null,
     "directories": {
-      "output": "dist"
+      "output": "dist14"
     },
     "files": [
       "main.js",
@@ -29,18 +29,25 @@
       "node_modules/**/*",
       "package.json"
     ],
+    "extraResources": [
+      {
+        "from": "动态壁纸",
+        "to": "动态壁纸"
+      }
+    ],
     "win": {
       "target": "nsis",
       "icon": "Music_31107.ico",
-      "artifactName": "音乐搜索与下载-Setup-${version}.${ext}"
+      "artifactName": "QB音乐-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "uninstallDisplayName": "音乐搜索与下载",
-      "shortcutName": "音乐搜索与下载"
+      "uninstallDisplayName": "QB音乐",
+      "shortcutName": "QB音乐",
+      "license": "授权书.txt"
     }
   },
   "keywords": [],
@@ -50,7 +57,9 @@
     "axios": "^1.18.0",
     "cheerio": "^1.2.0",
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "ffmpeg-static": "^5.3.0",
+    "fluent-ffmpeg": "^2.1.3"
   },
   "devDependencies": {
     "electron": "^42.4.1",
