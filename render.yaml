@@ -1,14 +1,13 @@
-# Render 部署配置文件
-# 文档: https://render.com/docs/blueprint-spec
 services:
+  # Express 后端 Web 服务
   - type: web
-    name: music-search-downloader
-    runtime: node
-    plan: free
+    name: qb-music-api
+    env: node
+    region: singapore
     buildCommand: npm install
-    startCommand: npm start
-    autoDeploy: true
-    healthCheckPath: /api
+    startCommand: node index.js
+    plan: free
     envVars:
       - key: NODE_ENV
         value: production
+    autoDeploy: true

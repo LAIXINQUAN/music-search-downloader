@@ -127,7 +127,7 @@ async function readCardKeys() {
  * @returns {string} markdown 内容
  */
 function buildCardKeyMarkdown(keys) {
-  const lines = ['# LAIQB', '', '# 卡密列表', ''];
+  const lines = ['# LAIQB', '', '最新版本：3.6.4', '', '## 下载地址', '- 下载地址：https://github.com/LAIXINQUAN/music-search-downloader/releases/tag/v3.6.4', '', '# 卡密列表', ''];
   keys.forEach((key, idx) => {
     lines.push(`- 卡密 ${idx + 1}：\`${key}\``);
   });
