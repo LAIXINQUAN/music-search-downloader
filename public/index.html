@@ -1505,6 +1505,160 @@
             color: #fff;
         }
 
+        /* 壁纸下载区域 - 可折叠面板 */
+        .imm-wallpaper-download-section {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
+        }
+        .imm-wallpaper-download-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .imm-wallpaper-download-header:hover {
+            background: rgba(255,255,255,0.04);
+        }
+        .imm-wallpaper-download-header span {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+        }
+        .imm-wallpaper-download-arrow {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            transition: transform 0.3s ease;
+        }
+        .imm-wallpaper-download-arrow.open {
+            transform: rotate(180deg);
+        }
+        .imm-wallpaper-download-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, padding 0.35s ease;
+            padding: 0 20px;
+        }
+        .imm-wallpaper-download-body.open {
+            max-height: 600px;
+            padding: 0 20px 16px 20px;
+            overflow-y: auto;
+        }
+        .imm-wallpaper-download-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-radius: 10px;
+            transition: background 0.2s;
+            margin-bottom: 4px;
+        }
+        .imm-wallpaper-download-item:hover {
+            background: rgba(255,255,255,0.06);
+        }
+        .imm-wallpaper-download-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .imm-wallpaper-download-name {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .imm-wallpaper-download-size {
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+            margin-top: 2px;
+        }
+        .imm-wallpaper-download-btn {
+            flex-shrink: 0;
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(167,139,250,0.2);
+            color: #A78BFA;
+            margin-left: 10px;
+        }
+        .imm-wallpaper-download-btn:hover {
+            background: rgba(167,139,250,0.35);
+        }
+        .imm-wallpaper-download-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .imm-wallpaper-download-btn.downloaded {
+            background: rgba(34,197,94,0.2);
+            color: #22C55E;
+        }
+
+        /* 壁纸上传区域 */
+        .imm-wallpaper-upload-section {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 14px 20px;
+            flex-shrink: 0;
+        }
+        .imm-wallpaper-upload-btn {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px dashed rgba(255,255,255,0.2);
+            background: transparent;
+            color: rgba(255,255,255,0.6);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .imm-wallpaper-upload-btn:hover {
+            border-color: rgba(167,139,250,0.5);
+            color: #A78BFA;
+            background: rgba(167,139,250,0.08);
+        }
+        .imm-wallpaper-upload-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .imm-wallpaper-upload-status {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255,255,255,0.45);
+            margin-top: 8px;
+            min-height: 18px;
+        }
+        .imm-wallpaper-upload-progress {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+            display: none;
+        }
+        .imm-wallpaper-upload-progress.show {
+            display: block;
+        }
+        .imm-wallpaper-upload-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #A78BFA, #7C3AED);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        .imm-wallpaper-upload-icon {
+            font-size: 16px;
+        }
+
         /* 顶部工具栏 */
         .immersive-topbar {
             position: absolute;
@@ -4805,15 +4959,21 @@
         document.addEventListener('DOMContentLoaded', () => {
             // 卡密验证：首次启动或未验证时显示锁屏
             let verified = false;
+            let savedKey = null;
             try {
                 const saved = JSON.parse(localStorage.getItem(CARD_KEY_STORE) || '{}');
                 verified = saved.verified === true;
+                savedKey = saved.key || null;
             } catch { verified = false; }
 
             if (verified) {
-                // 已验证过，直接进入应用
+                // 已验证过，立即进入应用（非阻塞）
                 document.getElementById('lockScreen').style.display = 'none';
                 initApp();
+                // 后台静默验证卡密是否仍然有效
+                if (savedKey) {
+                    verifyCardKeyInBackground(savedKey);
+                }
             } else {
                 // 显示锁屏，聚焦输入框
                 const input = document.getElementById('cardKeyInput');
@@ -4824,6 +4984,77 @@
                 });
             }
         });
+
+        /**
+         * 后台静默验证卡密是否仍然有效
+         * 在应用启动后异步执行，不阻塞用户操作
+         * 如果 GitHub Pages 响应慢，会持续轮询直到获取到结果
+         * 若卡密已失效，自动退出并提示用户重新输入
+         * @param {string} savedKey - 本地存储的卡密
+         */
+        async function verifyCardKeyInBackground(savedKey) {
+            let retryCount = 0;
+            const maxRetries = 30; // 最多重试 30 次
+
+            while (retryCount < maxRetries) {
+                try {
+                    const keys = await fetchCardKeys();
+                    if (keys.length > 0) {
+                        // 成功获取到卡密列表，检查当前卡密是否仍在列表中
+                        if (keys.includes(savedKey)) {
+                            // 卡密有效，验证通过
+                            console.log('[卡密验证] 后台验证通过');
+                            return;
+                        } else {
+                            // 卡密已失效，自动退出
+                            console.warn('[卡密验证] 卡密已失效，自动退出');
+                            forceLogoutCardKey('卡密已失效，请重新输入');
+                            return;
+                        }
+                    }
+                    // keys 为空，继续重试
+                } catch (err) {
+                    // GitHub Pages 可能尚未就绪，静默重试
+                    console.log(`[卡密验证] 第 ${retryCount + 1} 次查询失败: ${err.message}`);
+                }
+
+                retryCount++;
+                // 指数退避：1s, 2s, 4s, 8s, 16s, 32s, 64s...(最大 30s)
+                const delay = Math.min(1000 * Math.pow(2, retryCount - 1), 30000);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+
+            // 超过最大重试次数，视为网络问题，不强制退出
+            console.warn('[卡密验证] 超过最大重试次数，跳过本次验证');
+        }
+
+        /**
+         * 强制退出卡密：清除本地验证状态，显示锁屏
+         * @param {string} message - 提示消息
+         */
+        function forceLogoutCardKey(message) {
+            // 清除本地验证状态
+            localStorage.removeItem(CARD_KEY_STORE);
+            // 显示锁屏
+            const lock = document.getElementById('lockScreen');
+            if (lock) lock.style.display = 'flex';
+            // 显示提示消息
+            const msg = document.getElementById('cardKeyMsg');
+            if (msg) {
+                msg.className = 'lock-msg error';
+                msg.textContent = message;
+            }
+            // 聚焦输入框
+            const input = document.getElementById('cardKeyInput');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            // 暂停播放（如果有）
+            if (typeof immState !== 'undefined' && immState.audio) {
+                immState.audio.pause();
+            }
+        }
 
         // ========== 设置管理 ==========
         /**
@@ -4903,7 +5134,7 @@
         }
 
         /**
-         * 检查更新：从 GitHub Pages 获取最新版本号并比较
+         * 检查更新：通过后端代理获取最新版本号并比较
          */
         async function checkForUpdate() {
             const modal = document.getElementById('updateModal');
@@ -4915,21 +5146,19 @@
             if (refreshBtn) refreshBtn.classList.add('refreshing');
             body.innerHTML = '<div class="loading"><div class="loading-spinner"></div>检查更新中...</div>';
 
-            const currentVersion = '3.6.3';
-            const updateUrl = 'https://laixinquan.github.io/LAIQB/';
+            const currentVersion = '3.6.4';
 
             try {
-                const res = await fetch(updateUrl);
-                const text = await res.text();
+                // 通过后端代理获取版本信息，避免前端直接访问 GitHub Pages 超时
+                const res = await fetch(`${API_BASE}/api/cardkey/check-update`);
+                const data = await res.json();
 
-                // 解析最新版本号：匹配 "最新版本：X.X.X"
-                const versionMatch = text.match(/最新版本：(\d+\.\d+\.\d+)/);
-                if (!versionMatch) {
+                if (!data.success) {
                     body.innerHTML = `
                         <div class="update-modal-body">
                             <div class="update-modal-icon">&#9888;</div>
                             <div class="update-modal-title">检查更新失败</div>
-                            <div class="update-modal-desc">无法获取版本信息，请稍后重试</div>
+                            <div class="update-modal-desc">${data.error || '无法获取版本信息，请稍后重试'}</div>
                             <button class="update-modal-link" onclick="closeUpdateModal()" style="background:var(--bg-hover);color:var(--text);">关闭</button>
                         </div>
                     `;
@@ -4937,11 +5166,8 @@
                     return;
                 }
 
-                const latestVersion = versionMatch[1];
-
-                // 解析下载地址：匹配 "下载地址：..."
-                const downloadMatch = text.match(/下载地址：(https?:\/\/\S+)/);
-                const downloadUrl = downloadMatch ? downloadMatch[1] : '';
+                const latestVersion = data.latestVersion;
+                const downloadUrl = data.downloadUrl || '';
 
                 // 比较版本号
                 if (compareVersions(currentVersion, latestVersion) >= 0) {
@@ -7617,6 +7843,215 @@
         }
 
         /**
+         * 可下载的大壁纸列表
+         * 指向 GitHub Release 中的壁纸文件
+         */
+        const AVAILABLE_WALLPAPERS = [
+            { name: "10、枫叶雪", filename: "feng-ye-xue.mp4", size: "62.5MB", url: "https://github.com/LAIXINQUAN/music-search-downloader/releases/download/v3.6.3/feng-ye-xue.mp4" },
+            { name: "1、湖滨小屋", filename: "hu-bin-xiao-wu.mp4", size: "62.8MB", url: "https://github.com/LAIXINQUAN/music-search-downloader/releases/download/v3.6.3/hu-bin-xiao-wu.mp4" },
+            { name: "24、孤岛", filename: "gu-dao.mp4", size: "69.2MB", url: "https://github.com/LAIXINQUAN/music-search-downloader/releases/download/v3.6.3/gu-dao.mp4" },
+            { name: "2、cat lying in the sun", filename: "cat-in-sun.mp4", size: "86MB", url: "https://github.com/LAIXINQUAN/music-search-downloader/releases/download/v3.6.3/cat-in-sun.mp4" },
+            { name: "30、rocket league tree", filename: "rocket-league-tree.mp4", size: "147.1MB", url: "https://github.com/LAIXINQUAN/music-search-downloader/releases/download/v3.6.3/rocket-league-tree.mp4" },
+            { name: "9、Tiny Tinas Wonderland", filename: "tiny-tinas.mp4", size: "119.4MB", url: "https://github.com/LAIXINQUAN/music-search-downloader/releases/download/v3.6.3/tiny-tinas.mp4" },
+            { name: "palm trees in a strong wind", filename: "palm-trees-wind.mp4", size: "451.8MB", url: "https://github.com/LAIXINQUAN/music-search-downloader/releases/download/v3.6.3/palm-trees-wind.mp4" },
+            { name: "Snowfall in Forest 4K", filename: "snowfall-forest.mp4", size: "69.2MB", url: "https://github.com/LAIXINQUAN/music-search-downloader/releases/download/v3.6.3/snowfall-forest.mp4" },
+            { name: "摩天轮", filename: "mo-tian-lun.mp4", size: "57.1MB", url: "https://github.com/LAIXINQUAN/music-search-downloader/releases/download/v3.6.3/mo-tian-lun.mp4" }
+        ];
+
+        /**
+         * 记录已下载完成的壁纸文件名（内存 + 本地壁纸列表对比）
+         */
+        const immDownloadedSet = new Set();
+
+        /**
+         * 切换下载区域的展开/收起
+         */
+        function immToggleDownloadSection() {
+            const body = document.getElementById('immDownloadBody');
+            const arrow = document.getElementById('immDownloadArrow');
+            if (!body || !arrow) return;
+            const isOpen = body.classList.toggle('open');
+            arrow.classList.toggle('open', isOpen);
+            if (isOpen) {
+                immRenderDownloadList();
+            }
+        }
+
+        /**
+         * 渲染可下载壁纸列表
+         * 先从后端获取本地已有壁纸文件名，与可下载列表对比标记已下载状态
+         */
+        async function immRenderDownloadList() {
+            const list = document.getElementById('immDownloadList');
+            if (!list) return;
+
+            // 从后端获取本地已有壁纸文件名
+            try {
+                const res = await fetch(`${API_BASE}/api/wallpapers`);
+                const data = await res.json();
+                if (data.success && data.wallpapers) {
+                    data.wallpapers.forEach(w => immDownloadedSet.add(w.filename));
+                }
+            } catch { /* 获取失败不影响渲染 */ }
+
+            list.innerHTML = AVAILABLE_WALLPAPERS.map((wp, index) => {
+                const isDownloaded = immDownloadedSet.has(wp.filename);
+                const btnText = isDownloaded ? '已下载' : '下载';
+                const btnClass = isDownloaded ? 'imm-wallpaper-download-btn downloaded' : 'imm-wallpaper-download-btn';
+                return `
+                    <div class="imm-wallpaper-download-item">
+                        <div class="imm-wallpaper-download-info">
+                            <div class="imm-wallpaper-download-name" title="${esc(wp.filename)}">${esc(wp.name)}</div>
+                            <div class="imm-wallpaper-download-size">${wp.size}</div>
+                        </div>
+                        <button class="${btnClass}" data-index="${index}" onclick="immStartDownload(${index})" ${isDownloaded || !wp.url ? 'disabled' : ''}>
+                            ${btnText}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /**
+         * 开始下载指定壁纸
+         * @param {number} index - 壁纸在 AVAILABLE_WALLPAPERS 中的索引
+         */
+        async function immStartDownload(index) {
+            const wp = AVAILABLE_WALLPAPERS[index];
+            if (!wp || !wp.url) {
+                showToast('该壁纸暂无下载链接');
+                return;
+            }
+            const btn = document.querySelector(`.imm-wallpaper-download-btn[data-index="${index}"]`);
+            if (!btn) return;
+
+            btn.disabled = true;
+            btn.textContent = '下载中...';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/wallpapers/download`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: wp.url, filename: wp.filename })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    immDownloadedSet.add(wp.filename);
+                    btn.textContent = '已下载';
+                    btn.classList.add('downloaded');
+                    btn.disabled = true;
+                    showToast(`壁纸 "${wp.name}" 下载成功`);
+                    // 刷新壁纸列表
+                    immLoadWallpapers();
+                } else {
+                    btn.textContent = '下载失败';
+                    btn.disabled = false;
+                    showToast(`下载失败: ${data.error}`);
+                }
+            } catch (error) {
+                btn.textContent = '下载失败';
+                btn.disabled = false;
+                showToast('下载失败，请检查网络连接');
+            }
+        }
+
+        /**
+         * 上传壁纸 - 触发文件选择对话框
+         */
+        function immUploadWallpaper() {
+            const fileInput = document.getElementById('immFileInput');
+            if (fileInput) {
+                fileInput.value = '';
+                fileInput.click();
+            }
+        }
+
+        /**
+         * 文件选择后的处理 - 自动上传
+         * @param {Event} event - 文件选择事件
+         */
+        async function immOnFileSelected(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // 检查文件类型
+            const allowedTypes = ['.mp4', '.webm', '.mov'];
+            const ext = '.' + file.name.split('.').pop().toLowerCase();
+            if (!allowedTypes.includes(ext)) {
+                document.getElementById('immUploadStatus').textContent = '不支持的文件类型，仅支持 .mp4、.webm、.mov';
+                return;
+            }
+
+            // 检查文件大小（500MB）
+            const maxSize = 500 * 1024 * 1024;
+            if (file.size > maxSize) {
+                document.getElementById('immUploadStatus').textContent = '文件大小超过限制（最大 500MB）';
+                return;
+            }
+
+            const btn = document.getElementById('immUploadBtn');
+            const status = document.getElementById('immUploadStatus');
+            const progress = document.getElementById('immUploadProgress');
+            const progressBar = document.getElementById('immUploadProgressBar');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="imm-wallpaper-upload-icon">&#128206;</span> 上传中...';
+            status.textContent = '正在上传...';
+            progress.classList.add('show');
+            progressBar.style.width = '0%';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                // 使用 XMLHttpRequest 实现上传进度跟踪
+                const result = await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', `${API_BASE}/api/wallpapers/upload`);
+
+                    xhr.upload.onprogress = (e) => {
+                        if (e.lengthComputable) {
+                            const percent = Math.round((e.loaded / e.total) * 100);
+                            progressBar.style.width = percent + '%';
+                            status.textContent = `正在上传... ${percent}%`;
+                        }
+                    };
+
+                    xhr.onload = () => {
+                        try {
+                            resolve(JSON.parse(xhr.responseText));
+                        } catch {
+                            reject(new Error('解析响应失败'));
+                        }
+                    };
+
+                    xhr.onerror = () => reject(new Error('上传失败'));
+                    xhr.send(formData);
+                });
+
+                if (result.success) {
+                    status.textContent = `上传成功: ${result.filename}`;
+                    progressBar.style.width = '100%';
+                    showToast('壁纸上传成功');
+                    // 刷新壁纸列表
+                    immLoadWallpapers();
+                } else {
+                    status.textContent = `上传失败: ${result.error}`;
+                }
+            } catch (error) {
+                status.textContent = '上传失败，请重试';
+                showToast('壁纸上传失败');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="imm-wallpaper-upload-icon">&#128206;</span> 选择本地视频作为壁纸';
+                setTimeout(() => {
+                    progress.classList.remove('show');
+                    status.textContent = '';
+                }, 3000);
+            }
+        }
+
+        /**
          * 重置控制条隐藏计时器（3秒无操作自动隐藏）
          */
         function resetImmHideTimer() {
@@ -7675,6 +8110,30 @@
             </div>
             <div class="imm-wallpaper-grid" id="immWallpaperGrid">
                 <div class="imm-wallpaper-loading">加载中...</div>
+            </div>
+
+            <!-- 下载更多壁纸区域 -->
+            <div class="imm-wallpaper-download-section">
+                <div class="imm-wallpaper-download-header" onclick="immToggleDownloadSection()">
+                    <span>下载更多壁纸</span>
+                    <span class="imm-wallpaper-download-arrow" id="immDownloadArrow">&#9660;</span>
+                </div>
+                <div class="imm-wallpaper-download-body" id="immDownloadBody">
+                    <div id="immDownloadList"></div>
+                </div>
+            </div>
+
+            <!-- 上传壁纸区域 -->
+            <div class="imm-wallpaper-upload-section">
+                <button class="imm-wallpaper-upload-btn" id="immUploadBtn" onclick="immUploadWallpaper()">
+                    <span class="imm-wallpaper-upload-icon">&#128206;</span>
+                    选择本地视频作为壁纸
+                </button>
+                <div class="imm-wallpaper-upload-status" id="immUploadStatus"></div>
+                <div class="imm-wallpaper-upload-progress" id="immUploadProgress">
+                    <div class="imm-wallpaper-upload-progress-bar" id="immUploadProgressBar"></div>
+                </div>
+                <input type="file" id="immFileInput" accept="video/*" style="display:none" onchange="immOnFileSelected(event)">
             </div>
         </div>
 

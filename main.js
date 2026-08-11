@@ -14,11 +14,14 @@ let serverPort = 3000;
 /**
  * 启动 Express 后端服务
  * 直接 await index.js 导出的 serverReady Promise，确保服务完全就绪
- * 如果默认端口被占用则递增重试
+ * 如果默认端口被占用则递增重试，最多重试 MAX_PORT_RETRIES 次
+ * 全部失败则弹出错误对话框并退出应用
  * @param {number} [port=3000] - 起始端口号
+ * @param {number} [retryCount=0] - 当前重试次数
  * @returns {Promise<number>} 实际监听的端口号
  */
-async function startServer(port = 3000) {
+const MAX_PORT_RETRIES = 20; // 最多尝试 20 个端口（3000-3019）
+async function startServer(port = 3000, retryCount = 0) {
   process.env.PORT = String(port);
   try {
     const { serverReady } = require('./index');
@@ -27,21 +30,33 @@ async function startServer(port = 3000) {
     console.log(`后端服务已就绪: http://localhost:${actualPort}`);
     return actualPort;
   } catch (err) {
-    // 端口被占用（EADDRINUSE），递增重试
-    if (err.code === 'EADDRINUSE' && port < 65535) {
+    // 端口被占用（EADDRINUSE），在重试上限内递增重试
+    if (err.code === 'EADDRINUSE' && retryCount < MAX_PORT_RETRIES) {
       console.warn(`端口 ${port} 被占用，尝试 ${port + 1}...`);
       // 清除 require 缓存，否则 index.js 不会重新执行
       delete require.cache[require.resolve('./index')];
       // 同时清除 index.js 依赖的模块缓存
       ['./routes/search', './routes/music', './routes/download', './routes/hot',
+       './routes/cardKey', './routes/proxyPlay',
        './routes/localFile', './routes/wallpaper',
-       './services/scraper', './utils/errorHandler'].forEach(m => {
+       './controllers/searchController', './controllers/downloadController',
+       './controllers/cardKeyController', './controllers/proxyPlayController',
+       './services/scraper', './services/cardKeyService',
+       './utils/errorHandler'].forEach(m => {
         try { delete require.cache[require.resolve(m)]; } catch {}
       });
-      return startServer(port + 1);
+      return startServer(port + 1, retryCount + 1);
     }
+    // 所有端口均被占用或其他错误，弹出错误对话框并退出
     console.error('后端服务启动失败:', err.message);
-    return port;
+    dialog.showErrorBox(
+      '服务启动失败',
+      `无法在端口 3000-${port} 范围内启动服务。\n\n` +
+      `错误原因: ${err.message}\n\n` +
+      '请检查是否有其他程序占用了这些端口，或重启电脑后重试。'
+    );
+    app.quit();
+    throw err;
   }
 }
 

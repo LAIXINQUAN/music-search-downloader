@@ -35,7 +35,13 @@ async function proxy(req, res) {
     return res.status(400).json({ success: false, error: '缺少音频链接参数' });
   }
 
-  const audioUrl = decodeURIComponent(url);
+  // 解码 URL（可能已被编码，解码失败则使用原始值）
+  let audioUrl = url;
+  try {
+    audioUrl = decodeURIComponent(url);
+  } catch {
+    // 解码失败，使用原始 URL
+  }
   if (!audioUrl.startsWith('http')) {
     return res.status(400).json({ success: false, error: '无效的音频链接' });
   }
