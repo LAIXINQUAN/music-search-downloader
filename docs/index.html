@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QB音乐 - Windows 桌面音乐搜索与下载平台</title>
+<meta name="description" content="QB音乐是一款基于 Electron + Express 的 Windows 桌面音乐客户端，支持多平台音乐源搜索、在线播放和下载。">
+<link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/LAIXINQUAN/music-search-downloader/main/Music_31107.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ========== CSS Variables ========== */
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #111118;
+  --bg-card: #16161f;
+  --bg-card-hover: #1c1c28;
+  --border: #1e1e2e;
+  --border-glow: rgba(139, 92, 246, 0.3);
+  --text-primary: #f0f0f5;
+  --text-secondary: #8888a0;
+  --text-muted: #555570;
+  --accent: #8b5cf6;
+  --accent-light: #a78bfa;
+  --accent-glow: rgba(139, 92, 246, 0.4);
+  --accent-2: #06b6d4;
+  --accent-2-glow: rgba(6, 182, 212, 0.3);
+  --gold: #f59e0b;
+  --gold-glow: rgba(245, 158, 11, 0.3);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  --font-display: 'Outfit', 'Noto Sans SC', sans-serif;
+  --font-body: 'Noto Sans SC', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --max-width: 1200px;
+}
+
+/* ========== Reset & Base ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== Background Effects ========== */
+.bg-glow {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+.bg-glow-1 { width: 600px; height: 600px; background: var(--accent); top: -200px; left: -100px; animation: floatGlow 8s ease-in-out infinite; }
+.bg-glow-2 { width: 500px; height: 500px; background: var(--accent-2); bottom: -150px; right: -100px; animation: floatGlow 10s ease-in-out infinite reverse; }
+.bg-glow-3 { width: 400px; height: 400px; background: var(--gold); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: floatGlow 12s ease-in-out infinite 2s; }
+
+@keyframes floatGlow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+/* ========== Noise Overlay ========== */
+.noise-overlay {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ========== Navigation ========== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(10, 10, 15, 0.75);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: all var(--transition);
+}
+.nav-inner {
+  max-width: var(--max-width); margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between; height: 64px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px; text-decoration: none;
+  font-family: var(--font-display); font-weight: 700; font-size: 20px; color: var(--text-primary);
+}
+.nav-logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; box-shadow: 0 4px 20px var(--accent-glow);
+}
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a {
+  text-decoration: none; color: var(--text-secondary); font-size: 14px; font-weight: 500;
+  transition: color var(--transition); position: relative;
+}
+.nav-links a:hover { color: var(--text-primary); }
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+  background: var(--accent); border-radius: 1px; transition: width var(--transition);
+}
+.nav-links a:hover::after { width: 100%; }
+.nav-cta {
+  padding: 8px 20px; border-radius: 999px; background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: white; text-decoration: none; font-size: 14px; font-weight: 600;
+  transition: all var(--transition); box-shadow: 0 4px 16px var(--accent-glow);
+}
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 24px var(--accent-glow); }
+
+/* ========== Hero Section ========== */
+.hero {
+  position: relative; z-index: 2; min-height: 100vh;
+  display: flex; align-items: center; padding: 120px 24px 80px;
+}
+.hero-inner {
+  max-width: var(--max-width); margin: 0 auto; width: 100%;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.hero-text { animation: heroFadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes heroFadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px;
+  border-radius: 999px; border: 1px solid var(--border-glow);
+  background: rgba(139, 92, 246, 0.08); font-size: 13px; color: var(--accent-light);
+  margin-bottom: 24px; font-weight: 500;
+}
+.hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.hero h1 {
+  font-family: var(--font-display); font-size: clamp(42px, 6vw, 64px); font-weight: 800;
+  line-height: 1.1; margin-bottom: 20px; letter-spacing: -0.02em;
+}
+.hero h1 .gradient-text {
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-2) 50%, var(--gold) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-desc {
+  font-size: 18px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 36px; max-width: 480px;
+}
+.hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px;
+  border-radius: 999px; font-size: 15px; font-weight: 600; text-decoration: none;
+  transition: all var(--transition); cursor: pointer; border: none; font-family: var(--font-body);
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  color: white; box-shadow: 0 8px 32px var(--accent-glow);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px var(--accent-glow); }
+.btn-secondary {
+  background: rgba(255,255,255,0.06); color: var(--text-primary);
+  border: 1px solid var(--border); backdrop-filter: blur(10px);
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--border-glow); }
+.btn-icon { width: 18px; height: 18px; }
+
+/* Hero Mockup */
+.hero-mockup {
+  position: relative; animation: heroFadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+  perspective: 1000px;
+}
+.mockup-window {
+  background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border);
+  overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 120px var(--accent-glow);
+  transform: rotateY(-5deg) rotateX(3deg); transition: transform 0.3s ease;
+}
+.mockup-window:hover { transform: rotateY(-2deg) rotateX(1deg); }
+.mockup-titlebar {
+  height: 36px; background: var(--bg-secondary); display: flex; align-items: center;
+  padding: 0 14px; gap: 8px; border-bottom: 1px solid var(--border);
+}
+.mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+.mockup-dot:nth-child(1) { background: #ff5f57; }
+.mockup-dot:nth-child(2) { background: #febc2e; }
+.mockup-dot:nth-child(3) { background: #28c840; }
+.mockup-title {
+  flex: 1; text-align: center; font-size: 12px; color: var(--text-muted); margin-right: 40px;
+}
+.mockup-body {
+  padding: 20px; display: flex; flex-direction: column; gap: 12px;
+}
+.mockup-sidebar {
+  display: flex; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+.mockup-nav-item {
+  padding: 6px 14px; border-radius: 6px; font-size: 12px; color: var(--text-muted);
+  background: var(--bg-secondary);
+}
+.mockup-nav-item.active { background: var(--accent); color: white; }
+.mockup-search {
+  height: 32px; border-radius: 8px; background: var(--bg-secondary); border: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 12px; gap: 8px;
+}
+.mockup-search-icon { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--text-muted); }
+.mockup-search-text { font-size: 12px; color: var(--text-muted); }
+.mockup-song-list {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.mockup-song {
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+  border-radius: 8px; background: var(--bg-secondary);
+}
+.mockup-song-cover {
+  width: 36px; height: 36px; border-radius: 6px; flex-shrink: 0;
+}
+.mockup-song-cover:nth-child(1) { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+.mockup-song-info { flex: 1; }
+.mockup-song-name { height: 10px; width: 60%; background: var(--text-secondary); border-radius: 3px; margin-bottom: 4px; }
+.mockup-song-artist { height: 8px; width: 40%; background: var(--text-muted); border-radius: 3px; }
+.mockup-song-dur { height: 8px; width: 30px; background: var(--text-muted); border-radius: 3px; }
+.mockup-player {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  background: var(--bg-secondary); border-radius: 10px; margin-top: 4px;
+}
+.mockup-player-cover { width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); flex-shrink: 0; }
+.mockup-player-info { flex: 1; }
+.mockup-player-name { height: 10px; width: 50%; background: var(--text-primary); border-radius: 3px; margin-bottom: 4px; }
+.mockup-player-artist { height: 8px; width: 35%; background: var(--text-secondary); border-radius: 3px; }
+.mockup-player-controls { display: flex; gap: 10px; }
+.mockup-ctrl { width: 24px; height: 24px; border-radius: 50%; background: var(--text-secondary); }
+.mockup-ctrl.play { background: var(--accent); width: 28px; height: 28px; }
+.mockup-progress { height: 3px; background: var(--border); border-radius: 2px; }
+.mockup-progress-fill { width: 45%; height: 100%; background: var(--accent); border-radius: 2px; }
+
+/* Equalizer animation in mockup */
+.mockup-eq {
+  display: flex; gap: 2px; align-items: flex-end; height: 20px;
+}
+.mockup-eq-bar {
+  width: 3px; border-radius: 1px; background: var(--accent);
+  animation: eqBounce 0.8s ease-in-out infinite alternate;
+}
+.mockup-eq-bar:nth-child(1) { height: 60%; animation-delay: 0s; }
+.mockup-eq-bar:nth-child(2) { height: 100%; animation-delay: 0.2s; }
+.mockup-eq-bar:nth-child(3) { height: 40%; animation-delay: 0.4s; }
+.mockup-eq-bar:nth-child(4) { height: 80%; animation-delay: 0.1s; }
+.mockup-eq-bar:nth-child(5) { height: 50%; animation-delay: 0.3s; }
+@keyframes eqBounce {
+  from { transform: scaleY(0.4); }
+  to { transform: scaleY(1); }
+}
+
+/* ========== Section Common ========== */
+.section {
+  position: relative; z-index: 2; padding: 100px 24px;
+}
+.section-inner { max-width: var(--max-width); margin: 0 auto; }
+.section-label {
+  display: inline-block; font-size: 13px; font-weight: 600; color: var(--accent-light);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--font-display); font-size: clamp(32px, 5vw, 48px); font-weight: 700;
+  margin-bottom: 16px; letter-spacing: -0.02em;
+}
+.section-desc {
+  font-size: 17px; color: var(--text-secondary); max-width: 600px; margin-bottom: 56px;
+}
+
+/* ========== Features Grid ========== */
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+}
+.feature-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 32px 28px; transition: all var(--transition); position: relative; overflow: hidden;
+}
+.feature-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  opacity: 0; transition: opacity var(--transition);
+}
+.feature-card:hover { border-color: var(--border-glow); transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.3); }
+.feature-card:hover::before { opacity: 1; }
+.feature-icon {
+  width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center;
+  justify-content: center; font-size: 22px; margin-bottom: 20px;
+  background: rgba(139, 92, 246, 0.1); color: var(--accent-light);
+}
+.feature-card:nth-child(2) .feature-icon { background: rgba(6, 182, 212, 0.1); color: var(--accent-2); }
+.feature-card:nth-child(3) .feature-icon { background: rgba(245, 158, 11, 0.1); color: var(--gold); }
+.feature-card:nth-child(4) .feature-icon { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.feature-card:nth-child(5) .feature-icon { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.feature-card:nth-child(6) .feature-icon { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+.feature-card h3 { font-family: var(--font-display); font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.feature-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+/* ========== Tech Stack ========== */
+.tech-section { background: var(--bg-secondary); }
+.tech-tags { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 48px; }
+.tech-tag {
+  padding: 10px 20px; border-radius: 999px; font-size: 14px; font-weight: 500;
+  border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary);
+  transition: all var(--transition); cursor: default;
+}
+.tech-tag:hover { border-color: var(--border-glow); color: var(--text-primary); transform: translateY(-2px); }
+
+/* ========== Terminal Block ========== */
+.terminal {
+  background: #0d0d14; border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.terminal-header {
+  height: 40px; background: #13131e; display: flex; align-items: center;
+  padding: 0 16px; gap: 8px; border-bottom: 1px solid var(--border);
+}
+.terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+.terminal-dot:nth-child(1) { background: #ff5f57; }
+.terminal-dot:nth-child(2) { background: #febc2e; }
+.terminal-dot:nth-child(3) { background: #28c840; }
+.terminal-title { flex: 1; text-align: center; font-size: 12px; color: var(--text-muted); margin-right: 40px; font-family: var(--font-mono); }
+.terminal-body {
+  padding: 24px; font-family: var(--font-mono); font-size: 13px; line-height: 1.8;
+  color: #a0a0b8;
+}
+.terminal-prompt { color: var(--accent-light); }
+.terminal-command { color: #e0e0f0; }
+.terminal-comment { color: #555570; }
+.terminal-output { color: #22c55e; }
+.terminal-cursor {
+  display: inline-block; width: 8px; height: 16px; background: var(--accent-light);
+  animation: blink 1s step-end infinite; vertical-align: text-bottom; margin-left: 2px;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ========== Download Section ========== */
+.download-section { text-align: center; }
+.download-card {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 24px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 48px 64px; position: relative; overflow: hidden;
+  box-shadow: 0 0 80px rgba(139, 92, 246, 0.08);
+}
+.download-card::before {
+  content: ''; position: absolute; inset: 0; border-radius: var(--radius); padding: 1px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2), var(--gold));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0.3;
+}
+.download-version {
+  font-family: var(--font-mono); font-size: 14px; color: var(--accent-light);
+  padding: 4px 14px; border-radius: 999px; background: rgba(139, 92, 246, 0.1);
+  border: 1px solid var(--border-glow);
+}
+.download-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; }
+.download-info { font-size: 14px; color: var(--text-muted); display: flex; gap: 24px; }
+.download-info span { display: flex; align-items: center; gap: 6px; }
+.btn-download {
+  padding: 16px 48px; font-size: 17px; border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: white; text-decoration: none; font-weight: 700;
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
+  transition: all var(--transition); display: inline-flex; align-items: center; gap: 10px;
+}
+.btn-download:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(139, 92, 246, 0.4); }
+
+/* ========== Footer ========== */
+.footer {
+  position: relative; z-index: 2; border-top: 1px solid var(--border);
+  padding: 40px 24px; text-align: center;
+}
+.footer-inner { max-width: var(--max-width); margin: 0 auto; }
+.footer-text { font-size: 14px; color: var(--text-muted); }
+.footer-text a { color: var(--accent-light); text-decoration: none; transition: color var(--transition); }
+.footer-text a:hover { color: var(--accent); }
+
+/* ========== Scroll Animation ========== */
+.scroll-reveal {
+  opacity: 0; transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ========== Responsive ========== */
+@media (max-width: 1024px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 48px; text-align: center; }
+  .hero-desc { margin: 0 auto 36px; }
+  .hero-actions { justify-content: center; }
+  .hero-mockup { max-width: 500px; margin: 0 auto; }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hero { padding: 100px 20px 60px; min-height: auto; }
+  .hero h1 { font-size: 36px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .download-card { padding: 32px 28px; }
+  .section { padding: 60px 20px; }
+  .mockup-window { transform: none; }
+  .mockup-window:hover { transform: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Background Effects -->
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+<div class="bg-glow bg-glow-3"></div>
+<div class="noise-overlay"></div>
+
+<!-- Navigation -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">&#9835;</div>
+      QB音乐
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">功能特性</a></li>
+      <li><a href="#tech">技术栈</a></li>
+      <li><a href="#install">安装指南</a></li>
+      <li><a href="#download">下载</a></li>
+    </ul>
+    <a href="https://github.com/LAIXINQUAN/music-search-downloader" class="nav-cta" target="_blank">GitHub</a>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span> Windows Desktop
+      </div>
+      <h1>
+        <span class="gradient-text">QB音乐</span><br>
+        你的桌面音乐中心
+      </h1>
+      <p class="hero-desc">
+        基于 Electron + Express 构建的 Windows 桌面音乐客户端。
+        支持多平台音乐源搜索、高清在线播放与下载，沉浸式聆听体验。
+      </p>
+      <div class="hero-actions">
+        <a href="#download" class="btn btn-primary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          立即下载
+        </a>
+        <a href="https://github.com/LAIXINQUAN/music-search-downloader" class="btn btn-secondary" target="_blank">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          源代码
+        </a>
+      </div>
+    </div>
+    <div class="hero-mockup">
+      <div class="mockup-window">
+        <div class="mockup-titlebar">
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+          <div class="mockup-title">QB音乐 v3.6.5</div>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-sidebar">
+            <div class="mockup-nav-item active">搜索</div>
+            <div class="mockup-nav-item">热门</div>
+            <div class="mockup-nav-item">下载</div>
+            <div class="mockup-nav-item">本地</div>
+          </div>
+          <div class="mockup-search">
+            <div class="mockup-search-icon"></div>
+            <div class="mockup-search-text">搜索你想听的音乐...</div>
+          </div>
+          <div class="mockup-song-list">
+            <div class="mockup-song">
+              <div class="mockup-song-cover"></div>
+              <div class="mockup-song-info">
+                <div class="mockup-song-name"></div>
+                <div class="mockup-song-artist"></div>
+              </div>
+              <div class="mockup-song-dur"></div>
+            </div>
+            <div class="mockup-song">
+              <div class="mockup-song-cover" style="background:linear-gradient(135deg,#06b6d4,#0ea5e9)"></div>
+              <div class="mockup-song-info">
+                <div class="mockup-song-name" style="width:50%"></div>
+                <div class="mockup-song-artist" style="width:35%"></div>
+              </div>
+              <div class="mockup-song-dur"></div>
+            </div>
+            <div class="mockup-song">
+              <div class="mockup-song-cover" style="background:linear-gradient(135deg,#f59e0b,#f97316)"></div>
+              <div class="mockup-song-info">
+                <div class="mockup-song-name" style="width:55%"></div>
+                <div class="mockup-song-artist" style="width:30%"></div>
+              </div>
+              <div class="mockup-song-dur"></div>
+            </div>
+          </div>
+          <div class="mockup-player">
+            <div class="mockup-eq">
+              <div class="mockup-eq-bar"></div>
+              <div class="mockup-eq-bar"></div>
+              <div class="mockup-eq-bar"></div>
+              <div class="mockup-eq-bar"></div>
+              <div class="mockup-eq-bar"></div>
+            </div>
+            <div class="mockup-player-cover"></div>
+            <div class="mockup-player-info">
+              <div class="mockup-player-name"></div>
+              <div class="mockup-player-artist"></div>
+            </div>
+            <div class="mockup-player-controls">
+              <div class="mockup-ctrl"></div>
+              <div class="mockup-ctrl play"></div>
+              <div class="mockup-ctrl"></div>
+            </div>
+          </div>
+          <div class="mockup-progress">
+            <div class="mockup-progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <div class="scroll-reveal">
+      <div class="section-label">Features</div>
+      <h2 class="section-title">一切尽在掌握</h2>
+      <p class="section-desc">集搜索、播放、下载于一体，专为音乐爱好者打造的桌面体验。</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card scroll-reveal">
+        <div class="feature-icon">&#128269;</div>
+        <h3>多源聚合搜索</h3>
+        <p>支持歌曲宝、酷我、酷狗、QQ音乐、网易云音乐等主流平台，一次搜索覆盖全网资源。</p>
+      </div>
+      <div class="feature-card scroll-reveal">
+        <div class="feature-icon">&#127911;</div>
+        <h3>沉浸式播放</h3>
+        <p>内置3D粒子频谱可视化，支持音效增强、5段均衡器、母带处理和耳机环绕音效。</p>
+      </div>
+      <div class="feature-card scroll-reveal">
+        <div class="feature-icon">&#128190;</div>
+        <h3>一键下载</h3>
+        <p>支持多音质选择，下载列表管理，下载进度实时显示，断点续传保障。</p>
+      </div>
+      <div class="feature-card scroll-reveal">
+        <div class="feature-icon">&#127769;</div>
+        <h3>明暗双主题</h3>
+        <p>浅色/深色主题自由切换，精心调校的色彩方案，呵护你的双眼。</p>
+      </div>
+      <div class="feature-card scroll-reveal">
+        <div class="feature-icon">&#127925;</div>
+        <h3>桌面歌词</h3>
+        <p>悬浮桌面歌词窗口，迷你播放器模式，随时随地的歌词体验。</p>
+      </div>
+      <div class="feature-card scroll-reveal">
+        <div class="feature-icon">&#9889;</div>
+        <h3>后台播放</h3>
+        <p>支持Media Session API通知栏控制，后台持续播放，不打断你的工作流。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tech Stack Section -->
+<section class="section tech-section" id="tech">
+  <div class="section-inner">
+    <div class="scroll-reveal">
+      <div class="section-label">Tech Stack</div>
+      <h2 class="section-title">技术架构</h2>
+      <p class="section-desc">现代化技术栈，确保高性能与稳定性。</p>
+    </div>
+    <div class="tech-tags scroll-reveal">
+      <span class="tech-tag">Electron</span>
+      <span class="tech-tag">Node.js</span>
+      <span class="tech-tag">Express 5</span>
+      <span class="tech-tag">Web Audio API</span>
+      <span class="tech-tag">HTML5 / CSS3</span>
+      <span class="tech-tag">JavaScript ES6+</span>
+      <span class="tech-tag">Axios</span>
+      <span class="tech-tag">Cheerio</span>
+      <span class="tech-tag">Media Session API</span>
+      <span class="tech-tag">Canvas 2D</span>
+      <span class="tech-tag">CSS Variables</span>
+      <span class="tech-tag">NSIS Installer</span>
+    </div>
+  </div>
+</section>
+
+<!-- Install Section -->
+<section class="section" id="install">
+  <div class="section-inner">
+    <div class="scroll-reveal">
+      <div class="section-label">Getting Started</div>
+      <h2 class="section-title">快速开始</h2>
+      <p class="section-desc">几行命令，即刻拥有专属桌面音乐客户端。</p>
+    </div>
+    <div class="terminal scroll-reveal">
+      <div class="terminal-header">
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+        <div class="terminal-dot"></div>
+        <div class="terminal-title">PowerShell</div>
+      </div>
+      <div class="terminal-body">
+        <div><span class="terminal-prompt">~</span> <span class="terminal-command">git clone https://github.com/LAIXINQUAN/music-search-downloader.git</span></div>
+        <div><span class="terminal-output">Cloning into 'music-search-downloader'... done.</span></div>
+        <div>&nbsp;</div>
+        <div><span class="terminal-prompt">~</span> <span class="terminal-command">cd music-search-downloader</span></div>
+        <div>&nbsp;</div>
+        <div><span class="terminal-prompt">~/music-search-downloader</span> <span class="terminal-command">npm install</span></div>
+        <div><span class="terminal-output">added 156 packages in 12s</span></div>
+        <div>&nbsp;</div>
+        <div><span class="terminal-prompt">~/music-search-downloader</span> <span class="terminal-command">npm start</span></div>
+        <div><span class="terminal-output">音乐搜索与下载平台服务已启动: http://localhost:3000</span></div>
+        <div>&nbsp;</div>
+        <div><span class="terminal-comment"># 或启动 Electron 桌面应用</span></div>
+        <div><span class="terminal-prompt">~/music-search-downloader</span> <span class="terminal-command">npm run electron</span></div>
+        <div><span class="terminal-cursor"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Download Section -->
+<section class="section download-section" id="download">
+  <div class="section-inner">
+    <div class="scroll-reveal">
+      <div class="section-label">Download</div>
+      <h2 class="section-title">下载安装</h2>
+      <p class="section-desc" style="margin:0 auto 48px;">Windows 安装包，下载即用，无需额外配置。</p>
+    </div>
+    <div class="download-card scroll-reveal">
+      <span class="download-version">v3.6.5</span>
+      <h3 class="download-title">QB音乐 Windows 客户端</h3>
+      <div class="download-info">
+        <span>&#128187; Windows 10/11</span>
+        <span>&#128190; ~320MB</span>
+        <span>&#128274; 已签名</span>
+      </div>
+      <a href="https://github.com/LAIXINQUAN/music-search-downloader/releases/latest" class="btn-download" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        下载安装包
+      </a>
+      <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">
+        或访问 <a href="https://github.com/LAIXINQUAN/music-search-downloader/releases" style="color:var(--accent-light);">GitHub Releases</a> 查看所有版本
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <p class="footer-text">
+      Made with &#10084; by <a href="https://github.com/LAIXINQUAN" target="_blank">LAIXINQUAN</a>
+      &nbsp;&middot;&nbsp;
+      <a href="https://github.com/LAIXINQUAN/music-search-downloader" target="_blank">GitHub</a>
+      &nbsp;&middot;&nbsp;
+      ISC License
+    </p>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal animation
+const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -50px 0px' };
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+
+// Staggered delay for feature cards
+document.querySelectorAll('.features-grid .feature-card').forEach((card, i) => {
+  card.style.transitionDelay = `${i * 0.08}s`;
+});
+
+// Navbar shadow on scroll
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 50) {
+    nav.style.boxShadow = '0 4px 24px rgba(0,0,0,0.3)';
+  } else {
+    nav.style.boxShadow = 'none';
+  }
+});
+</script>
+
+</body>
+</html>
