@@ -16,9 +16,24 @@ body{
   color:#ccc;
   line-height:1.7;
   -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
 }
 a{color:inherit;text-decoration:none}
 img{max-width:100%;display:block}
+
+/* ===== Reveal Animation ===== */
+.reveal{
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity 0.65s cubic-bezier(0.22,1,0.36,1),transform 0.65s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-d1{transition-delay:0.05s}
+.reveal-d2{transition-delay:0.1s}
+.reveal-d3{transition-delay:0.15s}
+.reveal-d4{transition-delay:0.2s}
+.reveal-d5{transition-delay:0.25s}
+.reveal-d6{transition-delay:0.3s}
 
 /* ===== Layout ===== */
 .wrap{max-width:1100px;margin:0 auto;padding:0 28px}
@@ -27,14 +42,24 @@ img{max-width:100%;display:block}
 .topbar{
   position:fixed;top:0;left:0;right:0;z-index:50;
   height:54px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;background:rgba(13,13,18,0.92);
-  border-bottom:1px solid rgba(255,255,255,0.06);
+  padding:0 28px;background:rgba(13,13,18,0.88);
+  border-bottom:1px solid transparent;
+  transition:border-color 0.3s,background 0.3s;
+}
+.topbar.scrolled{
+  background:rgba(13,13,18,0.96);
+  border-bottom-color:rgba(255,255,255,0.08);
 }
 .topbar-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:17px;color:#eee}
 .topbar-logo img{width:28px;height:28px;border-radius:6px}
 .topbar-links{display:flex;gap:28px;font-size:14px}
-.topbar-links a{color:#777;transition:color .2s}
+.topbar-links a{color:#777;transition:color .2s;position:relative}
 .topbar-links a:hover{color:#ccc}
+.topbar-links a.active{color:#ccc}
+.topbar-links a.active::after{
+  content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:#5b5bf0;
+}
 .topbar-gh{
   font-size:13px;padding:5px 14px;border:1px solid #333;border-radius:6px;
   color:#999;transition:all .2s
@@ -42,22 +67,31 @@ img{max-width:100%;display:block}
 .topbar-gh:hover{border-color:#666;color:#ccc}
 
 /* ===== Hero ===== */
-.hero{padding:140px 0 80px;display:flex;align-items:center;gap:72px}
+.hero{padding:150px 0 90px;display:flex;align-items:center;gap:72px;position:relative}
 .hero-left{flex:1;min-width:0}
 .hero-left .ver{
   display:inline-block;font-size:12px;color:#888;border:1px solid #333;
   padding:2px 10px;border-radius:4px;margin-bottom:20px;letter-spacing:0.05em
 }
-.hero-left h1{font-size:46px;font-weight:800;color:#f0f0f0;line-height:1.2;margin-bottom:16px;letter-spacing:-0.02em}
+.hero-left h1{font-size:48px;font-weight:800;color:#f0f0f0;line-height:1.15;margin-bottom:16px;letter-spacing:-0.02em}
 .hero-left h1 span{color:#8b8bff}
 .hero-left p{font-size:16px;color:#888;max-width:420px;margin-bottom:32px;line-height:1.7}
+
+/* Typewriter */
+.typewriter-wrap{display:inline-block;min-height:20px;margin-bottom:6px}
+.typewriter-wrap .cursor{
+  display:inline-block;width:1px;height:16px;background:#5b5bf0;margin-left:2px;
+  vertical-align:text-bottom;animation:blink 1s step-end infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
 .hero-btns{display:flex;gap:12px;flex-wrap:wrap}
 .hero-btns a{
   display:inline-flex;align-items:center;gap:6px;padding:11px 24px;
   border-radius:8px;font-size:15px;font-weight:600;transition:all .2s
 }
 .btn-dl{background:#5b5bf0;color:#fff}
-.btn-dl:hover{background:#6b6bff}
+.btn-dl:hover{background:#6b6bff;transform:translateY(-1px);box-shadow:0 4px 16px rgba(91,91,240,0.3)}
 .btn-src{background:#1a1a24;color:#ccc;border:1px solid #2a2a36}
 .btn-src:hover{background:#222;border-color:#444}
 
@@ -78,7 +112,7 @@ img{max-width:100%;display:block}
 .shot-bar .shot-title{flex:1;text-align:center;font-size:11px;color:#555;margin-right:36px}
 .shot-body{padding:18px;display:flex;flex-direction:column;gap:12px}
 .shot-tabs{display:flex;gap:8px;padding-bottom:12px;border-bottom:1px solid #1e1e2a}
-.shot-tab{padding:5px 12px;border-radius:5px;font-size:12px;color:#666;background:#111118}
+.shot-tab{padding:5px 12px;border-radius:5px;font-size:12px;color:#666;background:#111118;cursor:pointer;transition:all .2s}
 .shot-tab.on{background:#5b5bf0;color:#fff}
 .shot-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#111118;border-radius:8px}
 .shot-row .cov{width:34px;height:34px;border-radius:6px;flex-shrink:0}
@@ -108,25 +142,49 @@ img{max-width:100%;display:block}
 .shot-prog{height:3px;background:#1e1e2a;border-radius:2px;margin-top:4px}
 .shot-prog b{display:block;width:38%;height:100%;background:#5b5bf0;border-radius:2px}
 
+/* ===== Parallax glow behind hero ===== */
+.hero-glow{
+  position:absolute;top:10%;right:-10%;width:600px;height:600px;
+  background:radial-gradient(circle,rgba(91,91,240,0.06) 0%,transparent 70%);
+  pointer-events:none;z-index:0;border-radius:50%;
+  transition:transform 0.1s linear;
+}
+
 /* ===== Sections ===== */
-.sec{padding:80px 0}
+.sec{padding:80px 0;position:relative}
 .sec-label{font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px}
 .sec h2{font-size:32px;font-weight:700;color:#eee;margin-bottom:12px}
 .sec .sub{font-size:16px;color:#777;margin-bottom:48px;max-width:540px}
 
 /* ===== Features ===== */
 .feats{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#1a1a26;border-radius:12px;overflow:hidden}
-.ffeat{padding:32px 28px;background:#111118}
-.ffeat .num{font-size:13px;color:#555;margin-bottom:12px;font-weight:600}
+.ffeat{
+  padding:32px 28px;background:#111118;cursor:default;
+  transition:background 0.25s;
+}
+.ffeat:hover{background:#181822}
+.ffeat .num{font-size:13px;color:#555;margin-bottom:12px;font-weight:600;transition:color 0.25s}
+.ffeat:hover .num{color:#5b5bf0}
 .ffeat h3{font-size:17px;font-weight:600;color:#ddd;margin-bottom:6px}
 .ffeat p{font-size:14px;color:#777;line-height:1.6}
+
+/* ===== Stats ===== */
+.stats{display:flex;gap:60px;margin-top:48px;padding-top:48px;border-top:1px solid #1a1a26}
+.stat-item{text-align:center}
+.stat-num{font-size:42px;font-weight:800;color:#eee;line-height:1;font-variant-numeric:tabular-nums}
+.stat-label{font-size:13px;color:#666;margin-top:6px}
 
 /* ===== Divider ===== */
 .divider{height:1px;background:#1e1e2a;margin:0}
 
 /* ===== Tech ===== */
 .techs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:48px}
-.techs span{padding:7px 16px;border-radius:6px;font-size:13px;color:#999;background:#111118;border:1px solid #1e1e2a}
+.techs span{
+  padding:7px 16px;border-radius:6px;font-size:13px;color:#999;
+  background:#111118;border:1px solid #1e1e2a;
+  transition:all 0.2s;cursor:default;
+}
+.techs span:hover{color:#ccc;border-color:#444;background:#181822}
 
 /* ===== Code Block ===== */
 .code-block{
@@ -148,99 +206,143 @@ img{max-width:100%;display:block}
 .code-block .cb-body .out{color:#5a5}
 .code-block .cb-body .comment{color:#444}
 
+/* ===== Copy button ===== */
+.copy-btn{
+  position:absolute;top:10px;right:14px;padding:4px 10px;font-size:11px;
+  color:#555;background:transparent;border:1px solid #2a2a36;border-radius:4px;
+  cursor:pointer;font-family:inherit;transition:all .2s;
+}
+.copy-btn:hover{color:#ccc;border-color:#555}
+.copy-btn.copied{color:#5a5;border-color:#5a5}
+
 /* ===== Download ===== */
 .dl{text-align:center}
 .dl-box{
   display:inline-flex;flex-direction:column;align-items:center;gap:20px;
-  padding:44px 56px;background:#111118;border:1px solid #1e1e2a;border-radius:12px
+  padding:44px 56px;background:#111118;border:1px solid #1e1e2a;border-radius:12px;
+  transition:border-color 0.3s,box-shadow 0.3s;
 }
+.dl-box:hover{border-color:#2a2a40;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
 .dl-box .ver{font-size:13px;color:#5b5bf0;font-weight:600}
 .dl-box h3{font-size:22px;color:#eee}
 .dl-box .meta{font-size:13px;color:#666;display:flex;gap:20px}
 .dl-box .dl-btn{
   padding:14px 44px;font-size:16px;border-radius:8px;background:#5b5bf0;color:#fff;
-  font-weight:600;transition:background .2s;display:inline-flex;align-items:center;gap:8px
+  font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:8px;
+  position:relative;overflow:hidden;
 }
-.dl-box .dl-btn:hover{background:#6b6bff}
+.dl-box .dl-btn:hover{background:#6b6bff;transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,91,240,0.3)}
+.dl-box .dl-btn:active{transform:translateY(0)}
 .dl-box .hint{font-size:12px;color:#555}
+
+/* Ripple effect */
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,0.2);transform:scale(0);animation:ripple 0.6s ease-out;pointer-events:none}
+@keyframes ripple{to{transform:scale(4);opacity:0}}
 
 /* ===== Footer ===== */
 .foot{padding:40px 0;text-align:center;border-top:1px solid #1a1a26;font-size:13px;color:#555}
 .foot a{color:#888;transition:color .2s}
 .foot a:hover{color:#ccc}
 
+/* ===== Back to top ===== */
+.back-top{
+  position:fixed;bottom:28px;right:28px;z-index:50;
+  width:40px;height:40px;border-radius:8px;background:#1a1a24;
+  border:1px solid #2a2a36;color:#666;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:18px;opacity:0;pointer-events:none;
+  transition:all 0.3s;
+}
+.back-top.show{opacity:1;pointer-events:auto}
+.back-top:hover{background:#222;border-color:#444;color:#ccc}
+
+/* ===== Tab switching in screenshot ===== */
+.shot-panel{display:none}
+.shot-panel.active{display:block}
+
 /* ===== Responsive ===== */
 @media(max-width:900px){
-  .hero{flex-direction:column;gap:40px;padding:110px 0 60px}
+  .hero{flex-direction:column;gap:40px;padding:120px 0 60px}
   .hero-right{flex:0 0 auto;width:100%}
   .hero-left h1{font-size:34px}
   .feats{grid-template-columns:1fr 1fr}
   .topbar-links{display:none}
+  .stats{flex-wrap:wrap;gap:32px;justify-content:center}
+  .hero-glow{display:none}
 }
 @media(max-width:540px){
   .feats{grid-template-columns:1fr}
   .dl-box{padding:28px 24px}
   .hero-left h1{font-size:28px}
   .wrap{padding:0 18px}
+  .stats{gap:24px}
+  .stat-num{font-size:32px}
 }
 </style>
 </head>
 <body>
 
 <!-- Top Bar -->
-<div class="topbar">
+<nav class="topbar" id="topbar">
   <div class="topbar-logo">
     <img src="https://raw.githubusercontent.com/LAIXINQUAN/music-search-downloader/main/Music_31107.ico" alt="">
     QB音乐
   </div>
   <div class="topbar-links">
-    <a href="#features">功能</a>
-    <a href="#tech">技术</a>
-    <a href="#install">安装</a>
-    <a href="#download">下载</a>
+    <a href="#features" data-section="features">功能</a>
+    <a href="#tech" data-section="tech">技术</a>
+    <a href="#install" data-section="install">安装</a>
+    <a href="#download" data-section="download">下载</a>
   </div>
   <a class="topbar-gh" href="https://github.com/LAIXINQUAN/music-search-downloader">GitHub</a>
-</div>
+</nav>
 
 <!-- Hero -->
 <div class="wrap">
   <div class="hero" id="hero">
-    <div class="hero-left">
+    <div class="hero-glow" id="heroGlow"></div>
+    <div class="hero-left reveal">
       <div class="ver">Windows · v3.6.5</div>
       <h1>在桌面<span>听歌</span>，<br>就这么简单</h1>
+      <div class="typewriter-wrap">
+        <span id="typewriter" style="font-size:14px;color:#666;"></span><span class="cursor"></span>
+      </div>
       <p>一个免费开源的 Windows 音乐客户端，聚合多个音乐平台，搜歌、播放、下载全搞定。</p>
       <div class="hero-btns">
         <a class="btn-dl" href="#download">下载 v3.6.5</a>
         <a class="btn-src" href="https://github.com/LAIXINQUAN/music-search-downloader">查看源码</a>
       </div>
     </div>
-    <div class="hero-right">
+    <div class="hero-right reveal reveal-d1">
       <div class="shot">
         <div class="shot-bar">
           <span></span><span></span><span></span>
           <div class="shot-title">QB音乐</div>
         </div>
         <div class="shot-body">
-          <div class="shot-tabs">
-            <div class="shot-tab on">搜索</div>
-            <div class="shot-tab">热门</div>
-            <div class="shot-tab">下载</div>
-            <div class="shot-tab">本地</div>
+          <div class="shot-tabs" id="shotTabs">
+            <div class="shot-tab on" data-tab="search">搜索</div>
+            <div class="shot-tab" data-tab="hot">热门</div>
+            <div class="shot-tab" data-tab="downloads">下载</div>
+            <div class="shot-tab" data-tab="local">本地</div>
           </div>
-          <div class="shot-row">
-            <div class="cov" style="background:linear-gradient(135deg,#5b5bf0,#818cf8)"></div>
-            <div class="info"><div class="n" style="width:65%"></div><div class="a"></div></div>
-            <div class="dur"></div>
+          <div class="shot-panel active" data-panel="search">
+            <div class="shot-row"><div class="cov" style="background:linear-gradient(135deg,#5b5bf0,#818cf8)"></div><div class="info"><div class="n" style="width:65%"></div><div class="a"></div></div><div class="dur"></div></div>
+            <div class="shot-row"><div class="cov" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)"></div><div class="info"><div class="n" style="width:50%"></div><div class="a" style="width:45%"></div></div><div class="dur"></div></div>
+            <div class="shot-row"><div class="cov" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"></div><div class="info"><div class="n" style="width:55%"></div><div class="a" style="width:40%"></div></div><div class="dur"></div></div>
           </div>
-          <div class="shot-row">
-            <div class="cov" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)"></div>
-            <div class="info"><div class="n" style="width:50%"></div><div class="a" style="width:45%"></div></div>
-            <div class="dur"></div>
+          <div class="shot-panel" data-panel="hot">
+            <div class="shot-row"><div class="cov" style="background:linear-gradient(135deg,#ec4899,#f472b6)"></div><div class="info"><div class="n" style="width:70%"></div><div class="a" style="width:50%"></div></div><div class="dur"></div></div>
+            <div class="shot-row"><div class="cov" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)"></div><div class="info"><div class="n" style="width:58%"></div><div class="a" style="width:42%"></div></div><div class="dur"></div></div>
+            <div class="shot-row"><div class="cov" style="background:linear-gradient(135deg,#10b981,#34d399)"></div><div class="info"><div class="n" style="width:62%"></div><div class="a" style="width:35%"></div></div><div class="dur"></div></div>
           </div>
-          <div class="shot-row">
-            <div class="cov" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"></div>
-            <div class="info"><div class="n" style="width:55%"></div><div class="a" style="width:40%"></div></div>
-            <div class="dur"></div>
+          <div class="shot-panel" data-panel="downloads">
+            <div class="shot-row"><div class="cov" style="background:linear-gradient(135deg,#f97316,#fb923c)"></div><div class="info"><div class="n" style="width:45%"></div><div class="a" style="width:30%"></div></div><div class="dur" style="background:#5b5bf0;width:36px;border-radius:3px;height:7px"></div></div>
+            <div class="shot-row"><div class="cov" style="background:linear-gradient(135deg,#6366f1,#818cf8)"></div><div class="info"><div class="n" style="width:55%"></div><div class="a" style="width:38%"></div></div><div class="dur" style="background:#5b5bf0;width:22px;border-radius:3px;height:7px"></div></div>
+          </div>
+          <div class="shot-panel" data-panel="local">
+            <div class="shot-row"><div class="cov" style="background:linear-gradient(135deg,#14b8a6,#5eead4)"></div><div class="info"><div class="n" style="width:60%"></div><div class="a" style="width:44%"></div></div><div class="dur"></div></div>
+            <div class="shot-row"><div class="cov" style="background:linear-gradient(135deg,#eab308,#facc15)"></div><div class="info"><div class="n" style="width:48%"></div><div class="a" style="width:36%"></div></div><div class="dur"></div></div>
+            <div class="shot-row"><div class="cov" style="background:linear-gradient(135deg,#ef4444,#f87171)"></div><div class="info"><div class="n" style="width:52%"></div><div class="a" style="width:40%"></div></div><div class="dur"></div></div>
           </div>
           <div class="shot-player">
             <div class="eq"><b></b><b></b><b></b><b></b><b></b></div>
@@ -258,16 +360,30 @@ img{max-width:100%;display:block}
 <!-- Features -->
 <div class="sec" id="features">
   <div class="wrap">
-    <div class="sec-label">功能</div>
-    <h2>能做什么</h2>
-    <p class="sub">一个客户端，覆盖你日常听歌的所有需求。</p>
+    <div class="sec-label reveal">功能</div>
+    <h2 class="reveal reveal-d1">能做什么</h2>
+    <p class="sub reveal reveal-d1">一个客户端，覆盖你日常听歌的所有需求。</p>
     <div class="feats">
-      <div class="ffeat"><div class="num">01</div><h3>多源搜索</h3><p>接入了歌曲宝、酷我、酷狗、QQ音乐、网易云等平台，搜一首歌能出多个来源的结果。</p></div>
-      <div class="ffeat"><div class="num">02</div><h3>在线播放</h3><p>搜到直接听，支持音效增强、5段均衡器、母带处理和环绕声，还有个3D粒子频谱。</p></div>
-      <div class="ffeat"><div class="num">03</div><h3>下载到本地</h3><p>支持多音质选择，下载列表管理，进度实时显示，想什么时候听都行。</p></div>
-      <div class="ffeat"><div class="num">04</div><h3>明暗主题</h3><p>浅色/深色随你切换，晚上听歌不刺眼。</p></div>
-      <div class="ffeat"><div class="num">05</div><h3>桌面歌词</h3><p>悬浮歌词窗口 + 迷你播放器，挂后台也能看歌词。</p></div>
-      <div class="ffeat"><div class="num">06</div><h3>后台播放</h3><p>关了窗口照样放，通知栏还能切歌暂停。</p></div>
+      <div class="ffeat reveal reveal-d1"><div class="num">01</div><h3>多源搜索</h3><p>接入了歌曲宝、酷我、酷狗、QQ音乐、网易云等平台，搜一首歌能出多个来源的结果。</p></div>
+      <div class="ffeat reveal reveal-d2"><div class="num">02</div><h3>在线播放</h3><p>搜到直接听，支持音效增强、5段均衡器、母带处理和环绕声，还有个3D粒子频谱。</p></div>
+      <div class="ffeat reveal reveal-d3"><div class="num">03</div><h3>下载到本地</h3><p>支持多音质选择，下载列表管理，进度实时显示，想什么时候听都行。</p></div>
+      <div class="ffeat reveal reveal-d4"><div class="num">04</div><h3>明暗主题</h3><p>浅色/深色随你切换，晚上听歌不刺眼。</p></div>
+      <div class="ffeat reveal reveal-d5"><div class="num">05</div><h3>桌面歌词</h3><p>悬浮歌词窗口 + 迷你播放器，挂后台也能看歌词。</p></div>
+      <div class="ffeat reveal reveal-d6"><div class="num">06</div><h3>后台播放</h3><p>关了窗口照样放，通知栏还能切歌暂停。</p></div>
+    </div>
+    <div class="stats reveal reveal-d3">
+      <div class="stat-item">
+        <div class="stat-num" data-count="6">0</div>
+        <div class="stat-label">音乐平台接入</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" data-count="3">0</div>
+        <div class="stat-label">音质可选</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" data-count="320">0</div>
+        <div class="stat-label">MB 安装包</div>
+      </div>
     </div>
   </div>
 </div>
@@ -277,10 +393,10 @@ img{max-width:100%;display:block}
 <!-- Tech -->
 <div class="sec" id="tech">
   <div class="wrap">
-    <div class="sec-label">技术</div>
-    <h2>用了什么</h2>
-    <p class="sub">基于这些技术构建，欢迎贡献代码。</p>
-    <div class="techs">
+    <div class="sec-label reveal">技术</div>
+    <h2 class="reveal reveal-d1">用了什么</h2>
+    <p class="sub reveal reveal-d1">基于这些技术构建，欢迎贡献代码。</p>
+    <div class="techs reveal reveal-d2">
       <span>Electron</span><span>Node.js</span><span>Express 5</span>
       <span>Web Audio API</span><span>HTML5 / CSS3</span><span>JavaScript</span>
       <span>Axios</span><span>Cheerio</span><span>Media Session API</span>
@@ -294,12 +410,13 @@ img{max-width:100%;display:block}
 <!-- Install -->
 <div class="sec" id="install">
   <div class="wrap">
-    <div class="sec-label">安装</div>
-    <h2>开发者上手</h2>
-    <p class="sub">克隆仓库，装依赖，跑起来。</p>
-    <div class="code-block">
+    <div class="sec-label reveal">安装</div>
+    <h2 class="reveal reveal-d1">开发者上手</h2>
+    <p class="sub reveal reveal-d1">克隆仓库，装依赖，跑起来。</p>
+    <div class="code-block reveal reveal-d2" style="position:relative">
+      <button class="copy-btn" id="copyBtn" title="复制命令">复制</button>
       <div class="cb-header"><span></span><span></span><span></span><div class="cbt">Terminal</div></div>
-      <div class="cb-body">
+      <div class="cb-body" id="codeContent">
         <div><span class="prompt">$</span> <span class="cmd">git clone https://github.com/LAIXINQUAN/music-search-downloader.git</span></div>
         <div><span class="out">Cloning into 'music-search-downloader'... done.</span></div>
         <div>&nbsp;</div>
@@ -322,16 +439,16 @@ img{max-width:100%;display:block}
 <div class="sec" id="download">
   <div class="wrap">
     <div class="dl">
-      <div class="sec-label">下载</div>
-      <h2 style="margin-bottom:36px">拿走去用</h2>
-      <div class="dl-box">
+      <div class="sec-label reveal">下载</div>
+      <h2 class="reveal reveal-d1" style="margin-bottom:36px">拿走去用</h2>
+      <div class="dl-box reveal reveal-d2">
         <div class="ver">v3.6.5</div>
         <h3>QB音乐 Windows 客户端</h3>
         <div class="meta">
           <span>Windows 10 / 11</span>
           <span>~320MB</span>
         </div>
-        <a class="dl-btn" href="https://share.feijipan.com/n/OYU4TmP" target="_blank">
+        <a class="dl-btn" href="https://share.feijipan.com/n/OYU4TmP" target="_blank" id="dlBtn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           下载安装包
         </a>
@@ -352,5 +469,218 @@ img{max-width:100%;display:block}
   </div>
 </div>
 
+<!-- Back to top -->
+<button class="back-top" id="backTop" title="回到顶部">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script>
+/**
+ * QB音乐项目主页 - 动态交互脚本
+ * 包含：滚动动画、打字机效果、数字滚动、Tab切换、复制按钮、波纹效果等
+ */
+
+// ===== 1. Intersection Observer - 滚动显示动画 =====
+(function initRevealOnScroll() {
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+  reveals.forEach(el => observer.observe(el));
+})();
+
+// ===== 2. 导航栏滚动效果 =====
+(function initNavScroll() {
+  const topbar = document.getElementById('topbar');
+  const sections = document.querySelectorAll('section, .sec');
+  const navLinks = document.querySelectorAll('.topbar-links a[data-section]');
+
+  window.addEventListener('scroll', () => {
+    // 导航栏背景变化
+    topbar.classList.toggle('scrolled', window.scrollY > 20);
+
+    // 高亮当前区域导航链接
+    let current = '';
+    sections.forEach(sec => {
+      const top = sec.getBoundingClientRect().top;
+      if (top < 120) current = sec.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.dataset.section === current);
+    });
+  });
+})();
+
+// ===== 3. 回到顶部按钮 =====
+(function initBackToTop() {
+  const btn = document.getElementById('backTop');
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('show', window.scrollY > 500);
+  });
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+
+// ===== 4. 打字机效果 =====
+(function initTypewriter() {
+  const el = document.getElementById('typewriter');
+  const texts = ['聚合搜索，一键下载', '多平台音源，想听就听', '免费开源，持续更新'];
+  let textIdx = 0, charIdx = 0, isDeleting = false;
+  const typeSpeed = 60, deleteSpeed = 30, pauseTime = 2000;
+
+  function tick() {
+    const current = texts[textIdx];
+    if (isDeleting) {
+      el.textContent = current.substring(0, charIdx - 1);
+      charIdx--;
+    } else {
+      el.textContent = current.substring(0, charIdx + 1);
+      charIdx++;
+    }
+
+    if (!isDeleting && charIdx === current.length) {
+      setTimeout(tick, pauseTime);
+      isDeleting = true;
+      return;
+    }
+    if (isDeleting && charIdx === 0) {
+      isDeleting = false;
+      textIdx = (textIdx + 1) % texts.length;
+      setTimeout(tick, 300);
+      return;
+    }
+    setTimeout(tick, isDeleting ? deleteSpeed : typeSpeed);
+  }
+  setTimeout(tick, 600);
+})();
+
+// ===== 5. 数字滚动动画 =====
+(function initCountUp() {
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseInt(el.dataset.count);
+      const duration = 1200;
+      const start = performance.now();
+
+      function update(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        // easeOutCubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(target * eased);
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+      countObserver.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.stat-num[data-count]').forEach(el => countObserver.observe(el));
+})();
+
+// ===== 6. 截图Tab切换 =====
+(function initShotTabs() {
+  const tabs = document.querySelectorAll('#shotTabs .shot-tab');
+  const panels = document.querySelectorAll('.shot-panel');
+  let autoSwitchTimer;
+
+  function switchTab(target) {
+    tabs.forEach(t => t.classList.remove('on'));
+    panels.forEach(p => p.classList.remove('active'));
+    const tab = document.querySelector(`#shotTabs .shot-tab[data-tab="${target}"]`);
+    const panel = document.querySelector(`.shot-panel[data-panel="${target}"]`);
+    if (tab) tab.classList.add('on');
+    if (panel) panel.classList.add('active');
+  }
+
+  function startAutoSwitch() {
+    autoSwitchTimer = setInterval(() => {
+      const current = document.querySelector('#shotTabs .shot-tab.on');
+      const all = [...tabs];
+      const idx = all.indexOf(current);
+      const next = all[(idx + 1) % all.length];
+      if (next) switchTab(next.dataset.tab);
+    }, 3000);
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      clearInterval(autoSwitchTimer);
+      switchTab(tab.dataset.tab);
+      startAutoSwitch();
+    });
+  });
+
+  startAutoSwitch();
+})();
+
+// ===== 7. 复制代码按钮 =====
+(function initCopyCode() {
+  const btn = document.getElementById('copyBtn');
+  const codeEl = document.getElementById('codeContent');
+  const rawCommands = [
+    'git clone https://github.com/LAIXINQUAN/music-search-downloader.git',
+    'cd music-search-downloader',
+    'npm install',
+    'npm start',
+    '# 或者启动桌面客户端',
+    'npm run electron'
+  ].join('\n');
+
+  btn.addEventListener('click', () => {
+    navigator.clipboard.writeText(rawCommands).then(() => {
+      btn.textContent = '已复制';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = '复制';
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      btn.textContent = '失败';
+      setTimeout(() => { btn.textContent = '复制'; }, 1500);
+    });
+  });
+})();
+
+// ===== 8. 下载按钮波纹效果 =====
+(function initRipple() {
+  document.querySelectorAll('.dl-btn, .btn-dl').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      this.appendChild(ripple);
+      ripple.addEventListener('animationend', () => ripple.remove());
+    });
+  });
+})();
+
+// ===== 9. Hero区域视差光晕 =====
+(function initParallaxGlow() {
+  const glow = document.getElementById('heroGlow');
+  if (!glow) return;
+  const hero = document.getElementById('hero');
+  hero.addEventListener('mousemove', (e) => {
+    const rect = hero.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    glow.style.transform = `translate(${x * 30}px, ${y * 30}px)`;
+  });
+  hero.addEventListener('mouseleave', () => {
+    glow.style.transform = 'translate(0, 0)';
+  });
+})();
+</script>
 </body>
 </html>
