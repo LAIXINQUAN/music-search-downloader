@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QB音乐</title>
+<meta name="description" content="Windows 桌面音乐客户端 — 搜索、播放、下载">
+<link rel="icon" href="https://raw.githubusercontent.com/LAIXINQUAN/music-search-downloader/main/Music_31107.ico">
+<style>
+/* ===== Reset ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:#0d0d12;
+  color:#ccc;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ===== Layout ===== */
+.wrap{max-width:1100px;margin:0 auto;padding:0 28px}
+
+/* ===== Top Bar ===== */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  height:54px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;background:rgba(13,13,18,0.92);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.topbar-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:17px;color:#eee}
+.topbar-logo img{width:28px;height:28px;border-radius:6px}
+.topbar-links{display:flex;gap:28px;font-size:14px}
+.topbar-links a{color:#777;transition:color .2s}
+.topbar-links a:hover{color:#ccc}
+.topbar-gh{
+  font-size:13px;padding:5px 14px;border:1px solid #333;border-radius:6px;
+  color:#999;transition:all .2s
+}
+.topbar-gh:hover{border-color:#666;color:#ccc}
+
+/* ===== Hero ===== */
+.hero{padding:140px 0 80px;display:flex;align-items:center;gap:72px}
+.hero-left{flex:1;min-width:0}
+.hero-left .ver{
+  display:inline-block;font-size:12px;color:#888;border:1px solid #333;
+  padding:2px 10px;border-radius:4px;margin-bottom:20px;letter-spacing:0.05em
+}
+.hero-left h1{font-size:46px;font-weight:800;color:#f0f0f0;line-height:1.2;margin-bottom:16px;letter-spacing:-0.02em}
+.hero-left h1 span{color:#8b8bff}
+.hero-left p{font-size:16px;color:#888;max-width:420px;margin-bottom:32px;line-height:1.7}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+.hero-btns a{
+  display:inline-flex;align-items:center;gap:6px;padding:11px 24px;
+  border-radius:8px;font-size:15px;font-weight:600;transition:all .2s
+}
+.btn-dl{background:#5b5bf0;color:#fff}
+.btn-dl:hover{background:#6b6bff}
+.btn-src{background:#1a1a24;color:#ccc;border:1px solid #2a2a36}
+.btn-src:hover{background:#222;border-color:#444}
+
+/* Hero Right — Screenshot */
+.hero-right{flex:0 0 480px}
+.hero-right .shot{
+  background:#15151e;border:1px solid #222;border-radius:12px;
+  overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);
+}
+.shot-bar{
+  height:34px;background:#111118;display:flex;align-items:center;padding:0 12px;gap:7px;
+  border-bottom:1px solid #1e1e2a
+}
+.shot-bar span{width:10px;height:10px;border-radius:50%}
+.shot-bar span:nth-child(1){background:#ff5f57}
+.shot-bar span:nth-child(2){background:#febc2e}
+.shot-bar span:nth-child(3){background:#28c840}
+.shot-bar .shot-title{flex:1;text-align:center;font-size:11px;color:#555;margin-right:36px}
+.shot-body{padding:18px;display:flex;flex-direction:column;gap:12px}
+.shot-tabs{display:flex;gap:8px;padding-bottom:12px;border-bottom:1px solid #1e1e2a}
+.shot-tab{padding:5px 12px;border-radius:5px;font-size:12px;color:#666;background:#111118}
+.shot-tab.on{background:#5b5bf0;color:#fff}
+.shot-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#111118;border-radius:8px}
+.shot-row .cov{width:34px;height:34px;border-radius:6px;flex-shrink:0}
+.shot-row .info{flex:1;min-width:0}
+.shot-row .info .n{height:10px;background:#333;border-radius:3px;margin-bottom:5px}
+.shot-row .info .a{height:7px;background:#222;border-radius:3px;width:60%}
+.shot-row .dur{width:28px;height:7px;background:#222;border-radius:3px}
+.shot-player{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:#111118;border-radius:10px;margin-top:4px
+}
+.shot-player .pc{width:38px;height:38px;border-radius:8px;background:#5b5bf0;flex-shrink:0}
+.shot-player .pi{flex:1}
+.shot-player .pi .pn{height:10px;background:#555;border-radius:3px;margin-bottom:4px;width:50%}
+.shot-player .pi .pa{height:7px;background:#333;border-radius:3px;width:35%}
+.shot-player .eq{display:flex;gap:2px;align-items:flex-end;height:18px;margin-right:8px}
+.shot-player .eq b{width:3px;background:#5b5bf0;border-radius:1px;animation:eq 0.7s ease-in-out infinite alternate}
+.shot-player .eq b:nth-child(1){height:50%;animation-delay:0s}
+.shot-player .eq b:nth-child(2){height:100%;animation-delay:0.15s}
+.shot-player .eq b:nth-child(3){height:35%;animation-delay:0.3s}
+.shot-player .eq b:nth-child(4){height:75%;animation-delay:0.1s}
+.shot-player .eq b:nth-child(5){height:45%;animation-delay:0.25s}
+@keyframes eq{from{transform:scaleY(0.3)}to{transform:scaleY(1)}}
+.shot-ctrl{display:flex;gap:8px;align-items:center}
+.shot-ctrl i{width:20px;height:20px;border-radius:50%;background:#333}
+.shot-ctrl i.play{background:#5b5bf0;width:24px;height:24px}
+.shot-prog{height:3px;background:#1e1e2a;border-radius:2px;margin-top:4px}
+.shot-prog b{display:block;width:38%;height:100%;background:#5b5bf0;border-radius:2px}
+
+/* ===== Sections ===== */
+.sec{padding:80px 0}
+.sec-label{font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px}
+.sec h2{font-size:32px;font-weight:700;color:#eee;margin-bottom:12px}
+.sec .sub{font-size:16px;color:#777;margin-bottom:48px;max-width:540px}
+
+/* ===== Features ===== */
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#1a1a26;border-radius:12px;overflow:hidden}
+.ffeat{padding:32px 28px;background:#111118}
+.ffeat .num{font-size:13px;color:#555;margin-bottom:12px;font-weight:600}
+.ffeat h3{font-size:17px;font-weight:600;color:#ddd;margin-bottom:6px}
+.ffeat p{font-size:14px;color:#777;line-height:1.6}
+
+/* ===== Divider ===== */
+.divider{height:1px;background:#1e1e2a;margin:0}
+
+/* ===== Tech ===== */
+.techs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:48px}
+.techs span{padding:7px 16px;border-radius:6px;font-size:13px;color:#999;background:#111118;border:1px solid #1e1e2a}
+
+/* ===== Code Block ===== */
+.code-block{
+  background:#0a0a12;border:1px solid #1e1e2a;border-radius:10px;
+  overflow:hidden;font-family:"SF Mono","Fira Code","Consolas",monospace;font-size:13px;
+}
+.code-block .cb-header{
+  height:36px;background:#0f0f18;display:flex;align-items:center;
+  padding:0 14px;gap:7px;border-bottom:1px solid #1a1a26
+}
+.code-block .cb-header span{width:9px;height:9px;border-radius:50%}
+.code-block .cb-header span:nth-child(1){background:#ff5f57}
+.code-block .cb-header span:nth-child(2){background:#febc2e}
+.code-block .cb-header span:nth-child(3){background:#28c840}
+.code-block .cb-header .cbt{flex:1;text-align:center;font-size:11px;color:#444;margin-right:30px}
+.code-block .cb-body{padding:22px 24px;line-height:1.9;color:#999}
+.code-block .cb-body .prompt{color:#5b5bf0}
+.code-block .cb-body .cmd{color:#ddd}
+.code-block .cb-body .out{color:#5a5}
+.code-block .cb-body .comment{color:#444}
+
+/* ===== Download ===== */
+.dl{text-align:center}
+.dl-box{
+  display:inline-flex;flex-direction:column;align-items:center;gap:20px;
+  padding:44px 56px;background:#111118;border:1px solid #1e1e2a;border-radius:12px
+}
+.dl-box .ver{font-size:13px;color:#5b5bf0;font-weight:600}
+.dl-box h3{font-size:22px;color:#eee}
+.dl-box .meta{font-size:13px;color:#666;display:flex;gap:20px}
+.dl-box .dl-btn{
+  padding:14px 44px;font-size:16px;border-radius:8px;background:#5b5bf0;color:#fff;
+  font-weight:600;transition:background .2s;display:inline-flex;align-items:center;gap:8px
+}
+.dl-box .dl-btn:hover{background:#6b6bff}
+.dl-box .hint{font-size:12px;color:#555}
+
+/* ===== Footer ===== */
+.foot{padding:40px 0;text-align:center;border-top:1px solid #1a1a26;font-size:13px;color:#555}
+.foot a{color:#888;transition:color .2s}
+.foot a:hover{color:#ccc}
+
+/* ===== Responsive ===== */
+@media(max-width:900px){
+  .hero{flex-direction:column;gap:40px;padding:110px 0 60px}
+  .hero-right{flex:0 0 auto;width:100%}
+  .hero-left h1{font-size:34px}
+  .feats{grid-template-columns:1fr 1fr}
+  .topbar-links{display:none}
+}
+@media(max-width:540px){
+  .feats{grid-template-columns:1fr}
+  .dl-box{padding:28px 24px}
+  .hero-left h1{font-size:28px}
+  .wrap{padding:0 18px}
+}
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <img src="https://raw.githubusercontent.com/LAIXINQUAN/music-search-downloader/main/Music_31107.ico" alt="">
+    QB音乐
+  </div>
+  <div class="topbar-links">
+    <a href="#features">功能</a>
+    <a href="#tech">技术</a>
+    <a href="#install">安装</a>
+    <a href="#download">下载</a>
+  </div>
+  <a class="topbar-gh" href="https://github.com/LAIXINQUAN/music-search-downloader">GitHub</a>
+</div>
+
+<!-- Hero -->
+<div class="wrap">
+  <div class="hero" id="hero">
+    <div class="hero-left">
+      <div class="ver">Windows · v3.6.5</div>
+      <h1>在桌面<span>听歌</span>，<br>就这么简单</h1>
+      <p>一个免费开源的 Windows 音乐客户端，聚合多个音乐平台，搜歌、播放、下载全搞定。</p>
+      <div class="hero-btns">
+        <a class="btn-dl" href="#download">下载 v3.6.5</a>
+        <a class="btn-src" href="https://github.com/LAIXINQUAN/music-search-downloader">查看源码</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="shot">
+        <div class="shot-bar">
+          <span></span><span></span><span></span>
+          <div class="shot-title">QB音乐</div>
+        </div>
+        <div class="shot-body">
+          <div class="shot-tabs">
+            <div class="shot-tab on">搜索</div>
+            <div class="shot-tab">热门</div>
+            <div class="shot-tab">下载</div>
+            <div class="shot-tab">本地</div>
+          </div>
+          <div class="shot-row">
+            <div class="cov" style="background:linear-gradient(135deg,#5b5bf0,#818cf8)"></div>
+            <div class="info"><div class="n" style="width:65%"></div><div class="a"></div></div>
+            <div class="dur"></div>
+          </div>
+          <div class="shot-row">
+            <div class="cov" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)"></div>
+            <div class="info"><div class="n" style="width:50%"></div><div class="a" style="width:45%"></div></div>
+            <div class="dur"></div>
+          </div>
+          <div class="shot-row">
+            <div class="cov" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"></div>
+            <div class="info"><div class="n" style="width:55%"></div><div class="a" style="width:40%"></div></div>
+            <div class="dur"></div>
+          </div>
+          <div class="shot-player">
+            <div class="eq"><b></b><b></b><b></b><b></b><b></b></div>
+            <div class="pc"></div>
+            <div class="pi"><div class="pn"></div><div class="pa"></div></div>
+            <div class="shot-ctrl"><i></i><i class="play"></i><i></i></div>
+          </div>
+          <div class="shot-prog"><b></b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Features -->
+<div class="sec" id="features">
+  <div class="wrap">
+    <div class="sec-label">功能</div>
+    <h2>能做什么</h2>
+    <p class="sub">一个客户端，覆盖你日常听歌的所有需求。</p>
+    <div class="feats">
+      <div class="ffeat"><div class="num">01</div><h3>多源搜索</h3><p>接入了歌曲宝、酷我、酷狗、QQ音乐、网易云等平台，搜一首歌能出多个来源的结果。</p></div>
+      <div class="ffeat"><div class="num">02</div><h3>在线播放</h3><p>搜到直接听，支持音效增强、5段均衡器、母带处理和环绕声，还有个3D粒子频谱。</p></div>
+      <div class="ffeat"><div class="num">03</div><h3>下载到本地</h3><p>支持多音质选择，下载列表管理，进度实时显示，想什么时候听都行。</p></div>
+      <div class="ffeat"><div class="num">04</div><h3>明暗主题</h3><p>浅色/深色随你切换，晚上听歌不刺眼。</p></div>
+      <div class="ffeat"><div class="num">05</div><h3>桌面歌词</h3><p>悬浮歌词窗口 + 迷你播放器，挂后台也能看歌词。</p></div>
+      <div class="ffeat"><div class="num">06</div><h3>后台播放</h3><p>关了窗口照样放，通知栏还能切歌暂停。</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Tech -->
+<div class="sec" id="tech">
+  <div class="wrap">
+    <div class="sec-label">技术</div>
+    <h2>用了什么</h2>
+    <p class="sub">基于这些技术构建，欢迎贡献代码。</p>
+    <div class="techs">
+      <span>Electron</span><span>Node.js</span><span>Express 5</span>
+      <span>Web Audio API</span><span>HTML5 / CSS3</span><span>JavaScript</span>
+      <span>Axios</span><span>Cheerio</span><span>Media Session API</span>
+      <span>Canvas 2D</span><span>NSIS</span>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Install -->
+<div class="sec" id="install">
+  <div class="wrap">
+    <div class="sec-label">安装</div>
+    <h2>开发者上手</h2>
+    <p class="sub">克隆仓库，装依赖，跑起来。</p>
+    <div class="code-block">
+      <div class="cb-header"><span></span><span></span><span></span><div class="cbt">Terminal</div></div>
+      <div class="cb-body">
+        <div><span class="prompt">$</span> <span class="cmd">git clone https://github.com/LAIXINQUAN/music-search-downloader.git</span></div>
+        <div><span class="out">Cloning into 'music-search-downloader'... done.</span></div>
+        <div>&nbsp;</div>
+        <div><span class="prompt">$</span> <span class="cmd">cd music-search-downloader</span></div>
+        <div>&nbsp;</div>
+        <div><span class="prompt">$</span> <span class="cmd">npm install</span></div>
+        <div><span class="out">added 156 packages</span></div>
+        <div>&nbsp;</div>
+        <div><span class="prompt">$</span> <span class="cmd">npm start</span></div>
+        <div><span class="out">服务已启动: http://localhost:3000</span></div>
+        <div>&nbsp;</div>
+        <div><span class="comment"># 或者启动桌面客户端</span></div>
+        <div><span class="prompt">$</span> <span class="cmd">npm run electron</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Download -->
+<div class="sec" id="download">
+  <div class="wrap">
+    <div class="dl">
+      <div class="sec-label">下载</div>
+      <h2 style="margin-bottom:36px">拿走去用</h2>
+      <div class="dl-box">
+        <div class="ver">v3.6.5</div>
+        <h3>QB音乐 Windows 客户端</h3>
+        <div class="meta">
+          <span>Windows 10 / 11</span>
+          <span>~320MB</span>
+        </div>
+        <a class="dl-btn" href="https://github.com/LAIXINQUAN/music-search-downloader/releases/latest">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          下载安装包
+        </a>
+        <div class="hint">或查看 <a href="https://github.com/LAIXINQUAN/music-search-downloader/releases" style="color:#5b5bf0">所有版本</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="foot">
+  <div class="wrap">
+    <a href="https://github.com/LAIXINQUAN">LAIXINQUAN</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/LAIXINQUAN/music-search-downloader">GitHub</a>
+    &nbsp;·&nbsp;
+    ISC License
+  </div>
+</div>
+
+</body>
+</html>
