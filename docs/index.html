@@ -12,6 +12,15 @@
 </head>
 <body>
 
+<!-- 预加载动画 -->
+<div id="preloader">
+  <div class="preloader-eq">
+    <b></b><b></b><b></b><b></b><b></b><b></b><b></b>
+  </div>
+  <div class="preloader-text">QB MUSIC</div>
+</div>
+
+<!-- 环境光背景 -->
 <div class="ambient-bg">
   <div class="ambient-orb"></div>
   <div class="ambient-orb"></div>
@@ -20,6 +29,13 @@
 <div class="noise-overlay"></div>
 <div class="grid-lines"></div>
 
+<!-- 底部波形可视化 -->
+<canvas id="waveformCanvas"></canvas>
+
+<!-- 浮动音符容器 -->
+<div id="notesContainer"></div>
+
+<!-- 顶部导航 -->
 <nav class="topbar" id="topbar">
   <div class="topbar-logo">
     <img src="https://raw.githubusercontent.com/LAIXINQUAN/music-search-downloader/main/Music_31107.ico" alt="QB音乐图标">
@@ -28,6 +44,7 @@
   <div class="topbar-links">
     <a href="#features" data-section="features">功能</a>
     <a href="#tech" data-section="tech">技术</a>
+    <a href="#changelog" data-section="changelog">更新</a>
     <a href="#faq" data-section="faq">常见问题</a>
     <a href="#install" data-section="install">安装</a>
     <a href="#download" data-section="download">下载</a>
@@ -35,8 +52,11 @@
   <a class="topbar-gh" href="https://github.com/LAIXINQUAN/music-search-downloader" target="_blank" rel="noopener">GitHub</a>
 </nav>
 
+<!-- Hero 区域 -->
 <div class="wrap">
   <div class="hero">
+    <!-- Hero 粒子画布 -->
+    <canvas id="heroParticles"></canvas>
     <div class="hero-left reveal">
       <div class="ver">Windows · v3.6.5</div>
       <h1>在桌面<em>听歌</em>，<br>就这么简单</h1>
@@ -56,50 +76,58 @@
       </div>
     </div>
     <div class="hero-right reveal reveal-d1">
-      <div class="app-window">
-        <div class="window-bar">
-          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-          <div class="win-title">QB音乐</div>
-        </div>
-        <div class="window-body">
-          <div class="win-tabs" id="winTabs">
-            <div class="win-tab on" data-tab="search">搜索</div>
-            <div class="win-tab" data-tab="hot">热门</div>
-            <div class="win-tab" data-tab="downloads">下载</div>
-            <div class="win-tab" data-tab="local">本地</div>
+      <div class="tilt-wrapper">
+        <div class="app-window">
+          <div class="window-bar">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <div class="win-title">QB音乐</div>
           </div>
-          <div class="win-panel active" data-panel="search">
-            <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#ff6b4a,#ff8a6f)"></div><div class="info"><div class="n" style="width:65%"></div><div class="a"></div></div><div class="dur"></div></div>
-            <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#60a5fa,#93c5fd)"></div><div class="info"><div class="n" style="width:50%"></div><div class="a" style="width:45%"></div></div><div class="dur"></div></div>
-            <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#fbbf24,#fcd34d)"></div><div class="info"><div class="n" style="width:55%"></div><div class="a" style="width:40%"></div></div><div class="dur"></div></div>
+          <div class="window-body">
+            <div class="win-tabs" id="winTabs">
+              <div class="win-tab on" data-tab="search">搜索</div>
+              <div class="win-tab" data-tab="hot">热门</div>
+              <div class="win-tab" data-tab="downloads">下载</div>
+              <div class="win-tab" data-tab="local">本地</div>
+            </div>
+            <!-- 搜索面板 -->
+            <div class="win-panel active" data-panel="search">
+              <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#ff6b4a,#ff8a6f)"></div><div class="info"><div class="n" style="width:65%"></div><div class="a"></div></div><div class="dur"></div></div>
+              <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#60a5fa,#93c5fd)"></div><div class="info"><div class="n" style="width:50%"></div><div class="a" style="width:45%"></div></div><div class="dur"></div></div>
+              <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#fbbf24,#fcd34d)"></div><div class="info"><div class="n" style="width:55%"></div><div class="a" style="width:40%"></div></div><div class="dur"></div></div>
+            </div>
+            <!-- 热门面板 -->
+            <div class="win-panel" data-panel="hot">
+              <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#a78bfa,#c4b5fd)"></div><div class="info"><div class="n" style="width:70%"></div><div class="a" style="width:50%"></div></div><div class="dur"></div></div>
+              <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#4ade80,#86efac)"></div><div class="info"><div class="n" style="width:58%"></div><div class="a" style="width:42%"></div></div><div class="dur"></div></div>
+              <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#f472b6,#f9a8d4)"></div><div class="info"><div class="n" style="width:62%"></div><div class="a" style="width:35%"></div></div><div class="dur"></div></div>
+            </div>
+            <!-- 下载面板 -->
+            <div class="win-panel" data-panel="downloads">
+              <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#fb923c,#fdba74)"></div><div class="info"><div class="n" style="width:45%"></div><div class="a" style="width:30%"></div></div><div class="dur" style="background:var(--accent);width:36px;border-radius:3px;height:7px"></div></div>
+              <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#818cf8,#a5b4fc)"></div><div class="info"><div class="n" style="width:55%"></div><div class="a" style="width:38%"></div></div><div class="dur" style="background:var(--accent);width:22px;border-radius:3px;height:7px"></div></div>
+            </div>
+            <!-- 本地面板 -->
+            <div class="win-panel" data-panel="local">
+              <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#2dd4bf,#5eead4)"></div><div class="info"><div class="n" style="width:60%"></div><div class="a" style="width:44%"></div></div><div class="dur"></div></div>
+              <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#eab308,#facc15)"></div><div class="info"><div class="n" style="width:48%"></div><div class="a" style="width:36%"></div></div><div class="dur"></div></div>
+              <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#ef4444,#fca5a5)"></div><div class="info"><div class="n" style="width:52%"></div><div class="a" style="width:40%"></div></div><div class="dur"></div></div>
+            </div>
+            <!-- 播放器 -->
+            <div class="win-player">
+              <div class="eq"><b></b><b></b><b></b><b></b><b></b></div>
+              <div class="pc"></div>
+              <div class="pi"><div class="pn"></div><div class="pa"></div></div>
+              <div class="win-ctrl"><i></i><i class="play"></i><i></i></div>
+            </div>
+            <div class="win-progress"><b></b></div>
           </div>
-          <div class="win-panel" data-panel="hot">
-            <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#a78bfa,#c4b5fd)"></div><div class="info"><div class="n" style="width:70%"></div><div class="a" style="width:50%"></div></div><div class="dur"></div></div>
-            <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#4ade80,#86efac)"></div><div class="info"><div class="n" style="width:58%"></div><div class="a" style="width:42%"></div></div><div class="dur"></div></div>
-            <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#f472b6,#f9a8d4)"></div><div class="info"><div class="n" style="width:62%"></div><div class="a" style="width:35%"></div></div><div class="dur"></div></div>
-          </div>
-          <div class="win-panel" data-panel="downloads">
-            <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#fb923c,#fdba74)"></div><div class="info"><div class="n" style="width:45%"></div><div class="a" style="width:30%"></div></div><div class="dur" style="background:var(--accent);width:36px;border-radius:3px;height:7px"></div></div>
-            <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#818cf8,#a5b4fc)"></div><div class="info"><div class="n" style="width:55%"></div><div class="a" style="width:38%"></div></div><div class="dur" style="background:var(--accent);width:22px;border-radius:3px;height:7px"></div></div>
-          </div>
-          <div class="win-panel" data-panel="local">
-            <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#2dd4bf,#5eead4)"></div><div class="info"><div class="n" style="width:60%"></div><div class="a" style="width:44%"></div></div><div class="dur"></div></div>
-            <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#eab308,#facc15)"></div><div class="info"><div class="n" style="width:48%"></div><div class="a" style="width:36%"></div></div><div class="dur"></div></div>
-            <div class="win-row"><div class="cov" style="background:linear-gradient(135deg,#ef4444,#fca5a5)"></div><div class="info"><div class="n" style="width:52%"></div><div class="a" style="width:40%"></div></div><div class="dur"></div></div>
-          </div>
-          <div class="win-player">
-            <div class="eq"><b></b><b></b><b></b><b></b><b></b></div>
-            <div class="pc"></div>
-            <div class="pi"><div class="pn"></div><div class="pa"></div></div>
-            <div class="win-ctrl"><i></i><i class="play"></i><i></i></div>
-          </div>
-          <div class="win-progress"><b></b></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- 功能特性 -->
 <div class="section" id="features">
   <div class="wrap">
     <div class="section-label reveal">Features</div>
@@ -143,6 +171,7 @@
         <p>关了窗口照样放，系统通知栏直接切歌暂停，不打断你的工作流。</p>
       </div>
     </div>
+    <!-- 统计数据 -->
     <div class="stats-row reveal reveal-d3">
       <div class="stat-item">
         <div class="stat-num" data-count="6">0</div>
@@ -162,6 +191,7 @@
 
 <div class="divider"></div>
 
+<!-- 技术栈 -->
 <div class="section" id="tech">
   <div class="wrap">
     <div class="section-label reveal">Tech Stack</div>
@@ -185,6 +215,60 @@
 
 <div class="divider"></div>
 
+<!-- 更新日志 -->
+<div class="section" id="changelog">
+  <div class="wrap">
+    <div class="section-label reveal">Changelog</div>
+    <h2 class="reveal reveal-d1">更新日志</h2>
+    <p class="section-desc reveal reveal-d1">每次迭代，都让体验更好一点。</p>
+    <div class="changelog-timeline">
+      <div class="changelog-item reveal reveal-d1">
+        <div class="cl-ver">v3.6.5 <span class="cl-date">2026-08</span></div>
+        <div class="cl-title">全新主页 & 体验优化</div>
+        <ul class="cl-changes">
+          <li><span class="cl-tag feat">新增</span> 项目主页全面升级，暗色工业风设计</li>
+          <li><span class="cl-tag perf">优化</span> 沉浸模式 3D 粒子效果性能提升</li>
+          <li><span class="cl-tag fix">修复</span> 歌词同步在循环播放时偏移问题</li>
+          <li><span class="cl-tag refactor">重构</span> Windows 客户端安装包构建流程</li>
+        </ul>
+      </div>
+      <div class="changelog-item reveal reveal-d2">
+        <div class="cl-ver">v3.6.0 <span class="cl-date">2026-07</span></div>
+        <div class="cl-title">音效引擎 & 沉浸模式</div>
+        <ul class="cl-changes">
+          <li><span class="cl-tag feat">新增</span> 5 段均衡器 + 母带处理 + 环绕声效果</li>
+          <li><span class="cl-tag feat">新增</span> 3D 粒子频谱沉浸模式</li>
+          <li><span class="cl-tag perf">优化</span> 动态壁纸面板加载性能</li>
+          <li><span class="cl-tag fix">修复</span> 音频 seek 导致时间显示归零问题</li>
+        </ul>
+      </div>
+      <div class="changelog-item reveal reveal-d3">
+        <div class="cl-ver">v3.5.0 <span class="cl-date">2026-06</span></div>
+        <div class="cl-title">多平台支持 & 明暗主题</div>
+        <ul class="cl-changes">
+          <li><span class="cl-tag feat">新增</span> 酷狗、网易云音乐平台接入</li>
+          <li><span class="cl-tag feat">新增</span> 浅色/深色主题一键切换</li>
+          <li><span class="cl-tag feat">新增</span> 桌面歌词悬浮窗 + 迷你播放器</li>
+          <li><span class="cl-tag fix">修复</span> 系统代理环境变量冲突导致构建失败</li>
+        </ul>
+      </div>
+      <div class="changelog-item reveal reveal-d4">
+        <div class="cl-ver">v3.0.0 <span class="cl-date">2026-05</span></div>
+        <div class="cl-title">首个正式发布</div>
+        <ul class="cl-changes">
+          <li><span class="cl-tag feat">新增</span> 歌曲宝、酷我、QQ音乐三平台聚合搜索</li>
+          <li><span class="cl-tag feat">新增</span> 标准/高清/无损多音质下载</li>
+          <li><span class="cl-tag feat">新增</span> 后台播放 + 通知栏控制</li>
+          <li><span class="cl-tag feat">新增</span> Windows NSIS 安装包</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FAQ 常见问题 -->
 <div class="section" id="faq">
   <div class="wrap">
     <div class="section-label reveal">FAQ</div>
@@ -242,6 +326,7 @@
 
 <div class="divider"></div>
 
+<!-- 安装指南 -->
 <div class="section" id="install">
   <div class="wrap">
     <div class="section-label reveal">Get Started</div>
@@ -269,6 +354,7 @@
   </div>
 </div>
 
+<!-- 下载 -->
 <div class="section" id="download">
   <div class="wrap">
     <div class="download-center">
@@ -291,6 +377,7 @@
   </div>
 </div>
 
+<!-- 页脚 -->
 <div class="footer">
   <div class="wrap">
     <div class="footer-links">
@@ -302,6 +389,7 @@
   </div>
 </div>
 
+<!-- 回到顶部 -->
 <button class="back-top" aria-label="回到顶部">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
 </button>
