@@ -1,13 +1,14 @@
 /**
- * QB音乐 项目主页 — 交互脚本 v2.0
+ * QB音乐 项目主页 — 交互脚本 v3.0
  * 包含：预加载、滚动动画、导航、打字机、数字滚动、Tab切换、FAQ、波纹、
- *       Canvas波形、卡片倾斜、浮动音符、粒子效果等
+ *       Canvas波形、卡片倾斜、浮动音符、粒子效果、进度条、移动菜单、自定义光标等
  */
 
 // ===== DOM Ready =====
 document.addEventListener('DOMContentLoaded', () => {
   initPreloader();
   initRevealOnScroll();
+  initScrollProgress();
   initNavScroll();
   initBackToTop();
   initTypewriter();
@@ -17,10 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
   initRipple();
   initFAQ();
   initSmoothScroll();
+  initMobileMenu();
+  initCustomCursor();
+  initSectionDots();
   initWaveformCanvas();
   initFloatingNotes();
   initHeroParticles();
   initCardTilt();
+  initParallaxOrbs();
 });
 
 // ===== 0. 预加载动画 =====
@@ -300,7 +305,6 @@ function initWaveformCanvas() {
   window.addEventListener('resize', resize);
 
   const bars = 120;
-  const barWidth = canvas.width / bars;
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -493,4 +497,217 @@ function initCardTilt() {
   heroRight.addEventListener('mouseleave', () => {
     tiltWrapper.style.transform = 'rotateY(0deg) rotateX(0deg)';
   });
+}
+
+// ===== 15. 滚动进度条 =====
+function initScrollProgress() {
+  const bar = document.querySelector('.scroll-progress-bar');
+  if (!bar) return;
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    bar.style.width = progress + '%';
+  }, { passive: true });
+}
+
+// ===== 16. 移动端菜单 =====
+function initMobileMenu() {
+  const btn = document.querySelector('.mobile-menu-btn');
+  if (!btn) return;
+
+  // 创建菜单覆盖层
+  const overlay = document.createElement('div');
+  overlay.className = 'mobile-menu-overlay';
+
+  const panel = document.createElement('nav');
+  panel.className = 'mobile-menu-panel';
+
+  // 复制导航链接
+  const navLinks = [
+    { href: '#features', text: '功能' },
+    { href: '#tech', text: '技术' },
+    { href: '#changelog', text: '更新' },
+    { href: '#faq', text: '常见问题' },
+    { href: '#install', text: '安装' },
+    { href: '#download', text: '下载' },
+  ];
+
+  navLinks.forEach(link => {
+    const a = document.createElement('a');
+    a.href = link.href;
+    a.textContent = link.text;
+    a.addEventListener('click', () => closeMenu());
+    panel.appendChild(a);
+  });
+
+  // GitHub 链接
+  const ghLink = document.createElement('a');
+  ghLink.href = 'https://github.com/LAIXINQUAN/music-search-downloader';
+  ghLink.target = '_blank';
+  ghLink.rel = 'noopener';
+  ghLink.textContent = 'GitHub';
+  ghLink.className = 'gh-link';
+  panel.appendChild(ghLink);
+
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+
+  // 切换菜单
+  function openMenu() {
+    btn.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMenu() {
+    btn.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  btn.addEventListener('click', () => {
+    if (btn.classList.contains('active')) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  });
+
+  // 点击遮罩关闭
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeMenu();
+  });
+
+  // ESC 关闭
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && btn.classList.contains('active')) {
+      closeMenu();
+    }
+  });
+
+  // 窗口大小变化时关闭菜单
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 960 && btn.classList.contains('active')) {
+      closeMenu();
+    }
+  });
+}
+
+// ===== 17. 自定义光标 =====
+function initCustomCursor() {
+  // 仅桌面端启用
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+
+  const dot = document.querySelector('.cursor-dot');
+  const ring = document.querySelector('.cursor-ring');
+  if (!dot || !ring) return;
+
+  let mouseX = 0, mouseY = 0;
+  let ringX = 0, ringY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    // 点直接跟随
+    dot.style.left = mouseX + 'px';
+    dot.style.top = mouseY + 'px';
+  });
+
+  // 环带延迟跟随
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.15;
+    ringY += (mouseY - ringY) * 0.15;
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // 鼠标离开窗口时隐藏
+  document.addEventListener('mouseleave', () => {
+    dot.style.opacity = '0';
+    ring.style.opacity = '0';
+  });
+  document.addEventListener('mouseenter', () => {
+    dot.style.opacity = '1';
+    ring.style.opacity = '1';
+  });
+
+  // 悬停在可交互元素上时放大环
+  const interactiveSelectors = 'a, button, .win-tab, .faq-question, .copy-btn, .section-dot, .feature-card, .tech-tag';
+  document.querySelectorAll(interactiveSelectors).forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+  });
+}
+
+// ===== 18. 右侧导航圆点 =====
+function initSectionDots() {
+  // 仅桌面端显示
+  if (window.innerWidth <= 960) return;
+
+  const sections = document.querySelectorAll('.section[id]');
+  if (!sections.length) return;
+
+  // 创建圆点容器
+  const dotsContainer = document.createElement('div');
+  dotsContainer.className = 'section-dots';
+
+  const labels = {
+    features: '功能',
+    tech: '技术',
+    changelog: '更新',
+    faq: '常见问题',
+    install: '安装',
+    download: '下载',
+  };
+
+  sections.forEach(sec => {
+    const dot = document.createElement('a');
+    dot.className = 'section-dot';
+    dot.href = '#' + sec.id;
+    dot.dataset.section = sec.id;
+    dot.dataset.label = labels[sec.id] || sec.id;
+    dot.title = labels[sec.id] || sec.id;
+    dot.addEventListener('click', (e) => {
+      e.preventDefault();
+      sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    dotsContainer.appendChild(dot);
+  });
+
+  document.body.appendChild(dotsContainer);
+
+  // 滚动时高亮对应圆点
+  const dots = dotsContainer.querySelectorAll('.section-dot');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      const top = sec.getBoundingClientRect().top;
+      if (top < 200) current = sec.id;
+    });
+    dots.forEach(dot => {
+      dot.classList.toggle('active', dot.dataset.section === current);
+    });
+  }, { passive: true });
+}
+
+// ===== 19. 环境光视差滚动 =====
+function initParallaxOrbs() {
+  const orbs = document.querySelectorAll('.ambient-orb');
+  if (!orbs.length) return;
+
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    const multiplier = 0.03;
+
+    orbs.forEach((orb, i) => {
+      const direction = i % 2 === 0 ? 1 : -1;
+      const offset = scrollY * multiplier * direction * (i + 1);
+      orb.style.transform = `translateY(${offset}px)`;
+    });
+  }, { passive: true });
 }

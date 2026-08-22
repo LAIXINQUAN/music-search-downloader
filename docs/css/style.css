@@ -1,5 +1,5 @@
 /* ============================================================
-   QB音乐 项目主页 — 样式表 v2.0
+   QB音乐 项目主页 — 样式表 v3.0
    设计方向：暗色工业风 × 音乐律动感 × 沉浸式交互
    ============================================================ */
 
@@ -369,10 +369,6 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   line-height: 1.1;
   margin-bottom: 16px;
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--text) 0%, var(--text) 60%, var(--accent-light) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 .hero-left h1 em {
   font-style: italic;
@@ -1120,39 +1116,6 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   display: flex;
   gap: 24px;
 }
-.dl-btn {
-  padding: 16px 48px;
-  font-size: 16px;
-  border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: #fff;
-  font-weight: 700;
-  transition: all var(--transition);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 6px 24px rgba(255, 107, 74, 0.3);
-}
-.dl-btn:hover {
-  background: var(--accent-light);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 32px rgba(255, 107, 74, 0.4);
-}
-.dl-btn:active { transform: translateY(0); }
-.dl-btn .icon-dl {
-  width: 18px;
-  height: 18px;
-}
-.download-box .hint {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-.download-box .hint a {
-  color: var(--accent-light);
-  font-weight: 500;
-}
 
 /* ===== Star Badge ===== */
 .star-badge {
@@ -1236,6 +1199,260 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   transform: translateY(-2px);
 }
 
+/* ===== Scroll Progress Bar ===== */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--purple), var(--blue), var(--accent));
+  background-size: 200% 100%;
+  z-index: 1000;
+  transition: width 0.1s linear;
+  animation: progressShimmer 2s linear infinite;
+}
+@keyframes progressShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ===== Mobile Menu Button ===== */
+.mobile-menu-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 200;
+  position: relative;
+}
+.mobile-menu-btn span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--text-secondary);
+  border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mobile-menu-btn.active span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.mobile-menu-btn.active span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.mobile-menu-btn.active span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ===== Mobile Menu Overlay ===== */
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+.mobile-menu-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.mobile-menu-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100vh;
+  background: var(--bg-elevated);
+  border-left: 1px solid var(--border);
+  z-index: 151;
+  display: flex;
+  flex-direction: column;
+  padding: 80px 32px 40px;
+  gap: 8px;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mobile-menu-overlay.active .mobile-menu-panel {
+  transform: translateX(0);
+}
+.mobile-menu-panel a {
+  display: block;
+  padding: 14px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+  letter-spacing: 0.01em;
+}
+.mobile-menu-panel a:hover,
+.mobile-menu-panel a.active {
+  color: var(--accent-light);
+  background: rgba(255, 107, 74, 0.06);
+}
+.mobile-menu-panel a.gh-link {
+  margin-top: auto;
+  border: 1px solid var(--border);
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.mobile-menu-panel a.gh-link:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+/* ===== Custom Cursor ===== */
+.cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background 0.2s;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid rgba(255, 107, 74, 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s, border-color 0.3s, opacity 0.3s;
+}
+.cursor-ring.hover {
+  width: 48px;
+  height: 48px;
+  border-color: var(--accent-light);
+  background: rgba(255, 107, 74, 0.08);
+}
+
+/* ===== Section Navigation Dots ===== */
+.section-dots {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+.section-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border);
+  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+}
+.section-dot::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.section-dot:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.3);
+}
+.section-dot:hover::after {
+  opacity: 1;
+}
+.section-dot.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(255, 107, 74, 0.5);
+  transform: scale(1.2);
+}
+
+/* ===== Enhanced Hero Gradient Animation ===== */
+.hero-left h1 {
+  background: linear-gradient(135deg, var(--text) 0%, var(--accent-light) 40%, var(--purple) 70%, var(--text) 100%);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: heroGradient 8s ease-in-out infinite;
+}
+@keyframes heroGradient {
+  0%, 100% { background-position: 0% 50%; }
+  25% { background-position: 100% 0%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+}
+
+/* ===== Enhanced Download Button Pulse ===== */
+.dl-btn {
+  padding: 16px 48px;
+  font-size: 16px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  animation: dlPulse 2.5s ease-in-out infinite;
+}
+@keyframes dlPulse {
+  0%, 100% { box-shadow: 0 6px 24px rgba(255, 107, 74, 0.3); }
+  50% { box-shadow: 0 6px 36px rgba(255, 107, 74, 0.5), 0 0 60px rgba(255, 107, 74, 0.1); }
+}
+.dl-btn:hover {
+  background: var(--accent-light);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(255, 107, 74, 0.4);
+}
+.dl-btn:active { transform: translateY(0); }
+.dl-btn .icon-dl {
+  width: 18px;
+  height: 18px;
+}
+.download-box .hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.download-box .hint a {
+  color: var(--accent-light);
+  font-weight: 500;
+}
+
 /* ===== Screenshot Panel Switching ===== */
 .win-panel { display: none; }
 .win-panel.active { display: block; }
@@ -1251,6 +1468,9 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   .hero-left h1 { font-size: 40px; }
   .features-grid { grid-template-columns: repeat(2, 1fr); }
   .topbar-links { display: none; }
+  .mobile-menu-btn { display: flex; }
+  .cursor-dot, .cursor-ring { display: none; }
+  .section-dots { display: none; }
   .stats-row { flex-wrap: wrap; gap: 40px; justify-content: center; }
   .section { padding: 70px 0; }
   .section h2 { font-size: 30px; }
