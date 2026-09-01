@@ -5649,7 +5649,7 @@
                     <button class="card-key-btn" onclick="checkForUpdate()">&#128260; 检查更新</button>
                 </div>
                 <div id="updateStatus" style="font-size:11px;color:var(--text-secondary);margin-top:8px;line-height:1.5;">
-                    当前版本：3.6.5
+                    当前版本：3.6.6
                 </div>
             </div>
 
@@ -5661,7 +5661,7 @@
                         <div class="about-icon">&#9835;</div>
                         <div>
                             <div class="about-name">QB音乐</div>
-                            <div class="about-version">版本 3.6.5</div>
+                            <div class="about-version">版本 3.6.6</div>
                         </div>
                     </div>
                     <div class="about-desc">
@@ -7453,7 +7453,7 @@
                     body: JSON.stringify({
                         username: SYSTEM_USERNAME || '',
                         machineId: machineId,
-                        version: '3.6.5',
+                        version: '3.6.6',
                         signature: signature || ''
                     })
                 });
@@ -7669,7 +7669,7 @@
             if (refreshBtn) refreshBtn.classList.add('refreshing');
             body.innerHTML = '<div class="loading"><div class="loading-spinner"></div>检查更新中...</div>';
 
-            const currentVersion = '3.6.5';
+            const currentVersion = '3.6.6';
 
             try {
                 // 通过后端代理获取版本信息，避免前端直接访问 GitHub Pages 超时

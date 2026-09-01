@@ -1,6 +1,6 @@
 {
   "name": "music-downloader",
-  "version": "3.6.5",
+  "version": "3.6.6",
   "description": "音乐搜索与下载平台 - 基于 Electron + Express 的 Windows 桌面客户端",
   "author": "LAIXINGQUAN (https://github.com/LAIXINGQUAN)",
   "main": "main.js",
