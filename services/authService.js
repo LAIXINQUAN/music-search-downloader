@@ -108,7 +108,7 @@ async function findUser(token, email) {
     `${FEISHU_API}/bitable/v1/apps/${BITABLE_APP_TOKEN}/tables/${USER_TABLE_ID}/records/search`,
     {
       filter: { conjunction: 'and', conditions: [{ field_name: FIELD_EMAIL, operator: 'is', value: [email] }] },
-      page_size: 1
+      page_size: 20
     },
     { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, timeout: 15000 }
   );
@@ -118,6 +118,54 @@ async function findUser(token, email) {
   const f = items[0].fields;
   const get = s => Array.isArray(f[s]) ? f[s].map(x => x.text).join('') : (f[s] || '');
   return { recordId: items[0].record_id, email: get(FIELD_EMAIL), hash: get(FIELD_HASH), salt: get(FIELD_SALT) };
+}
+
+/**
+ * 查找某邮箱在飞书用户表中的全部记录（用于检测重复账号）
+ * @param {string} token
+ * @param {string} email
+ * @returns {Promise<Array<{recordId: string, register?: string}>>}
+ */
+async function findAllUsersByEmail(token, email) {
+  const res = await axios.post(
+    `${FEISHU_API}/bitable/v1/apps/${BITABLE_APP_TOKEN}/tables/${USER_TABLE_ID}/records/search`,
+    {
+      filter: { conjunction: 'and', conditions: [{ field_name: FIELD_EMAIL, operator: 'is', value: [email] }] },
+      page_size: 100
+    },
+    { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, timeout: 15000 }
+  );
+  if (!res.data || res.data.code !== 0) throw new Error(`查询用户失败: ${res.data && res.data.msg || '未知错误'}`);
+  const items = (res.data.data && res.data.data.items) || [];
+  return items.map(item => {
+    const f = item.fields || {};
+    const get = s => Array.isArray(f[s]) ? f[s].map(x => x.text).join('') : (f[s] || '');
+    return { recordId: item.record_id, email: get(FIELD_EMAIL), register: get(FIELD_REGISTER) };
+  });
+}
+
+/**
+ * 清理某邮箱的重复账号：保留最早一条记录，删除其余重复记录
+ * @param {string} token
+ * @param {string} email
+ * @returns {Promise<{success: boolean, removed: number}>}
+ */
+async function cleanupDuplicateUsers(token, email) {
+  const records = await findAllUsersByEmail(token, email);
+  if (records.length <= 1) return { success: true, removed: 0 };
+  // 按注册时间排序，时间最小的保留（无注册时间则按记录顺序）
+  records.sort((a, b) => String(a.register || '').localeCompare(String(b.register || '')));
+  const keep = records[0];
+  let removed = 0;
+  for (const r of records) {
+    if (r.recordId === keep.recordId) continue;
+    await axios.delete(
+      `${FEISHU_API}/bitable/v1/apps/${BITABLE_APP_TOKEN}/tables/${USER_TABLE_ID}/records/${r.recordId}`,
+      { headers: { Authorization: `Bearer ${token}` }, timeout: 15000 }
+    );
+    removed++;
+  }
+  return { success: true, removed };
 }
 
 /**
@@ -173,6 +221,9 @@ async function register(email, password) {
   const token = await getTenantToken();
   const existing = await findUser(token, email);
   if (existing) return { success: false, error: '该邮箱已注册' };
+  // 二次校验：缩小并发竞态窗口，避免同邮箱重复注册
+  const dup = await findAllUsersByEmail(token, email);
+  if (dup.length > 0) return { success: false, error: '该邮箱已注册' };
   const salt = crypto.randomBytes(16).toString('hex');
   const hash = hashPassword(password, salt);
   await createUser(token, email, hash, salt);
@@ -320,6 +371,8 @@ module.exports = {
   verifySession,
   logout,
   isValidEmail,
+  findAllUsersByEmail,
+  cleanupDuplicateUsers,
   CODE_RESEND_INTERVAL,
   codeStore // 导出（供测试/调试读取验证码）
 };

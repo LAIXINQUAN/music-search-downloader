@@ -294,6 +294,30 @@
             margin-right: -6px;
             padding-right: 6px;
             scrollbar-width: thin;
+            scrollbar-color: rgba(139,92,246,0.35) transparent;
+        }
+        /* 侧边栏滚动条美化（webkit / Chromium） */
+        .sidebar-nav-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar-nav-scroll::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 8px;
+        }
+        .sidebar-nav-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(139,92,246,0.45), rgba(139,92,246,0.2));
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background-clip: padding-box;
+            transition: background 0.3s ease;
+        }
+        .sidebar-nav-scroll::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--accent), rgba(139,92,246,0.6));
+            background-clip: padding-box;
+        }
+        .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--accent), rgba(139,92,246,0.5));
+            background-clip: padding-box;
         }
         .sidebar-footer {
             padding: 8px 2px;
@@ -1177,6 +1201,16 @@
             transform: translateY(-3px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(139,92,246,0.06), 0 0 32px rgba(139,92,246,0.04);
         }
+        .song-item-disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+        .song-item-disabled:hover {
+            background: var(--bg-card);
+            border-color: var(--border);
+            transform: none;
+            box-shadow: none;
+        }
         .song-item:hover::before {
             opacity: 0.8;
         }
@@ -1554,6 +1588,65 @@
             margin-bottom: 12px;
         }
         .settings-options { display: flex; flex-direction: column; gap: 8px; }
+        /* 设置项开关行 */
+        .settings-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 12px 14px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+        .settings-toggle-text {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .settings-toggle-desc {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        .settings-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .settings-switch input { opacity: 0; width: 0; height: 0; }
+        .settings-switch-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: var(--border);
+            border-radius: 24px;
+            transition: background 0.3s ease;
+        }
+        .settings-switch-slider::before {
+            content: '';
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            top: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .settings-switch input:checked + .settings-switch-slider {
+            background: var(--accent-gradient);
+        }
+        .settings-switch input:checked + .settings-switch-slider::before {
+            transform: translateX(20px);
+        }
         .radio-card {
             position: relative;
             cursor: pointer;
@@ -5066,10 +5159,6 @@
                         <span class="nav-icon">&#128229;</span>
                         <span>下载管理</span>
                     </div>
-                    <div class="nav-item" id="navCustom" onclick="switchTab('custom')">
-                        <span class="nav-icon">&#10133;</span>
-                        <span>手动添加</span>
-                    </div>
                     <div class="nav-item" id="navHistory" onclick="switchTab('history')">
                         <span class="nav-icon">&#128337;</span>
                         <span>播放历史</span>
@@ -5220,16 +5309,6 @@
                         <input type="file" id="localDirInput" webkitdirectory style="display:none" onchange="handleLocalDirSelect(event)">
                     </div>
                     <div class="song-list" id="localResults"><div class="empty-message">点击"选择文件夹"导入本地音乐（自动读取歌名、歌手、专辑、封面等元数据）</div></div>
-                </div>
-
-                <!-- 手动添加歌曲 -->
-                <div id="customPanel" style="display:none;">
-                    <div class="section-header">
-                        <span class="section-icon">&#10133;</span>
-                        <span class="section-title">手动添加歌曲</span>
-                        <button class="action-btn" onclick="openAddSongModal()" style="margin-left:auto;background:var(--accent-gradient);color:white;border:none;padding:6px 16px;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;">&#10133; 添加歌曲</button>
-                    </div>
-                    <div class="song-list" id="customResults"></div>
                 </div>
 
                 <!-- 播放历史 -->
@@ -5460,6 +5539,21 @@
                                 <span class="radio-card-desc">主流音源，封面丰富</span>
                             </span>
                         </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 歌词设置 -->
+            <div class="settings-section">
+                <h3 class="settings-label">歌词</h3>
+                <div class="settings-toggle-row">
+                    <div class="settings-toggle-text">
+                        <span>自动获取歌词</span>
+                        <span class="settings-toggle-desc">播放本地/文件夹歌曲时，按「歌手 + 歌名」自动匹配歌词</span>
+                    </div>
+                    <label class="settings-switch">
+                        <input type="checkbox" id="autoLyrics">
+                        <span class="settings-switch-slider"></span>
                     </label>
                 </div>
             </div>
@@ -5701,49 +5795,18 @@
         </div>
     </div>
 
-    <!-- 手动添加歌曲弹窗 -->
-    <div class="modal" id="addSongModal">
-        <div class="modal-content" style="max-width:520px;">
-            <button class="modal-close" onclick="closeAddSongModal()">&times;</button>
+    <!-- 新建歌单弹窗 -->
+    <div class="modal" id="playlistModal">
+        <div class="modal-content" style="max-width:400px;">
+            <button class="modal-close" onclick="closePlaylistModal()">&times;</button>
             <h2 style="font-size:20px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px;">
-                <span>&#10133;</span> 手动添加歌曲
+                <span>&#128212;</span> 新建歌单
             </h2>
             <div class="add-song-form-group">
-                <label class="add-song-form-label">歌曲名称 <span style="color:#ef4444;">*</span></label>
-                <input type="text" class="add-song-form-input" id="addSongName" placeholder="请输入歌曲名称" maxlength="100">
+                <label class="add-song-form-label">歌单名称 <span style="color:#ef4444;">*</span></label>
+                <input type="text" class="add-song-form-input" id="playlistNameInput" placeholder="请输入歌单名称" maxlength="60" autocomplete="off">
             </div>
-            <div class="add-song-form-group">
-                <label class="add-song-form-label">歌手名称</label>
-                <input type="text" class="add-song-form-input" id="addSongSinger" placeholder="请输入歌手名称" maxlength="100">
-            </div>
-            <div class="add-song-form-group">
-                <label class="add-song-form-label">封面图片URL</label>
-                <input type="text" class="add-song-form-input" id="addSongCover" placeholder="请输入封面图片链接（可选）">
-            </div>
-            <div class="add-song-form-group">
-                <label class="add-song-form-label">音频播放URL <span style="color:#ef4444;">*</span></label>
-                <div style="display:flex;gap:8px;">
-                    <input type="text" class="add-song-form-input" id="addSongPlayUrl" placeholder="请输入音频直链地址或选择本地文件" style="flex:1;">
-                    <button type="button" class="add-song-file-btn" onclick="selectLocalAudioFile()" title="选择本地音频文件">&#128194; 选择文件</button>
-                </div>
-                <div class="add-song-form-hint">支持 mp3 / flac / wav 等格式的直链地址或本地文件</div>
-                <input type="file" id="addSongFileInput" accept="audio/*" style="display:none;" onchange="handleLocalFileSelected(event)">
-            </div>
-            <div class="add-song-form-group">
-                <label class="add-song-form-label">下载URL</label>
-                <input type="text" class="add-song-form-input" id="addSongDownloadUrl" placeholder="请输入下载链接（可选，留空则使用播放链接下载）">
-                <div class="add-song-form-hint">留空则自动使用音频播放链接作为下载地址</div>
-            </div>
-            <div class="add-song-form-group">
-                <label class="add-song-form-label">歌词设置</label>
-                <div class="add-song-lyrics-options" id="addSongLyricsOptions">
-                    <div class="add-song-lyrics-option selected" data-mode="manual" onclick="selectLyricsMode('manual')">&#9998; 手动输入歌词</div>
-                    <div class="add-song-lyrics-option" data-mode="none" onclick="selectLyricsMode('none')">&#128683; 不显示歌词</div>
-                    <div class="add-song-lyrics-option" data-mode="auto" onclick="selectLyricsMode('auto')">&#128269; 自动搜索歌词</div>
-                </div>
-                <textarea class="add-song-form-textarea" id="addSongLyrics" placeholder="请输入歌词内容..." style="margin-top:10px;"></textarea>
-            </div>
-            <button class="add-song-submit-btn" onclick="submitCustomSong()">&#10133; 添加歌曲</button>
+            <button class="add-song-submit-btn" onclick="submitPlaylist()">&#10003; 创建歌单</button>
         </div>
     </div>
 
@@ -6386,15 +6449,42 @@
         }
 
         /**
-         * 创建新歌单
+         * 打开新建歌单弹窗（Electron 不支持 window.prompt，改用自定义模态框）
          */
         function createPlaylist() {
-            const name = prompt('请输入歌单名称：');
-            if (!name || !name.trim()) return;
-            playlists.push({ id: 'pl_' + Date.now().toString(36), name: name.trim(), songs: [] });
+            const modal = document.getElementById('playlistModal');
+            const input = document.getElementById('playlistNameInput');
+            if (modal && input) {
+                input.value = '';
+                modal.classList.add('show');
+                setTimeout(() => input.focus(), 60);
+            }
+        }
+
+        /**
+         * 关闭新建歌单弹窗
+         */
+        function closePlaylistModal() {
+            const modal = document.getElementById('playlistModal');
+            if (modal) modal.classList.remove('show');
+        }
+
+        /**
+         * 提交新建歌单
+         */
+        function submitPlaylist() {
+            const input = document.getElementById('playlistNameInput');
+            const name = (input && input.value || '').trim();
+            if (!name) {
+                showToast('请输入歌单名称');
+                input && input.focus();
+                return;
+            }
+            playlists.push({ id: 'pl_' + Date.now().toString(36), name: name, songs: [] });
             savePlaylists();
             renderPlaylists();
-            showToast('歌单已创建：' + name.trim());
+            closePlaylistModal();
+            showToast('歌单已创建：' + name);
         }
 
         /**
@@ -6681,6 +6771,17 @@
         }
 
         /**
+         * 判断音频扩展名是否被 Chromium 原生支持播放
+         * @param {string} name - 文件名或路径
+         * @returns {boolean}
+         */
+        function isSupportedAudio(name) {
+            if (!name) return true;
+            const ext = name.split('.').pop().toLowerCase();
+            return ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac', 'opus'].includes(ext);
+        }
+
+        /**
          * 渲染本地音乐列表
          */
         function renderLocalSongs() {
@@ -6690,8 +6791,10 @@
                 container.innerHTML = '<div class="empty-message">点击"选择文件夹"导入本地音乐（自动读取歌名、歌手、专辑、封面等元数据）</div>';
                 return;
             }
-            container.innerHTML = localSongs.map((s, i) => `
-                <div class="song-item" onclick="playLocalSong('${s.id}')">
+            container.innerHTML = localSongs.map((s, i) => {
+                const playable = isSupportedAudio(s.filePath || (s.file && s.file.name) || s.name);
+                return `
+                <div class="song-item ${playable ? '' : 'song-item-disabled'}" ${playable ? `onclick="playLocalSong('${s.id}')"` : ''}>
                     <div class="song-index">${i + 1}</div>
                     <div class="song-cover">${s.cover ? `<img src="${s.cover}" alt="">` : '<span style="font-size:18px;">&#127925;</span>'}</div>
                     <div class="song-info">
@@ -6700,10 +6803,12 @@
                     </div>
                     <div class="song-singer" style="color:var(--text-secondary);font-size:12px;">${formatDuration(s.duration)}</div>
                     <div class="song-actions">
-                        <button class="action-btn" onclick="event.stopPropagation();playLocalSong('${s.id}')">&#9654;</button>
+                        ${playable
+                            ? `<button class="action-btn" onclick="event.stopPropagation();playLocalSong('${s.id}')">&#9654;</button>`
+                            : `<span style="font-size:12px;color:var(--text-secondary);padding-right:8px;">格式不支持</span>`}
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         /**
@@ -6729,14 +6834,26 @@
                 immState.audio = null;
             }
             // 文件系统扫描的歌曲通过本地文件服务播放（支持 seek），浏览器方案用 blob URL
+            // 扩展名按实际文件类型取，避免统一 .mp3 导致 Content-Type 与解码不匹配
+            const ext = (song.filePath && song.filePath.includes('.')) ? song.filePath.split('.').pop().toLowerCase() : 'mp3';
             const src = song.filePath
-                ? `${API_BASE}/api/local-file?path=${encodeURIComponent(song.filePath)}&name=${encodeURIComponent(song.name + '.mp3')}`
+                ? `${API_BASE}/api/local-file?path=${encodeURIComponent(song.filePath)}&name=${encodeURIComponent(song.name + '.' + ext)}`
                 : song.url;
             immState.audio = new Audio(src);
-            immState.audio.play().catch(() => {});
+            immState.audio.playbackRate = parseFloat(localStorage.getItem('playRate') || '1');
+            immState.audio.volume = parseFloat(localStorage.getItem('immVolume') || '0.8');
+            // 初始化音频管线（音效+可视化一体化，MediaElementSource 只调用一次）
+            try {
+                if (typeof initAudioPipeline === 'function') {
+                    if (enhanceEnabled) initAudioPipeline(immState.audio);
+                    else initAudioVisualizer(immState.audio);
+                }
+            } catch (e) { console.error('本地音频管线初始化失败:', e); }
             immState.currentSong = { id: song.id, name: song.name, singer: song.singer };
             immState.isPlaying = true;
-            // 更新主界面播放条
+            // 同步主播放条
+            if (typeof mainPlayerSyncSong === 'function') mainPlayerSyncSong(immState.currentSong);
+            if (typeof immUpdateSongUI === 'function') immUpdateSongUI();
             const nameEl = document.getElementById('mpbName');
             const artistEl = document.getElementById('mpbArtist');
             if (nameEl) nameEl.textContent = song.name;
@@ -6746,6 +6863,63 @@
             const cover = document.getElementById('mpbCover');
             if (cover) cover.innerHTML = song.cover ? `<img src="${song.cover}" alt="">` : '&#9835;';
             if (typeof immUpdatePlayBtn === 'function') immUpdatePlayBtn();
+            // 时长缓存 + 进度/时间更新（与单曲播放一致）
+            immState.audio.onloadedmetadata = () => {
+                if (immState.audio.duration && !isNaN(immState.audio.duration)) {
+                    immState.cachedDuration = immState.audio.duration;
+                }
+                immUpdateProgress();
+            };
+            immState.audio.ontimeupdate = () => {
+                if (immState.audio.duration && !isNaN(immState.audio.duration)) {
+                    immState.cachedDuration = immState.audio.duration;
+                }
+                immUpdateProgress();
+                if (typeof immSyncLyrics === 'function') immSyncLyrics();
+            };
+            immState.audio.onerror = () => {
+                immState.isPlaying = false;
+                if (typeof immUpdatePlayBtn === 'function') immUpdatePlayBtn();
+                showToast('播放失败：格式不受支持或文件损坏');
+            };
+            // 本地歌曲自带歌词则直接解析，否则按开关自动按「歌手+歌名」识别歌词
+            if (song.lyrics && typeof immParseLyrics === 'function') {
+                immParseLyrics(song.lyrics);
+            } else if (localStorage.getItem('autoLyrics') !== 'false' && typeof immAutoFetchLyrics === 'function') {
+                immAutoFetchLyrics(song);
+            }
+            if (typeof immUpdateMiniPlaylist === 'function') immUpdateMiniPlaylist();
+            immState.audio.play().catch(() => {});
+        }
+
+        /**
+         * 自动识别歌词：按「歌手 + 歌名」双维度匹配在线歌词并解析
+         * 歌手/歌名来自本地文件 ID3 元数据或文件名解析（scanLocalFolder 已读取）
+         * @param {Object} song - 歌曲对象（需含 name, singer）
+         */
+        async function immAutoFetchLyrics(song) {
+            if (!song || !song.name) return;
+            const singer = (song.singer && song.singer !== '本地文件') ? song.singer : '';
+            const keyword = (singer ? singer + ' ' : '') + song.name;
+            try {
+                const res = await fetchWithTimeout(`${API_BASE}/api/search?keyword=${encodeURIComponent(keyword)}&source=gequbao`, 15000);
+                const data = await res.json();
+                if (!data.success || !data.data || data.data.length === 0) return;
+                // 取匹配度最高的结果：优先歌手一致
+                let best = data.data[0];
+                if (singer) {
+                    const hit = data.data.find(it => it.singer && it.singer.indexOf(singer) !== -1);
+                    if (hit) best = hit;
+                }
+                const qs = new URLSearchParams({ name: best.name || '', singer: best.singer || '' });
+                const detailRes = await fetchWithTimeout(`${API_BASE}/api/music/${best.id}?${qs}`, 15000);
+                const detailData = await detailRes.json();
+                if (detailData.success && detailData.data && detailData.data.lyrics) {
+                    if (typeof immParseLyrics === 'function') immParseLyrics(detailData.data.lyrics);
+                }
+            } catch (err) {
+                console.error('自动识别歌词失败:', err);
+            }
         }
 
         // ========== 播放历史管理 ==========
@@ -6846,222 +7020,6 @@
                     </div>
                 `;
             }).join('');
-            setTimeout(initTilt3DEffects, 50);
-        }
-
-        // ========== 播放历史管理 ==========
-        // 自定义歌曲列表：存储完整歌曲信息 { id, name, singer, cover, playUrl, downloadUrl, lyrics, lyricsMode }
-        let customSongs = JSON.parse(localStorage.getItem('customSongs') || '[]');
-
-        /**
-         * 保存自定义歌曲列表到 localStorage
-         */
-        function saveCustomSongs() {
-            localStorage.setItem('customSongs', JSON.stringify(customSongs));
-        }
-
-        // 存储 web 版通过文件选择器加载的本地文件 blob URL
-        let localFileBlobUrl = null;
-
-        /**
-         * 打开文件选择器选择本地音频文件
-         * Electron 环境通过 IPC 打开系统对话框，Web 环境使用隐藏的 file input
-         */
-        async function selectLocalAudioFile() {
-            if (window.electronAPI) {
-                // Electron 环境：通过 IPC 打开系统文件对话框
-                const result = await window.electronAPI.openFileDialog();
-                if (result.success && result.filePath) {
-                    // 提取文件名用于 Content-Disposition
-                    const fileName = result.filePath.split(/[\\/]/).pop() || 'audio.mp3';
-                    // 将本地文件路径转换为服务端 URL，附带文件名信息
-                    const localUrl = `${API_BASE}/api/local-file?path=${encodeURIComponent(result.filePath)}&name=${encodeURIComponent(fileName)}`;
-                    document.getElementById('addSongPlayUrl').value = localUrl;
-                    // 同时设置下载URL为本地文件路径
-                    document.getElementById('addSongDownloadUrl').value = localUrl;
-                    showToast('已选择本地文件');
-                }
-            } else {
-                // Web 环境：触发隐藏的 file input
-                document.getElementById('addSongFileInput').click();
-            }
-        }
-
-        /**
-         * Web 环境处理文件选择
-         * 将文件读取为 Blob URL 供播放使用
-         * @param {Event} event - 文件选择事件
-         */
-        function handleLocalFileSelected(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            // 释放之前的 blob URL
-            if (localFileBlobUrl) {
-                URL.revokeObjectURL(localFileBlobUrl);
-            }
-            localFileBlobUrl = URL.createObjectURL(file);
-            document.getElementById('addSongPlayUrl').value = localFileBlobUrl;
-            document.getElementById('addSongDownloadUrl').value = localFileBlobUrl;
-            showToast('已选择: ' + file.name);
-        }
-
-        /**
-         * 打开手动添加歌曲弹窗
-         */
-        function openAddSongModal() {
-            document.getElementById('addSongName').value = '';
-            document.getElementById('addSongSinger').value = '';
-            document.getElementById('addSongCover').value = '';
-            document.getElementById('addSongPlayUrl').value = '';
-            document.getElementById('addSongDownloadUrl').value = '';
-            document.getElementById('addSongLyrics').value = '';
-            document.getElementById('addSongFileInput').value = '';
-            if (localFileBlobUrl) {
-                URL.revokeObjectURL(localFileBlobUrl);
-                localFileBlobUrl = null;
-            }
-            selectLyricsMode('manual');
-            document.getElementById('addSongLyrics').style.display = '';
-            document.getElementById('addSongModal').classList.add('show');
-        }
-
-        /**
-         * 关闭手动添加歌曲弹窗
-         */
-        function closeAddSongModal() {
-            document.getElementById('addSongModal').classList.remove('show');
-        }
-
-        /**
-         * 选择歌词模式
-         * @param {string} mode - 'manual' | 'none' | 'auto'
-         */
-        function selectLyricsMode(mode) {
-            document.querySelectorAll('#addSongLyricsOptions .add-song-lyrics-option').forEach(el => {
-                el.classList.toggle('selected', el.dataset.mode === mode);
-            });
-            const lyricsTextarea = document.getElementById('addSongLyrics');
-            if (mode === 'manual') {
-                lyricsTextarea.style.display = '';
-                lyricsTextarea.placeholder = '请输入歌词内容...';
-            } else if (mode === 'auto') {
-                lyricsTextarea.style.display = 'none';
-            } else {
-                lyricsTextarea.style.display = 'none';
-            }
-            // 存储当前选择的模式
-            document.getElementById('addSongLyricsOptions').dataset.currentMode = mode;
-        }
-
-        /**
-         * 提交自定义歌曲
-         */
-        function submitCustomSong() {
-            const name = document.getElementById('addSongName').value.trim();
-            const singer = document.getElementById('addSongSinger').value.trim();
-            const cover = document.getElementById('addSongCover').value.trim();
-            const playUrl = document.getElementById('addSongPlayUrl').value.trim();
-            const downloadUrl = document.getElementById('addSongDownloadUrl').value.trim();
-            const lyricsMode = document.getElementById('addSongLyricsOptions').dataset.currentMode || 'manual';
-            const lyrics = document.getElementById('addSongLyrics').value.trim();
-
-            if (!name) {
-                showToast('请输入歌曲名称');
-                return;
-            }
-            if (!playUrl) {
-                showToast('请输入音频播放URL');
-                return;
-            }
-
-            const id = 'custom_' + Date.now();
-            const song = {
-                id,
-                name,
-                singer: singer || '未知歌手',
-                cover: cover || '',
-                playUrl,
-                downloadUrl: downloadUrl || playUrl,
-                lyrics: lyricsMode === 'manual' ? lyrics : '',
-                lyricsMode
-            };
-
-            customSongs.unshift(song);
-            saveCustomSongs();
-            closeAddSongModal();
-            renderCustomSongs();
-            showToast('歌曲添加成功');
-        }
-
-        /**
-         * 删除自定义歌曲
-         * @param {string} id - 歌曲ID
-         */
-        function deleteCustomSong(id) {
-            // 如果正在播放这首歌曲，先停止播放
-            if (typeof immState !== 'undefined' && immState.currentSong && immState.currentSong.id === id) {
-                if (immState.audio) {
-                    cleanupAudio(immState.audio);
-                    immState.audio.pause();
-                    immState.audio.src = '';
-                    immState.audio = null;
-                }
-                immState.currentSong = null;
-                immState.isPlaying = false;
-                immUpdatePlayBtn();
-                immState.lyrics = [];
-                immRenderLyrics();
-                // 隐藏主页控制条
-                const bar = document.getElementById('mainPlayerBar');
-                if (bar) bar.classList.remove('show');
-            }
-            // 同时从收藏中移除
-            const favIdx = favorites.findIndex(f => f.id === id);
-            if (favIdx >= 0) {
-                favorites.splice(favIdx, 1);
-                saveFavorites();
-            }
-            customSongs = customSongs.filter(s => s.id !== id);
-            saveCustomSongs();
-            renderCustomSongs();
-            showToast('已删除歌曲');
-        }
-
-        /**
-         * 渲染自定义歌曲列表
-         */
-        function renderCustomSongs() {
-            const container = document.getElementById('customResults');
-            if (!container) return;
-            if (customSongs.length === 0) {
-                container.innerHTML = '<div class="empty-message">暂无手动添加的歌曲，点击上方按钮添加</div>';
-                return;
-            }
-            // 缓存自定义歌曲信息供详情页使用
-            customSongs.forEach(s => {
-                songCache.set(s.id, {
-                    name: s.name || '',
-                    singer: s.singer || '',
-                    cover: s.cover || ''
-                });
-            });
-            container.innerHTML = customSongs.map((s, i) => `
-                <div class="song-item custom-song-item" id="song-${s.id}" onclick="showDetail('${s.id}')">
-                    <button class="custom-song-delete" onclick="event.stopPropagation();deleteCustomSong('${s.id}')" title="删除">&#10005;</button>
-                    <div class="song-index">${i + 1}</div>
-                    <div class="song-cover" id="cover-${s.id}">
-                        ${s.cover ? `<img src="${s.cover}" alt="">` : '&#9835;'}
-                    </div>
-                    <div class="song-info">
-                        <div class="song-name">${esc(s.name) || '未知歌曲'}</div>
-                        <div class="song-singer">${esc(s.singer) || '未知歌手'}</div>
-                    </div>
-                    <div class="song-actions">
-                        <button class="action-btn" onclick="event.stopPropagation();playSingleSong('${s.id}')" title="播放">&#9654;</button>
-                        <button class="action-btn" onclick="event.stopPropagation();showDetail('${s.id}')">详情</button>
-                    </div>
-                </div>
-            `).join('');
             setTimeout(initTilt3DEffects, 50);
         }
 
@@ -7594,6 +7552,15 @@
                 cb.checked = savedSources.includes(cb.value);
             });
 
+            // 自动获取歌词开关
+            const autoLyrics = document.getElementById('autoLyrics');
+            if (autoLyrics) {
+                autoLyrics.checked = localStorage.getItem('autoLyrics') !== 'false';
+                autoLyrics.addEventListener('change', (e) => {
+                    localStorage.setItem('autoLyrics', String(e.target.checked));
+                });
+            }
+
             // 倍速初始化（读取保存的倍速，高亮当前项）
             const savedRate = parseFloat(localStorage.getItem('playRate') || '1');
             const rateLabel = document.getElementById('currentRateLabel');
@@ -8003,13 +7970,12 @@
             document.getElementById('navEnhance').classList.toggle('active', tab === 'enhance');
             document.getElementById('navFav').classList.toggle('active', tab === 'fav');
             document.getElementById('navDownloads').classList.toggle('active', tab === 'downloads');
-            document.getElementById('navCustom').classList.toggle('active', tab === 'custom');
             document.getElementById('navHistory').classList.toggle('active', tab === 'history');
             document.getElementById('navPlaylists').classList.toggle('active', tab === 'playlists');
             document.getElementById('navReport').classList.toggle('active', tab === 'report');
             document.getElementById('navLocal').classList.toggle('active', tab === 'local');
             // 面板切换动画 - 隐藏所有面板
-            ['searchPanel','hotPanel','artistPanel','enhancePanel','favPanel','downloadsPanel','customPanel','historyPanel','playlistsPanel','reportPanel','localPanel'].forEach(id => {
+            ['searchPanel','hotPanel','artistPanel','enhancePanel','favPanel','downloadsPanel','historyPanel','playlistsPanel','reportPanel','localPanel'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     el.style.display = 'none';
@@ -8026,7 +7992,6 @@
             if (tab === 'hot' && !document.getElementById('hotResults').innerHTML.trim()) loadHotSongs();
             if (tab === 'fav') renderFavorites();
             if (tab === 'downloads') renderDownloads();
-            if (tab === 'custom') renderCustomSongs();
             if (tab === 'history') renderPlayHistory();
             if (tab === 'playlists') renderPlaylists();
             if (tab === 'report') renderReport();
@@ -8242,80 +8207,6 @@
          * @param {string} id - 歌曲ID
          */
         async function playSingleSong(id) {
-            // 自定义歌曲：直接从本地数据播放，不走 API
-            if (id.startsWith('custom_')) {
-                const customSong = customSongs.find(s => s.id === id);
-                if (!customSong) {
-                    showToast('歌曲信息未找到');
-                    return;
-                }
-                try {
-                    let playUrl = customSong.playUrl;
-                    if (playUrl && /^https?:\/\//.test(playUrl) && !playUrl.includes('/api/')) {
-                        playUrl = `${API_BASE}/api/proxy-play?url=${encodeURIComponent(playUrl)}`;
-                    }
-                    if (immState.audio) {
-                        cleanupAudio(immState.audio);
-                        immState.audio.pause();
-                        immState.audio.src = '';
-                    }
-                    immState.audio = new Audio(playUrl);
-                    immState.audio.playbackRate = parseFloat(localStorage.getItem('playRate') || '1');
-                    immState.audio.volume = parseFloat(localStorage.getItem('immVolume') || '0.8');
-                    // 初始化音频管线（音效+可视化一体化，MediaElementSource 只调用一次）
-                    if (enhanceEnabled) {
-                        initAudioPipeline(immState.audio);
-                    } else {
-                        initAudioVisualizer(immState.audio);
-                    }
-                    immState.currentSong = customSong;
-                    immState.playlist = [customSong];
-                    immState.currentIndex = 0;
-                    immState.consecutiveFailures = 0;
-                    mainPlayerSyncSong(customSong);
-                    immUpdatePlayBtn();
-                    immState.audio.onloadedmetadata = () => {
-                        immState.cachedDuration = immState.audio.duration || 0;
-                        immUpdateProgress();
-                    };
-                    immState.audio.ontimeupdate = () => {
-                        if (immState.audio.duration && !isNaN(immState.audio.duration)) {
-                            immState.cachedDuration = immState.audio.duration;
-                        }
-                        immUpdateProgress();
-                        immSyncLyrics();
-                    };
-                    immState.audio.onended = () => immHandleSongEnd();
-                    immState.audio.onerror = () => {
-                        immState.isPlaying = false;
-                        immUpdatePlayBtn();
-                        showToast('播放失败：' + (customSong.name || '未知歌曲'));
-                    };
-                    immState.loadedSongs.set(customSong.id, customSong);
-                    await immState.audio.play();
-                    immState.isPlaying = true;
-                    immUpdatePlayBtn();
-                    immUpdateSongUI();
-                    // 根据歌词模式处理歌词
-                    if (customSong.lyricsMode === 'manual') {
-                        immParseLyrics(customSong.lyrics || '');
-                    } else if (customSong.lyricsMode === 'auto') {
-                        immParseLyrics('');
-                        immSearchLyricsForCustom(customSong);
-                    } else {
-                        immParseLyrics('');
-                    }
-                    initParticles(customSong.cover || '');
-                    immUpdateMiniPlaylist();
-                    addToPlayHistory(customSong);
-                    showToast('正在播放：' + (customSong.name || '未知歌曲'));
-                } catch (err) {
-                    showToast('播放失败');
-                    console.error('playSingleSong custom error:', err);
-                }
-                return;
-            }
-
             const cached = songCache.get(id);
             if (!cached) {
                 showToast('歌曲信息未找到');
@@ -8412,17 +8303,6 @@
             modal.classList.add('show');
             body.innerHTML = '<div class="loading"><div class="loading-spinner"></div>加载中</div>';
 
-            // 自定义歌曲：直接渲染，不走 API
-            if (id.startsWith('custom_')) {
-                const customSong = customSongs.find(s => s.id === id);
-                if (customSong) {
-                    renderCustomSongDetail(customSong);
-                } else {
-                    body.innerHTML = '<div class="empty-message">歌曲信息未找到</div>';
-                }
-                return;
-            }
-
             try {
                 // 从缓存中取出搜索结果里的 name/singer，透传给后端用于网易云后备搜索
                 const cached = songCache.get(id) || {};
@@ -8514,68 +8394,6 @@
                 html += `<div class="detail-section"><h3>歌词</h3><div class="lyrics-box">${esc(song.lyrics)}</div></div>`;
             }
             body.innerHTML = html;
-        }
-
-        /**
-         * 渲染自定义歌曲详情弹窗
-         * @param {Object} song - 自定义歌曲对象
-         */
-        function renderCustomSongDetail(song) {
-            currentDetailSong = song;
-            const body = document.getElementById('modalBody');
-            let html = `
-                <div class="detail-cover">${song.cover ? `<img src="${song.cover}" alt="">` : ''}</div>
-                <div class="detail-title">${esc(song.name)}</div>
-                <div class="detail-singer">${esc(song.singer) || '未知歌手'}</div>
-                <div style="text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                    <button class="immersive-entry-btn" onclick="enterImmersiveFromDetail()">
-                        &#127911; 沉浸模式
-                    </button>
-                    <button class="immersive-entry-btn detail-fav-btn ${favorites.some(f => f.id === song.id) ? 'active' : ''}" onclick="toggleFavoriteFromDetail()" style="${favorites.some(f => f.id === song.id) ? 'border-color:#ff4757;color:#ff4757;' : ''}">
-                        &#9829; ${favorites.some(f => f.id === song.id) ? '已收藏' : '收藏'}
-                    </button>
-                </div>
-            `;
-            if (song.playUrl) {
-                // 外部直链需通过代理播放，避免防盗链拦截
-                const detailPlayUrl = /^https?:\/\//.test(song.playUrl) && !song.playUrl.includes('/api/')
-                    ? `${API_BASE}/api/proxy-play?url=${encodeURIComponent(song.playUrl)}`
-                    : song.playUrl;
-                html += `<div class="detail-section">
-                    <h3>在线播放</h3>
-                    <div class="player-box"><audio class="audio-player" controls src="${detailPlayUrl}"></audio></div>
-                </div>`;
-            }
-            html += `<div class="detail-section"><h3>下载选项</h3><div class="download-options">`;
-            if (song.downloadUrl) {
-                // blob URL 不使用代理，直接通过 a 标签下载
-                const isBlob = song.downloadUrl.startsWith('blob:');
-                const dlUrl = isBlob ? song.downloadUrl : `${API_BASE}/api/download?url=${encodeURIComponent(song.downloadUrl)}&name=${encodeURIComponent(song.name)}`;
-                html += `<div class="download-option" onclick="handleDownload('${dlUrl.replace(/'/g, "\\'")}', '${esc(song.name)}.mp3')" style="cursor:pointer">
-                    <div class="download-option-icon">&#8595;</div>
-                    <div class="download-option-info"><div class="download-option-type">直接下载 MP3</div><div class="download-option-desc">点击下载到本地</div></div>
-                </div>`;
-            }
-            html += `</div></div>`;
-            if (song.lyricsMode === 'manual' && song.lyrics) {
-                html += `<div class="detail-section"><h3>歌词</h3><div class="lyrics-box">${esc(song.lyrics)}</div></div>`;
-            } else if (song.lyricsMode === 'auto') {
-                html += `<div class="detail-section"><h3>歌词</h3><div class="lyrics-box" style="color:var(--text-secondary);font-style:italic;">自动搜索歌词功能将在播放时生效</div></div>`;
-            }
-            // 相似推荐
-            if (song.singer) {
-                html += `<div class="similar-section">
-                    <h3>&#128293; 相似推荐</h3>
-                    <div class="similar-list" id="similarContainer">
-                        <div class="loading" style="padding:10px;">加载推荐中...</div>
-                    </div>
-                </div>`;
-            }
-            body.innerHTML = html;
-            // 加载相似推荐
-            if (song.singer) {
-                loadSimilarSongs(song.singer, song.id);
-            }
         }
 
         /**
@@ -8779,7 +8597,6 @@
             if (sleepMenu) sleepMenu.style.display = 'none';
         });
         document.getElementById('cardKeyEditModal').addEventListener('click', e => { if (e.target.id === 'cardKeyEditModal') closeCardKeyEdit(); });
-        document.getElementById('addSongModal').addEventListener('click', e => { if (e.target.id === 'addSongModal') closeAddSongModal(); });
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
                 if (document.getElementById('immersiveMode').classList.contains('show')) {
@@ -9233,12 +9050,7 @@
                 immUpdateProgress();
                 const loaded = immState.loadedSongs.get(song.id);
                 const lyrics = (loaded && loaded.lyrics) || song.lyrics || '';
-                if (song.id && song.id.startsWith('custom_') && song.lyricsMode === 'auto' && !lyrics) {
-                    immParseLyrics('');
-                    immSearchLyricsForCustom(song);
-                } else {
-                    immParseLyrics(lyrics);
-                }
+                immParseLyrics(lyrics);
                 // 初始化圆形可视化（复用音频时不重新调用 immLoadSong，需手动初始化）
                 setTimeout(() => initRadialVisualizer(immState.audio), 300);
             } else if (song && (song.playUrl || song.neteaseId || song.lyrics)) {
@@ -9505,14 +9317,7 @@
             addToPlayHistory(song);
 
             // 解析歌词
-            if (song.id && song.id.startsWith('custom_') && song.lyricsMode === 'auto') {
-                immParseLyrics('');
-                immSearchLyricsForCustom(song);
-            } else if (song.id && song.id.startsWith('custom_') && song.lyricsMode === 'none') {
-                immParseLyrics('');
-            } else {
-                immParseLyrics(song.lyrics || '');
-            }
+            immParseLyrics(song.lyrics || '');
 
             // 构建播放URL（优先playUrl，否则用网易云后备，最后尝试downloadUrl）
             // 外部直链需通过后端代理播放，避免浏览器被防盗链拦截
@@ -9804,35 +9609,6 @@
          * 解析歌词文本为行数组
          * 支持 [mm:ss.xx]格式和纯文本
          */
-        /**
-         * 自动搜索自定义歌曲的歌词
-         * 通过搜索 API 查找同名歌曲的歌词
-         * @param {Object} customSong - 自定义歌曲对象
-         */
-        async function immSearchLyricsForCustom(customSong) {
-            showToast('正在搜索歌词...');
-            try {
-                const keyword = customSong.name + (customSong.singer ? ' ' + customSong.singer : '');
-                const res = await fetchWithTimeout(`${API_BASE}/api/search?keyword=${encodeURIComponent(keyword)}&source=gequbao`, 15000);
-                const data = await res.json();
-                if (data.success && data.data && data.data.length > 0) {
-                    // 获取第一首匹配歌曲的详情
-                    const firstSong = data.data[0];
-                    const detailRes = await fetchWithTimeout(`${API_BASE}/api/music/${firstSong.id}?name=${encodeURIComponent(firstSong.name || '')}&singer=${encodeURIComponent(firstSong.singer || '')}`, 15000);
-                    const detailData = await detailRes.json();
-                    if (detailData.success && detailData.data && detailData.data.lyrics) {
-                        immParseLyrics(detailData.data.lyrics);
-                        return;
-                    }
-                }
-                // 未找到歌词，显示提示
-                immParseLyrics('');
-            } catch (err) {
-                console.error('自动搜索歌词失败:', err);
-                immParseLyrics('');
-            }
-        }
-
         function immParseLyrics(lyricsText) {
             immState.lyrics = [];
             if (!lyricsText) {
@@ -10570,10 +10346,15 @@
                 // 设置新壁纸：先加载再播放，避免 play() 在未就绪时失败
                 const url = `${API_BASE}/api/wallpapers/video?name=${encodeURIComponent(filename)}`;
                 video.classList.remove('active');
+                // 解码失败（多为视频编码不被 Chromium 支持，如 HEVC/AV1）时给出明确提示，避免静默黑屏
+                video.onerror = () => {
+                    showToast('壁纸加载失败：视频编码不受支持（建议 H.264/MP4 或 WebM）或文件已损坏');
+                };
                 video.src = url;
                 video.load();
                 const onCanPlay = () => {
                     video.removeEventListener('canplay', onCanPlay);
+                    video.onerror = null;
                     video.play().then(() => {
                         video.classList.add('active');
                     }).catch(() => {
