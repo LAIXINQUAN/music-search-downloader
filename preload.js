@@ -21,6 +21,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
    */
   isQuiting: () => ipcRenderer.invoke('is-quiting'),
   /**
+   * 获取系统信息（电脑用户名 + 版本配置）
+   * 用于开源版署名显示与使用统计
+   * @returns {Promise<{username: string, edition: string, licenseName: string}>}
+   */
+  getSystemInfo: () => ipcRenderer.invoke('get-system-info'),
+  /**
    * 触发文件下载（通过主进程 webContents.downloadURL）
    * @param {string} url - 下载链接
    * @param {string} fileName - 文件名
@@ -58,6 +64,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
  * @returns {Promise<{success: boolean, canceled?: boolean, filePath?: string}>}
  */
 openFileDialog: () => ipcRenderer.invoke('open-file-dialog'),
+/**
+ * 打开文件夹选择对话框，选择本地音乐文件夹
+ * @returns {Promise<{success: boolean, canceled?: boolean, path?: string}>}
+ */
+selectLocalFolder: () => ipcRenderer.invoke('select-local-folder'),
+/**
+ * 扫描本地音乐文件夹并读取音频元数据
+ * @param {string} dir - 要扫描的目录
+ * @returns {Promise<{success: boolean, songs?: Array, error?: string}>}
+ */
+scanLocalFolder: (dir) => ipcRenderer.invoke('scan-local-folder', dir),
 /**
  * 打开桌面歌词窗口
  * @returns {Promise<{success: boolean}>}

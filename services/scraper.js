@@ -1,6 +1,6 @@
 /**
  * 爬虫服务模块
- * 负责爬取多站点音乐资源，支持 gequbao、toomic(酷我)、酷我直连、酷狗、QQ音乐
+ * 负责爬取多站点音乐资源，支持 gequbao、酷狗、QQ音乐
  * 播放源缺失时自动使用网易云后备播放
  */
 const axios = require('axios');
@@ -9,10 +9,7 @@ const cheerio = require('cheerio');
 // 音源站点配置
 const BASE_URL = 'https://www.gequbao.com';
 const MIRROR_URL = 'https://www.gequbao.net';
-const TOOMIC_URL = 'https://www.toomic.com';
 const NETEASE_API = 'https://music.163.com';
-const KUWO_SEARCH_URL = 'http://search.kuwo.cn/r.s';
-const KUWO_PLAY_URL = 'https://antiserver.kuwo.cn/anti.s';
 const KUGOU_SEARCH_URL = 'https://songsearch.kugou.com/song_search_v2';
 const KUGOU_PLAY_URL = 'https://wwwapi.kugou.com/yy/index.php';
 const QQ_SEARCH_URL = 'https://shc.y.qq.com/soso/fcgi-bin/client_search_cp';
@@ -105,64 +102,44 @@ async function searchFromSite(keyword, siteUrl) {
 }
 
 /**
- * 搜索音乐（双站点合并）
- * 同时从 gequbao.com 和 gequbao.net 搜索，合并去重结果
+ * 搜索音乐（多站点合并）
+ * 支持逗号分隔的多音源参数，如 "gequbao,kugou,qq"
  * @param {string} keyword - 搜索关键词
+ * @param {string} source - 音源选择，逗号分隔（'all' 表示全部）
  * @returns {Promise<Array>} 合并后的歌曲列表
  */
 async function searchMusic(keyword, source = 'all') {
-  // 根据音源选择决定搜索哪些站点
-  const tasks = [];
-  const sources = [];
+  // 解析音源列表
+  const sourceList = source === 'all'
+    ? ['gequbao', 'kugou', 'qq']
+    : source.split(',').map(s => s.trim()).filter(Boolean);
 
-  // gequbao 源
-  if (source === 'all' || source === 'gequbao') {
+  const tasks = [];
+
+  // gequbao 源（双站点）
+  if (sourceList.includes('gequbao')) {
     tasks.push(searchFromSite(keyword, BASE_URL));
     tasks.push(searchFromSite(keyword, MIRROR_URL));
-    sources.push('gequbao', 'gequbao');
   } else {
     tasks.push(Promise.resolve([]));
     tasks.push(Promise.resolve([]));
-    sources.push('', '');
-  }
-
-  // toomic 源
-  if (source === 'all' || source === 'toomic') {
-    tasks.push(searchFromToomic(keyword));
-    sources.push('toomic');
-  } else {
-    tasks.push(Promise.resolve([]));
-    sources.push('');
-  }
-
-  // 酷我直连源
-  if (source === 'all' || source === 'kuwo') {
-    tasks.push(searchFromKuwo(keyword));
-    sources.push('kuwo');
-  } else {
-    tasks.push(Promise.resolve([]));
-    sources.push('');
   }
 
   // 酷狗源
-  if (source === 'all' || source === 'kugou') {
+  if (sourceList.includes('kugou')) {
     tasks.push(searchFromKugou(keyword));
-    sources.push('kugou');
   } else {
     tasks.push(Promise.resolve([]));
-    sources.push('');
   }
 
   // QQ音乐源
-  if (source === 'all' || source === 'qq') {
+  if (sourceList.includes('qq')) {
     tasks.push(searchFromQQ(keyword));
-    sources.push('qq');
   } else {
     tasks.push(Promise.resolve([]));
-    sources.push('');
   }
 
-  const results = await Promise.all(tasks);
+  const results = await Promise.all(tasks.map(p => p.catch(() => [])));
 
   // 合并去重
   const songMap = new Map();
@@ -293,172 +270,6 @@ async function searchNetease(keyword, singer) {
     console.error('网易云搜索失败:', error.message);
     return null;
   }
-}
-
-/**
- * 从 toomic.com 搜索音乐
- * 解析搜索页中的 base64 编码 dates 属性，提取歌曲信息
- * ID 使用 t_ 前缀以区分 gequbao 源
- * @param {string} keyword - 搜索关键词
- * @returns {Promise<Array>} 歌曲列表，每项包含 id, name, singer, cover
- */
-async function searchFromToomic(keyword) {
-  try {
-    const url = `${TOOMIC_URL}/?search=${encodeURIComponent(keyword)}`;
-    const response = await httpClient.get(url);
-    const $ = cheerio.load(response.data);
-    const songs = [];
-
-    $('a[name=a_bank]').each((_index, element) => {
-      const raw = $(element).attr('dates') || '';
-      // dates 属性格式: 9 + base64编码的JSON
-      const b64 = raw.replace(/^9/, '');
-      try {
-        const decoded = Buffer.from(b64, 'base64').toString('utf-8');
-        const obj = JSON.parse(decoded);
-        if (!obj.EID || !obj.Name) return;
-
-        // 构建封面URL（toomic 封面是相对路径）
-        let cover = '';
-        if (obj.Img) {
-          cover = obj.Img.startsWith('http') ? obj.Img : `${TOOMIC_URL}/${obj.Img}`;
-        }
-
-        songs.push({
-          id: `t_${obj.EID}`,
-          name: obj.Name,
-          singer: obj.Tag || '',
-          cover
-        });
-      } catch {
-        // base64 解码失败则跳过
-      }
-    });
-
-    return songs;
-  } catch (error) {
-    console.error(`从 toomic.com 搜索失败: ${error.message}`);
-    return [];
-  }
-}
-
-/**
- * 获取 toomic.com 歌曲详情
- * 通过 EID 直接构建酷我播放URL，并从详情页获取歌词
- * @param {string} eid - toomic 歌曲的 EID（不含 t_ 前缀）
- * @returns {Promise<Object>} 音乐详情对象
- */
-async function getToomicDetail(eid) {
-  // 构建酷我播放URL（toomic 底层使用酷我音乐API）
-  const playUrl = `https://antiserver.kuwo.cn/anti.s?format=mp3|aac&rid=${eid}&br=320kmp3&type=convert_url&response=res`;
-
-  let name = '';
-  let singer = '';
-  let cover = '';
-  let lyrics = '';
-
-  // 从搜索页获取歌曲基本信息（通过重新搜索太慢，直接访问详情页）
-  // 构建访问 toomic 详情页所需的 token
-  try {
-    // token = 9 + base64(JSON)，但我们需要 Name/Tag 等信息
-    // 直接构建一个最小 token 来访问详情页
-    const tokenData = Buffer.from(JSON.stringify({ EID: eid, Name: '', Tag: '', Img: '', Type: 'kw', Vip: '1' })).toString('base64');
-    const token = '9' + tokenData;
-    const detailUrl = `${TOOMIC_URL}/searchr/?token=${encodeURIComponent(token)}`;
-    const response = await httpClient.get(detailUrl, {
-      headers: { 'Referer': TOOMIC_URL }
-    });
-    const $ = cheerio.load(response.data);
-
-    // 提取歌曲名和歌手
-    name = $('h1').first().text().trim();
-    const singerMatch = $('.taglist a').first().text().trim();
-    singer = singerMatch || '';
-
-    // 提取歌词
-    const $content = $('.content');
-    if ($content.length > 0) {
-      lyrics = $content.text().trim();
-    }
-
-    // 提取封面（从 script 中的 pics 变量解码）
-    const scriptText = $('script:not([src])').text();
-    const imgsMatch = scriptText.match(/var\s+imgs\s*=\s*"([^"]+)"/);
-    if (imgsMatch) {
-      try {
-        const decoded = Buffer.from(imgsMatch[1], 'base64').toString('utf-8');
-        // imgs 可能包含封面URL或播放URL
-      } catch { /* 忽略解码失败 */ }
-    }
-  } catch (error) {
-    console.error(`获取 toomic 详情失败: ${error.message}`);
-  }
-
-  return {
-    id: `t_${eid}`,
-    name,
-    singer,
-    cover,
-    lyrics,
-    playUrl,
-    downloadUrl: playUrl,
-    extraUrls: []
-  };
-}
-
-/**
- * 从酷我音乐搜索歌曲（直连API）
- * 使用 search.kuwo.cn 搜索接口，返回歌曲列表
- * ID 使用 kw_ 前缀，播放URL通过 antiserver.kuwo.cn 获取
- * @param {string} keyword - 搜索关键词
- * @returns {Promise<Array>} 歌曲列表
- */
-async function searchFromKuwo(keyword) {
-  try {
-    const url = `${KUWO_SEARCH_URL}?all=${encodeURIComponent(keyword)}&ft=music&itemset=1&st=1&newsearch=1&pn=0&rn=20&rformat=json&encoding=utf8&ver=mbox&plat=pc`;
-    const response = await axios.get(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Referer': 'http://www.kuwo.cn/' },
-      timeout: 10000
-    });
-
-    // 酷我返回的JSON可能用单引号，需要修复
-    let data = response.data;
-    if (typeof data === 'string') {
-      data = JSON.parse(data.replace(/'/g, '"'));
-    }
-
-    const songs = (data?.abslist || []).map(s => ({
-      id: `kw_${s.DC_TARGETID}`,
-      name: (s.SONGNAME || '').replace(/&nbsp;/g, ' ').trim(),
-      singer: (s.ARTIST || '').replace(/&nbsp;/g, ' ').trim(),
-      cover: ''
-    })).filter(s => s.name);
-
-    return songs;
-  } catch (error) {
-    console.error(`酷我音乐搜索失败: ${error.message}`);
-    return [];
-  }
-}
-
-/**
- * 获取酷我音乐详情
- * 通过 rid 直接构建播放URL，支持在线播放和下载
- * @param {string} rid - 酷我歌曲ID（不含 kw_ 前缀）
- * @returns {Promise<Object>} 音乐详情对象
- */
-async function getKuwoDetail(rid) {
-  const playUrl = `${KUWO_PLAY_URL}?format=mp3|aac&rid=${rid}&br=320kmp3&type=convert_url&response=res`;
-  return {
-    id: `kw_${rid}`,
-    name: '',
-    singer: '',
-    cover: '',
-    lyrics: '',
-    playUrl,
-    downloadUrl: playUrl,
-    extraUrls: []
-  };
 }
 
 /**
@@ -675,7 +486,9 @@ async function getDetailFromSite(musicId, siteUrl) {
     if (appData?.mp3_extra_urls) {
       for (const item of appData.mp3_extra_urls) {
         try {
-          const decodedLink = Buffer.from(item.share_link, 'base64').toString('utf-8');
+          let decodedLink = Buffer.from(item.share_link, 'base64').toString('utf-8');
+          // 清理链接末尾可能附带的 HTML 标签（如 </p>）
+          decodedLink = decodedLink.replace(/<\/?[^>]+>/g, '').trim();
           extraUrls.push({
             type: item.type,
             url: decodedLink
@@ -707,22 +520,10 @@ async function getDetailFromSite(musicId, siteUrl) {
  * 先从主站获取，再从镜像站补充网盘链接
  * @param {string} musicId - 音乐ID
  * @param {{name?: string, singer?: string}} [fallbackInfo] - 前端透传的歌曲名/歌手名，
- *   当主播放源为空时作为网易云后备播放的搜索关键词（kw_/kg_/qq_ 源详情接口本身拿不到这些信息）
+ *   当主播放源为空时作为网易云后备播放的搜索关键词（kg_/qq_ 源详情接口本身拿不到这些信息）
  * @returns {Promise<Object>} 合并后的音乐详情对象
  */
 async function getMusicDetail(musicId, fallbackInfo) {
-  // 检测 toomic 源（t_ 前缀），直接走 toomic 详情逻辑
-  if (musicId.startsWith('t_')) {
-    const eid = musicId.substring(2);
-    return await getToomicDetail(eid);
-  }
-
-  // 检测酷我直连源（kw_ 前缀）
-  if (musicId.startsWith('kw_')) {
-    const rid = musicId.substring(3);
-    return await getKuwoDetail(rid);
-  }
-
   // 检测酷狗源（kg_ 前缀）
   if (musicId.startsWith('kg_')) {
     return await getKugouDetail(musicId, fallbackInfo);

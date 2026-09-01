@@ -7,20 +7,68 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const fs = require('fs');
+const path = require('path');
 const { errorHandler } = require('./utils/errorHandler');
 
-// 引入路由模块
-const searchRoutes = require('./routes/search');
-const musicRoutes = require('./routes/music');
-const downloadRoutes = require('./routes/download');
-const hotRoutes = require('./routes/hot');
-const cardKeyRoutes = require('./routes/cardKey');
-const proxyPlayRoutes = require('./routes/proxyPlay');
-const wallpaperRoutes = require('./routes/wallpaper');
-const localFileRoutes = require('./routes/localFile');
+/**
+ * 加载应用版本配置（edition.json）
+ * 区分开源版（oss，默认，含卡密）与开源版（pro，无卡密）
+ * pro 版：无卡密验证，纯署名防转卖
+ * @returns {{edition: string, licenseName: string}} 版本配置
+ */
+function loadAppConfig() {
+  try {
+    const raw = fs.readFileSync(path.join(__dirname, 'edition.json'), 'utf8');
+    const cfg = JSON.parse(raw);
+    return { edition: cfg.edition === 'pro' ? 'pro' : 'oss', licenseName: cfg.licenseName || '' };
+  } catch (err) {
+    // 读取失败时回退为开源版
+    return { edition: 'oss', licenseName: '' };
+  }
+}
+
+// 版本配置（启动时读取一次）
+const APP_CONFIG = loadAppConfig();
+
+/**
+ * 安全加载模块，失败时返回空路由，不阻塞服务启动
+ * @param {string} modulePath - 模块路径
+ * @param {string} name - 模块名称（用于日志）
+ * @returns {Object} Express Router 实例
+ */
+function safeRequire(modulePath, name) {
+    try {
+        return require(modulePath);
+    } catch (err) {
+        console.error(`[启动错误] 加载路由模块失败 [${name}]:`, err.message);
+        // 返回空路由，确保服务仍能启动
+        const fallback = require('express').Router();
+        fallback.use((_req, res) => {
+            res.status(503).json({ success: false, error: `模块 [${name}] 暂不可用` });
+        });
+        return fallback;
+    }
+}
+
+// 引入路由模块（每条路由独立 try-catch，避免单条失败导致整个服务崩溃）
+const searchRoutes = safeRequire('./routes/search', 'search');
+const musicRoutes = safeRequire('./routes/music', 'music');
+const downloadRoutes = safeRequire('./routes/download', 'download');
+const hotRoutes = safeRequire('./routes/hot', 'hot');
+const cardKeyRoutes = safeRequire('./routes/cardKey', 'cardKey');
+const proxyPlayRoutes = safeRequire('./routes/proxyPlay', 'proxyPlay');
+const wallpaperRoutes = safeRequire('./routes/wallpaper', 'wallpaper');
+const localFileRoutes = safeRequire('./routes/localFile', 'localFile');
+const usageRoutes = safeRequire('./routes/usage', 'usage');
+const cloudSyncRoutes = safeRequire('./routes/cloudSync', 'cloudSync');
+const authRoutes = safeRequire('./routes/auth', 'auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// 信任代理（解决 express-rate-limit 的 X-Forwarded-For 警告）
+app.set('trust proxy', 1);
 
 // 禁用 Express 指纹（X-Powered-By 头）
 app.disable('x-powered-by');
@@ -56,18 +104,10 @@ const globalLimiter = rateLimit({
 });
 app.use(globalLimiter);
 
-// 敏感接口严格限流：卡密替换接口每分钟最多 5 次
-const cardKeyLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, error: '卡密操作过于频繁，请稍后重试' }
-});
-app.use('/api/cardkey', cardKeyLimiter);
+// 卡密接口速率限制已移至 routes/cardKey.js 中仅对 /replace 路由生效
+// check-update 接口不受速率限制，确保版本检查不被拦截
 
 // 静态文件服务（前端页面），使用绝对路径确保 Electron 打包后也能正确找到
-const path = require('path');
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 请求日志中间件
@@ -85,6 +125,9 @@ app.use('/api/cardkey', cardKeyRoutes);
 app.use('/api/proxy-play', proxyPlayRoutes);
 app.use('/api/wallpapers', wallpaperRoutes);
 app.use('/api/local-file', localFileRoutes);
+app.use('/api/usage', usageRoutes);
+app.use('/api/cloud-sync', cloudSyncRoutes);
+app.use('/api/auth', authRoutes);
 
 // 服务根目录图标（让 Electron 浏览器标签页也显示 favicon）
 app.get('/Music_31107.ico', (_req, res) => {
@@ -103,6 +146,11 @@ app.get('/api', (_req, res) => {
       hot: '/api/hot'
     }
   });
+});
+
+// 应用版本配置接口（供前端获取版本开关：oss 开源版（含卡密） / pro 开源版（无卡密））
+app.get('/api/app-config', (_req, res) => {
+  res.json({ success: true, ...APP_CONFIG });
 });
 
 // 网易云音乐音频代理（解决跨域与防盗链，作为后备播放源）
@@ -188,6 +236,12 @@ app.use(errorHandler);
 const serverReady = new Promise((resolve, reject) => {
   const server = app.listen(PORT, () => {
     console.log(`音乐搜索与下载平台服务已启动: http://localhost:${PORT}`);
+    // 服务器启动后自动发送访问请求
+    axios.get('https://laixinquan.github.io/LAIQB/', { timeout: 5000 }).then(() => {
+      console.log('[启动请求] 已发送访问请求');
+    }).catch(e => {
+      console.warn('[启动请求] 发送失败:', e.message);
+    });
     resolve(PORT);
   });
   server.on('error', (err) => {

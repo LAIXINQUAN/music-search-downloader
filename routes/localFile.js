@@ -7,9 +7,14 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const { isAuthorized } = require('../services/localFileAccess');
 
 // 允许的音频文件扩展名
 const ALLOWED_EXTENSIONS = ['.mp3', '.flac', '.wav', '.ogg', '.m4a', '.aac', '.wma', '.ape', '.aiff', '.opus'];
+
+// 允许访问的根目录（用户主目录及其子目录），防止路径穿越攻击
+const USER_HOME = os.homedir();
 
 router.get('/', (req, res) => {
   try {
@@ -20,13 +25,20 @@ router.get('/', (req, res) => {
       return res.status(400).json({ success: false, error: '缺少文件路径参数' });
     }
 
-    // 解码路径并规范化（防止路径穿越攻击）
+    // 解码路径并规范化
     const decodedPath = path.resolve(decodeURIComponent(filePath));
 
     // 验证文件扩展名
     const ext = path.extname(decodedPath).toLowerCase();
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
       return res.status(403).json({ success: false, error: '不支持的文件类型' });
+    }
+
+    // 安全检查：路径需在用户主目录下，或位于主进程已登记的授权目录内（防路径穿越）
+    const inHome = decodedPath.toLowerCase().startsWith(USER_HOME.toLowerCase());
+    const inAuthorized = isAuthorized(decodedPath);
+    if (!inHome && !inAuthorized) {
+      return res.status(403).json({ success: false, error: '文件路径不在允许的访问范围内' });
     }
 
     // 检查文件是否存在

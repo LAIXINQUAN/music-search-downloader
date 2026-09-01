@@ -11,7 +11,7 @@ const net = require('net');
  */
 const ALLOWED_DOMAINS = [
   'gequbao.com', 'www.gequbao.com',
-  'kuwo.cn', 'www.kuwo.cn', 'kw-',
+  'kuwo.cn', 'www.kuwo.cn',
   'kugou.com', 'www.kugou.com',
   'qq.com', 'y.qq.com',
   'music.163.com', 'music.126.net',

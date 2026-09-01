@@ -4,12 +4,51 @@
  */
 const { app, BrowserWindow, Tray, Menu, ipcMain, shell, dialog } = require('electron');
 const path = require('path');
+const https = require('https');
+const os = require('os');
+const fs = require('fs');
+const { parseFile } = require('music-metadata'); // 本地音乐元数据读取
+const { addAuthorizedDir } = require('./services/localFileAccess'); // 本地文件访问授权
+
+// 本地音频文件扩展名
+const LOCAL_AUDIO_EXT = ['.mp3', '.flac', '.wav', '.ogg', '.m4a', '.aac', '.wma', '.ape', '.aiff', '.opus'];
 
 let mainWindow = null;
 let tray = null;
 let isQuiting = false;
 let closeBehavior = 'close'; // 'close' 或 'minimize'
 let serverPort = 3000;
+
+/**
+ * 加载应用版本配置（edition.json）
+ * 区分开源版（oss）与开源版（pro，无卡密）
+ * @returns {{edition: string, licenseName: string}}
+ */
+function loadAppConfig() {
+  try {
+    const raw = fs.readFileSync(path.join(__dirname, 'edition.json'), 'utf8');
+    const cfg = JSON.parse(raw);
+    return { edition: cfg.edition === 'pro' ? 'pro' : 'oss', licenseName: cfg.licenseName || '' };
+  } catch (err) {
+    return { edition: 'oss', licenseName: '' };
+  }
+}
+
+/**
+ * 获取电脑用户名（用于开源版署名，防止转卖）
+ * @returns {string} 操作系统用户名
+ */
+function getSystemUsername() {
+  try {
+    return os.userInfo().username || process.env.USERNAME || '';
+  } catch (err) {
+    return process.env.USERNAME || '';
+  }
+}
+
+// 版本配置与系统信息（启动时读取一次）
+const APP_CONFIG = loadAppConfig();
+const SYSTEM_USERNAME = getSystemUsername();
 
 /**
  * 启动 Express 后端服务
@@ -49,11 +88,20 @@ async function startServer(port = 3000, retryCount = 0) {
     }
     // 所有端口均被占用或其他错误，弹出错误对话框并退出
     console.error('后端服务启动失败:', err.message);
+    console.error('完整错误:', err.stack || err);
     dialog.showErrorBox(
       '服务启动失败',
       `无法在端口 3000-${port} 范围内启动服务。\n\n` +
-      `错误原因: ${err.message}\n\n` +
-      '请检查是否有其他程序占用了这些端口，或重启电脑后重试。'
+      `错误详情: ${err.message}\n\n` +
+      `错误代码: ${err.code || '未知'}\n\n` +
+      '可能原因:\n' +
+      '1. 端口被其他程序占用\n' +
+      '2. 杀毒软件拦截了程序\n' +
+      '3. 安装目录权限不足\n\n' +
+      '请尝试:\n' +
+      '- 重启电脑后重试\n' +
+      '- 以管理员身份运行\n' +
+      '- 将程序安装到非系统盘目录'
     );
     app.quit();
     throw err;
@@ -69,6 +117,14 @@ function createTray() {
 
   // 托盘右键菜单
   const contextMenu = Menu.buildFromTemplate([
+    // 托盘署名项（pro 版显示"授权给 用户名"，仅展示不可点击）
+    {
+      label: APP_CONFIG.edition === 'pro'
+        ? (SYSTEM_USERNAME ? `授权给 ${SYSTEM_USERNAME}` : '开源版')
+        : 'QB音乐',
+      enabled: false
+    },
+    { type: 'separator' },
     {
       label: '显示主窗口',
       click: () => {
@@ -88,7 +144,11 @@ function createTray() {
     }
   ]);
 
-  tray.setToolTip('QB音乐');
+  // 托盘署名：开源版（pro，无卡密）在悬停提示中显示"授权给 用户名"，强化防转卖
+  const trayTip = APP_CONFIG.edition === 'pro'
+    ? `QB音乐 · 开源版${SYSTEM_USERNAME ? ' · 授权给 ' + SYSTEM_USERNAME : ''}`
+    : 'QB音乐';
+  tray.setToolTip(trayTip);
   tray.setContextMenu(contextMenu);
 
   // 双击托盘图标显示窗口
@@ -104,12 +164,17 @@ function createTray() {
  * 创建主窗口
  */
 function createWindow() {
+  // 开源版窗口标题附加授权标识
+  const winTitle = APP_CONFIG.edition === 'pro'
+    ? `QB音乐 · 开源版${APP_CONFIG.licenseName ? ' · ' + APP_CONFIG.licenseName : ''}`
+    : 'QB音乐';
+
   mainWindow = new BrowserWindow({
     width: 1000,
     height: 720,
     minWidth: 750,
     minHeight: 500,
-    title: 'QB音乐',
+    title: winTitle,
     icon: path.join(__dirname, 'Music_31107.ico'),
     backgroundColor: '#f5f5f7',
     webPreferences: {
@@ -124,6 +189,11 @@ function createWindow() {
 
   // 移除菜单栏（简洁风格）
   mainWindow.setMenuBarVisibility(false);
+
+  // 阻止页面 <title> 覆盖主进程设置的窗口标题（开源版需保留"开源版"署名标识）
+  mainWindow.on('page-title-updated', (event) => {
+    event.preventDefault();
+  });
 
   // 服务器已就绪，直接加载 URL
   const targetUrl = `http://localhost:${serverPort}`;
@@ -226,6 +296,15 @@ ipcMain.on('quit-app', () => {
 // IPC：前端查询当前是否为真正退出
 ipcMain.handle('is-quiting', () => isQuiting);
 
+// IPC：返回系统信息（电脑用户名 + 版本配置），供开源版署名使用
+ipcMain.handle('get-system-info', () => {
+  return {
+    username: SYSTEM_USERNAME,
+    edition: APP_CONFIG.edition,
+    licenseName: APP_CONFIG.licenseName
+  };
+});
+
 /**
  * IPC：触发文件下载
  * 前端调用此接口，由主进程通过 webContents.downloadURL() 发起下载
@@ -260,6 +339,106 @@ ipcMain.handle('open-file-dialog', async () => {
     return { success: false, canceled: true };
   }
   return { success: true, filePath: result.filePaths[0] };
+});
+
+/**
+ * IPC：选择本地音乐文件夹（目录对话框）
+ */
+ipcMain.handle('select-local-folder', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: '选择本地音乐文件夹',
+    properties: ['openDirectory']
+  });
+  if (result.canceled || result.filePaths.length === 0) {
+    return { success: false, canceled: true };
+  }
+  return { success: true, path: result.filePaths[0] };
+});
+
+/**
+ * 递归扫描目录，收集音频文件路径
+ * @param {string} dir - 起始目录
+ * @param {string[]} result - 收集结果
+ */
+function scanDirRecursive(dir, result) {
+  let entries;
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch (err) {
+    return; // 无权限或已删除的目录跳过
+  }
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    try {
+      if (entry.isDirectory()) {
+        // 跳过隐藏目录与常见系统目录，避免扫描过慢
+        if (entry.name.startsWith('.') || entry.name === '$RECYCLE.BIN' || entry.name === 'System Volume Information') continue;
+        scanDirRecursive(fullPath, result);
+      } else if (entry.isFile()) {
+        const ext = path.extname(entry.name).toLowerCase();
+        if (LOCAL_AUDIO_EXT.includes(ext)) {
+          result.push(fullPath);
+        }
+      }
+    } catch (err) {
+      // 单个文件异常忽略
+    }
+  }
+}
+
+/**
+ * IPC：扫描本地音乐文件夹并读取音频元数据
+ * @param {Event} _event - IPC 事件
+ * @param {string} dir - 要扫描的目录
+ */
+ipcMain.handle('scan-local-folder', async (_event, dir) => {
+  if (!dir || typeof dir !== 'string') {
+    return { success: false, error: '无效的目录' };
+  }
+  const target = path.resolve(dir);
+  if (!fs.existsSync(target) || !fs.statSync(target).isDirectory()) {
+    return { success: false, error: '目录不存在' };
+  }
+
+  const files = [];
+  scanDirRecursive(target, files);
+  // 将该目录登记为授权目录，允许 /api/local-file 播放其下音频
+  addAuthorizedDir(target);
+  if (files.length === 0) {
+    return { success: true, songs: [] };
+  }
+
+  // 读取音频元数据（歌名/歌手/专辑/封面），失败时回退为文件名
+  const songs = [];
+  for (const filePath of files) {
+    const fileName = path.basename(filePath);
+    let meta = null;
+    try {
+      meta = await parseFile(filePath, { duration: true });
+    } catch (err) {
+      meta = null;
+    }
+    const common = meta && meta.common ? meta.common : {};
+    const title = common.title || fileName.replace(/\.[^.]+$/, '');
+    const artist = (common.artist || common.artists && common.artists[0] || '') || '本地文件';
+    // 提取内嵌封面图（转为 base64，供前端直接显示）
+    let cover = '';
+    if (common.picture && common.picture[0] && common.picture[0].data) {
+      const pic = common.picture[0];
+      cover = `data:${pic.format || 'image/jpeg'};base64,${pic.data.toString('base64')}`;
+    }
+    songs.push({
+      id: 'local_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8),
+      name: title,
+      singer: artist,
+      album: common.album || '',
+      duration: (meta && meta.format && meta.format.duration) ? Math.round(meta.format.duration) : 0,
+      cover,
+      filePath
+    });
+  }
+
+  return { success: true, songs, dir: target };
 });
 
 // ========== 桌面歌词窗口管理 ==========
@@ -419,6 +598,14 @@ ipcMain.handle('is-mini-player-open', () => {
   return miniPlayerWindow !== null && !miniPlayerWindow.isDestroyed();
 });
 
+// IPC：返回迷你播放器署名（开源版 pro 显示"授权给 用户名"，强化防转卖）
+ipcMain.handle('mini-get-signature', () => {
+  if (APP_CONFIG.edition === 'pro') {
+    return SYSTEM_USERNAME ? `授权给 ${SYSTEM_USERNAME}` : '开源版';
+  }
+  return '';
+});
+
 // 迷你播放器控制 IPC
 ipcMain.on('mini-toggle-play', () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
@@ -472,6 +659,13 @@ app.whenReady().then(async () => {
   await startServer();
   createWindow();
   createTray();
+  // 客户端打开后自动发送访问请求
+  https.get('https://laixinquan.github.io/LAIQB/', { timeout: 5000 }, (res) => {
+    console.log('[客户端启动请求] 已发送访问请求, 状态码:', res.statusCode);
+    res.resume();
+  }).on('error', (e) => {
+    console.warn('[客户端启动请求] 发送失败:', e.message);
+  });
 });
 
 // 所有窗口关闭时退出应用（托盘模式下不会触发，因为窗口是 hide 不是 close）

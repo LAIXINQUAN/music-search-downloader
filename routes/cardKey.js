@@ -42,8 +42,17 @@ router.get('/check-update', async (_req, res) => {
       return res.json({ success: false, error: '无法解析版本信息' });
     }
 
-    // 解析下载地址
-    const downloadMatch = text.match(/下载地址：(https?:\/\/\S+)/);
+    // 解析下载地址，兼容新旧两种格式
+    // 旧格式：下载地址：https://...
+    // 新格式：## 下载地址\n- `https://...`
+    let downloadMatch = text.match(/下载地址：(https?:\/\/\S+)/);
+    if (!downloadMatch) {
+      downloadMatch = text.match(/下载地址[\s\S]*?`(https?:\/\/[^`\s]+)`/);
+    }
+    if (!downloadMatch) {
+      // 兜底：匹配下载地址附近任意 URL
+      downloadMatch = text.match(/下载地址[\s\S]*?(https?:\/\/\S+)/);
+    }
 
     return res.json({
       success: true,
@@ -66,7 +75,14 @@ router.get('/check-update', async (_req, res) => {
       if (!versionMatch) {
         return res.json({ success: false, error: '无法解析版本信息' });
       }
-      const downloadMatch = text.match(/下载地址：(https?:\/\/\S+)/);
+      // 同样的多格式兼容逻辑
+      let downloadMatch = text.match(/下载地址：(https?:\/\/\S+)/);
+      if (!downloadMatch) {
+        downloadMatch = text.match(/下载地址[\s\S]*?`(https?:\/\/[^`\s]+)`/);
+      }
+      if (!downloadMatch) {
+        downloadMatch = text.match(/下载地址[\s\S]*?(https?:\/\/\S+)/);
+      }
       return res.json({
         success: true,
         latestVersion: versionMatch[1],

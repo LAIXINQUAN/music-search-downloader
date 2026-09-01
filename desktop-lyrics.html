@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桌面歌词 - QB音乐</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            background: transparent;
+            overflow: hidden;
+            user-select: none;
+            -webkit-app-region: drag;
+            height: 100vh;
+        }
+        .lyrics-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 0 20px;
+            position: relative;
+        }
+        .lyrics-text {
+            font-size: 32px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            line-height: 1.5;
+            transition: color 0.3s ease;
+            max-width: 90vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .lyrics-placeholder {
+            font-size: 20px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.4);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        .song-info {
+            position: absolute;
+            bottom: 8px;
+            right: 16px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+        .control-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 8px;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            -webkit-app-region: no-drag;
+        }
+        .lyrics-container:hover .control-bar {
+            opacity: 1;
+        }
+        .ctrl-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .ctrl-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        .ctrl-btn.close-btn:hover {
+            background: rgba(255, 59, 48, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="lyrics-container" id="lyricsContainer">
+        <div class="control-bar">
+            <button class="ctrl-btn" onclick="closeLyrics()" title="关闭">&#10005;</button>
+        </div>
+        <div class="lyrics-text" id="lyricsText">
+            <span class="lyrics-placeholder">暂无歌词</span>
+        </div>
+        <div class="song-info" id="songInfo"></div>
+    </div>
+
+    <script>
+        /**
+         * 更新歌词显示
+         * @param {string} text - 当前歌词文本
+         * @param {string} songInfo - 歌曲信息（歌手 - 歌名）
+         */
+        function updateLyrics(text, songInfo) {
+            const el = document.getElementById('lyricsText');
+            const info = document.getElementById('songInfo');
+            if (text) {
+                el.innerHTML = text;
+                el.className = 'lyrics-text';
+            } else {
+                el.innerHTML = '<span class="lyrics-placeholder">暂无歌词</span>';
+                el.className = 'lyrics-text';
+            }
+            if (songInfo) {
+                info.textContent = songInfo;
+            }
+        }
+
+        /**
+         * 关闭桌面歌词窗口
+         */
+        function closeLyrics() {
+            if (window.lyricsAPI) {
+                window.lyricsAPI.closeLyrics();
+            }
+        }
+
+        // 监听渲染进程发送的歌词更新
+        if (window.lyricsAPI) {
+            window.lyricsAPI.onUpdateLyrics(({ text, songInfo }) => {
+                updateLyrics(text, songInfo);
+            });
+        }
+    </script>
+</body>
+</html>

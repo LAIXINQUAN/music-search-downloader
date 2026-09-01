@@ -6,11 +6,39 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
-const ffmpeg = require('fluent-ffmpeg');
-const ffmpegStatic = require('ffmpeg-static');
+const axios = require('axios');
+const multer = require('multer');
 
-// 设置 ffmpeg 路径（使用 ffmpeg-static 提供的二进制文件）
-ffmpeg.setFfmpegPath(ffmpegStatic);
+// ===== ffmpeg 初始化（打包环境兼容） =====
+// 在 Electron 打包后，ffmpeg-static 的 __dirname 指向 app.asar 内部，
+// 但实际二进制文件在 app.asar.unpacked 中，需要修正路径
+let ffmpeg = null;
+let ffmpegAvailable = false;
+
+try {
+    ffmpeg = require('fluent-ffmpeg');
+    let ffmpegPath = require('ffmpeg-static');
+
+    // 修正打包环境中的路径（asar -> asar.unpacked）
+    if (ffmpegPath && !fs.existsSync(ffmpegPath)) {
+        const unpackedPath = ffmpegPath.replace(/app\.asar([\\/])/, 'app.asar.unpacked$1');
+        if (fs.existsSync(unpackedPath)) {
+            ffmpegPath = unpackedPath;
+            console.log('[壁纸] 已修正 ffmpeg 打包路径:', unpackedPath);
+        }
+    }
+
+    // 验证二进制文件存在后再设置路径
+    if (ffmpegPath && fs.existsSync(ffmpegPath)) {
+        ffmpeg.setFfmpegPath(ffmpegPath);
+        ffmpegAvailable = true;
+        console.log('[壁纸] ffmpeg 初始化成功:', ffmpegPath);
+    } else {
+        console.warn('[壁纸] ffmpeg 二进制文件不存在，缩略图功能将不可用');
+    }
+} catch (err) {
+    console.warn('[壁纸] ffmpeg 加载失败，缩略图功能将不可用:', err.message);
+}
 
 // 动态壁纸存储目录（开发环境和打包环境兼容）
 const WALLPAPER_DIR = (() => {
@@ -160,6 +188,15 @@ router.get('/thumbnail', (req, res) => {
         return res.send(cached);
     }
 
+    // ffmpeg 不可用时返回默认占位图
+    if (!ffmpegAvailable) {
+        res.setHeader('Content-Type', 'image/svg+xml');
+        return res.send(`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180">
+          <rect fill="#1a1a2e" width="320" height="180"/>
+          <text fill="#555" font-family="sans-serif" font-size="14" text-anchor="middle" x="160" y="95">视频预览不可用</text>
+        </svg>`);
+    }
+
     res.setHeader('Content-Type', 'image/jpeg');
     res.setHeader('Cache-Control', 'public, max-age=86400');
 
@@ -198,6 +235,142 @@ router.get('/thumbnail', (req, res) => {
     stream.on('error', (err) => {
         if (!res.headersSent) {
             res.status(500).json({ success: false, error: '缩略图传输失败' });
+        }
+    });
+});
+
+/**
+ * 配置 multer 用于文件上传
+ * 限制文件类型为视频格式，大小最大 500MB
+ */
+// 确保 multer 临时目录存在
+const UPLOAD_TEMP_DIR = path.join(WALLPAPER_DIR, '.upload_temp');
+if (!fs.existsSync(UPLOAD_TEMP_DIR)) {
+    fs.mkdirSync(UPLOAD_TEMP_DIR, { recursive: true });
+}
+
+const upload = multer({
+    dest: UPLOAD_TEMP_DIR,
+    limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
+    fileFilter: (_req, file, cb) => {
+        const allowedExts = ['.mp4', '.webm', '.mov'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowedExts.includes(ext)) {
+            cb(null, true);
+        } else {
+            cb(new Error(`不支持的文件类型: ${ext}，仅支持 .mp4、.webm、.mov`));
+        }
+    }
+});
+
+/**
+ * POST /api/wallpapers/download
+ * 从指定 URL 下载壁纸文件到本地壁纸目录
+ * Body: { url: string, filename: string }
+ */
+router.post('/download', async (req, res) => {
+    try {
+        const { url, filename } = req.body;
+        if (!url || !filename) {
+            return res.status(400).json({ success: false, error: '缺少 url 或 filename 参数' });
+        }
+
+        // 安全检查：防止路径穿越
+        const safeFilename = path.basename(filename);
+        const filePath = path.join(WALLPAPER_DIR, safeFilename);
+
+        // 如果文件已存在，直接返回成功
+        if (fs.existsSync(filePath)) {
+            return res.json({ success: true, filename: safeFilename, message: '文件已存在' });
+        }
+
+        // 确保壁纸目录存在
+        if (!fs.existsSync(WALLPAPER_DIR)) {
+            fs.mkdirSync(WALLPAPER_DIR, { recursive: true });
+        }
+
+        // 使用 axios 以流式方式下载文件
+        const response = await axios({
+            method: 'get',
+            url: url,
+            responseType: 'stream',
+            timeout: 300000 // 5分钟超时（大文件下载需要较长时间）
+        });
+
+        const writer = fs.createWriteStream(filePath);
+        response.data.pipe(writer);
+
+        await new Promise((resolve, reject) => {
+            writer.on('finish', resolve);
+            writer.on('error', reject);
+        });
+
+        // 清除该文件的缩略图缓存，确保下次请求时重新生成
+        thumbnailCache.delete(safeFilename);
+
+        console.log(`壁纸下载成功: ${safeFilename}`);
+        res.json({ success: true, filename: safeFilename });
+    } catch (error) {
+        console.error('壁纸下载失败:', error.message);
+        res.status(500).json({ success: false, error: `壁纸下载失败: ${error.message}` });
+    }
+});
+
+/**
+ * POST /api/wallpapers/upload
+ * 上传视频文件作为壁纸
+ * 接收 multipart/form-data，字段名: file
+ */
+router.post('/upload', (req, res) => {
+    upload.single('file')(req, res, (err) => {
+        if (err) {
+            if (err instanceof multer.MulterError) {
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    return res.status(400).json({ success: false, error: '文件大小超过限制（最大 500MB）' });
+                }
+                return res.status(400).json({ success: false, error: `上传错误: ${err.message}` });
+            }
+            return res.status(400).json({ success: false, error: err.message });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: '请选择要上传的文件' });
+        }
+
+        const tempPath = req.file.path;
+        const originalName = req.file.originalname;
+        const safeFilename = path.basename(originalName);
+        const targetPath = path.join(WALLPAPER_DIR, safeFilename);
+
+        try {
+            // 确保壁纸目录存在
+            if (!fs.existsSync(WALLPAPER_DIR)) {
+                fs.mkdirSync(WALLPAPER_DIR, { recursive: true });
+            }
+
+            // 将临时文件移动到壁纸目录
+            fs.renameSync(tempPath, targetPath);
+
+            // 清理临时目录中的空文件
+            const tempDir = path.join(WALLPAPER_DIR, '.upload_temp');
+            if (fs.existsSync(tempDir)) {
+                const tempFiles = fs.readdirSync(tempDir);
+                if (tempFiles.length === 0) {
+                    fs.rmSync(tempDir, { recursive: true });
+                }
+            }
+
+            console.log(`壁纸上传成功: ${safeFilename}`);
+            // 清除该文件的缩略图缓存（如果存在同名旧文件）
+            thumbnailCache.delete(safeFilename);
+            res.json({ success: true, filename: safeFilename });
+        } catch (error) {
+            console.error('壁纸上传失败:', error.message);
+            // 清理临时文件
+            if (fs.existsSync(tempPath)) {
+                fs.unlinkSync(tempPath);
+            }
+            res.status(500).json({ success: false, error: `壁纸上传失败: ${error.message}` });
         }
     });
 });

@@ -1,7 +1,7 @@
 /**
  * 卡密管理服务
  * 封装 GitHub Contents API 调用，实现卡密页面文件的读取与更新
- * GitHub Token 通过环境变量 GITHUB_TOKEN 注入，运行时读取
+ * GitHub Token 采用 AES-256-CBC 加密内置，运行时解密使用
  *
  * 仓库结构说明：
  * - 卡密页面 URL: https://laixinquan.github.io/LAIQB/
@@ -9,24 +9,30 @@
  * - 卡密页面文件位于仓库根目录（README.md / index.md / index.html 之一）
  */
 const axios = require('axios');
+const crypto = require('crypto');
 
 // GitHub 仓库配置
 const OWNER = 'LAIXINQUAN';
 const REPO = 'LAIQB';
 const GITHUB_API = 'https://api.github.com';
 
+// 加密密钥（SHA-256 派生，32 字节）与初始化向量（16 字节）
+const ENC_KEY = crypto.createHash('sha256').update('QBMusic_CardKey_2024_Secure_Internal').digest();
+const ENC_IV = Buffer.from('QB_Music_IV_16b!', 'utf8');
+
+// AES-256-CBC 加密后的 GitHub Token（密文 hex）
+const ENCRYPTED_TOKEN = '6bbaa617cae72c9e782906b51c4c3f87ecbd0805de1a2a1c7f83bbe80c8b647a24f5dfc879a950eed2dec917ce89a066';
+
 /**
- * 获取 GitHub Token
- * 优先从环境变量 GITHUB_TOKEN 读取，不存在则抛出明确错误
- * @returns {string} GitHub Token
- * @throws {Error} 未设置 GITHUB_TOKEN 环境变量时抛出
+ * 解密内置的 GitHub Token
+ * 使用 AES-256-CBC 算法，密钥通过 SHA-256 从固定字符串派生
+ * @returns {string} 解密后的 GitHub Token
  */
-function getToken() {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) {
-    throw new Error('未配置 GITHUB_TOKEN 环境变量，无法操作卡密文件');
-  }
-  return token;
+function decryptToken() {
+  const decipher = crypto.createDecipheriv('aes-256-cbc', ENC_KEY, ENC_IV);
+  let decrypted = decipher.update(ENCRYPTED_TOKEN, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
 }
 
 /**
@@ -36,7 +42,7 @@ function getToken() {
  * @returns {Promise<{path: string, sha: string|null}>} 文件路径与 sha
  */
 async function getCardKeyFile() {
-  const token = getToken();
+  const token = decryptToken();
   try {
     const res = await axios.get(`${GITHUB_API}/repos/${OWNER}/${REPO}/contents/`, {
       headers: {
@@ -80,7 +86,7 @@ async function readCardKeys() {
   if (!sha) {
     return { keys: [], path, sha: null, rawContent: '' };
   }
-  const token = getToken();
+  const token = decryptToken();
   try {
     const res = await axios.get(`${GITHUB_API}/repos/${OWNER}/${REPO}/contents/${path}`, {
       headers: {
@@ -117,7 +123,7 @@ async function readCardKeys() {
  * @returns {string} markdown 内容
  */
 function buildCardKeyMarkdown(keys) {
-  const lines = ['# LAIQB', '', '最新版本：3.6.4', '', '## 下载地址', '- 下载地址：https://github.com/LAIXINQUAN/music-search-downloader/releases/tag/v3.6.4', '', '# 卡密列表', ''];
+  const lines = ['# LAIQB', '', '最新版本：3.6.5', '', '## 下载地址', '- 下载地址：https://laixinquan.github.io/music-search-downloader/', '', '# 卡密列表', ''];
   keys.forEach((key, idx) => {
     lines.push(`- 卡密 ${idx + 1}：\`${key}\``);
   });
@@ -133,7 +139,7 @@ function buildCardKeyMarkdown(keys) {
  * @returns {Promise<void>}
  */
 async function writeCardKeyFile(path, sha, content) {
-  const token = getToken();
+  const token = decryptToken();
   const contentBase64 = Buffer.from(content, 'utf8').toString('base64');
   const body = {
     message: 'update card keys',

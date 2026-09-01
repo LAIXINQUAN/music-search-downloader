@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>迷你播放器 - QB音乐</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            background: transparent;
+            overflow: hidden;
+            user-select: none;
+            height: 100vh;
+        }
+        .player {
+            display: flex;
+            align-items: center;
+            height: 100vh;
+            padding: 0 12px;
+            gap: 10px;
+            background: rgba(20, 20, 30, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            -webkit-app-region: drag;
+        }
+        .cover {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.3);
+            -webkit-app-region: no-drag;
+        }
+        .cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .info {
+            flex: 1;
+            min-width: 0;
+            -webkit-app-region: no-drag;
+        }
+        .name {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .artist {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 1px;
+        }
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            -webkit-app-region: no-drag;
+        }
+        .ctrl-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .ctrl-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .play-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .play-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .progress {
+            width: 60px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            cursor: pointer;
+            -webkit-app-region: no-drag;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #5B7CFA, #9075FF);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        .close-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            -webkit-app-region: no-drag;
+        }
+        .close-btn:hover {
+            background: rgba(255, 59, 48, 0.4);
+            color: #fff;
+        }
+        .signature {
+            position: absolute;
+            bottom: 1px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 8px;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.5px;
+            pointer-events: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 6px;
+            -webkit-app-region: no-drag;
+        }
+    </style>
+</head>
+<body>
+    <div class="player">
+        <div class="cover" id="cover">&#9835;</div>
+        <div class="info">
+            <div class="name" id="name">未在播放</div>
+            <div class="artist" id="artist">--</div>
+        </div>
+        <div class="controls">
+            <button class="ctrl-btn" id="prevBtn" onclick="prev()" title="上一曲">&#9198;</button>
+            <button class="play-btn" id="playBtn" onclick="togglePlay()">&#9654;</button>
+            <button class="ctrl-btn" id="nextBtn" onclick="next()" title="下一曲">&#9197;</button>
+        </div>
+        <div class="progress" id="progress" onclick="seekProgress(event)">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <button class="close-btn" onclick="closePlayer()" title="关闭">&#10005;</button>
+        <!-- 授权署名（开源版 pro 显示"授权给 用户名"） -->
+        <div class="signature" id="signature"></div>
+    </div>
+
+    <script>
+        /**
+         * 更新歌曲信息
+         * @param {string} name - 歌曲名
+         * @param {string} artist - 歌手名
+         * @param {string} coverUrl - 封面URL
+         * @param {boolean} isPlaying - 是否正在播放
+         */
+        function updateSong(name, artist, coverUrl, isPlaying) {
+            document.getElementById('name').textContent = name || '未在播放';
+            document.getElementById('artist').textContent = artist || '--';
+            const cover = document.getElementById('cover');
+            cover.innerHTML = coverUrl ? `<img src="${coverUrl}" alt="">` : '&#9835;';
+            document.getElementById('playBtn').innerHTML = isPlaying ? '&#10074;&#10074;' : '&#9654;';
+        }
+
+        /**
+         * 更新播放状态
+         * @param {boolean} isPlaying - 是否正在播放
+         */
+        function updatePlayState(isPlaying) {
+            document.getElementById('playBtn').innerHTML = isPlaying ? '&#10074;&#10074;' : '&#9654;';
+        }
+
+        /**
+         * 更新进度条
+         * @param {number} percent - 0-100
+         */
+        function updateProgress(percent) {
+            document.getElementById('progressFill').style.width = Math.min(100, Math.max(0, percent)) + '%';
+        }
+
+        /**
+         * 切换播放/暂停
+         */
+        function togglePlay() {
+            if (window.miniAPI) {
+                window.miniAPI.togglePlay();
+            }
+        }
+
+        /**
+         * 上一曲
+         */
+        function prev() {
+            if (window.miniAPI) {
+                window.miniAPI.prev();
+            }
+        }
+
+        /**
+         * 下一曲
+         */
+        function next() {
+            if (window.miniAPI) {
+                window.miniAPI.next();
+            }
+        }
+
+        /**
+         * 点击进度条跳转
+         */
+        function seekProgress(e) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            if (window.miniAPI) {
+                window.miniAPI.seek(percent);
+            }
+        }
+
+        /**
+         * 关闭迷你播放器
+         */
+        function closePlayer() {
+            if (window.miniAPI) {
+                window.miniAPI.closePlayer();
+            }
+        }
+
+        // 监听主窗口状态更新
+        if (window.miniAPI) {
+            window.miniAPI.onUpdateSong(({ name, artist, coverUrl, isPlaying }) => {
+                updateSong(name, artist, coverUrl, isPlaying);
+            });
+            window.miniAPI.onUpdatePlayState(({ isPlaying }) => {
+                updatePlayState(isPlaying);
+            });
+            window.miniAPI.onUpdateProgress(({ percent }) => {
+                updateProgress(percent);
+            });
+            // 获取并显示授权署名
+            if (window.miniAPI.getSignature) {
+                window.miniAPI.getSignature().then(sig => {
+                    if (sig) {
+                        document.getElementById('signature').textContent = sig;
+                    }
+                }).catch(() => {});
+            }
+        }
+    </script>
+</body>
+</html>
