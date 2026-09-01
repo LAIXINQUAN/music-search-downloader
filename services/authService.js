@@ -211,23 +211,44 @@ function verifyCode(email, code) {
   return { success: true };
 }
 
+// 按邮箱的注册互斥锁：{ 邮箱: Promise }，同一邮箱的注册请求串行化执行
+const registerLocks = new Map();
+
+/**
+ * 按邮箱加锁执行操作（互斥锁，串行化同邮箱的并发请求）
+ * @param {string} email
+ * @param {() => Promise<any>} fn - 加锁后执行的操作
+ * @returns {Promise<any>} fn 的执行结果
+ */
+function withEmailLock(email, fn) {
+  const prev = registerLocks.get(email) || Promise.resolve();
+  // 无论上一个请求成功或失败，都继续执行下一个，避免 rejected promise 阻断队列
+  const run = prev.then(fn, fn);
+  // 缓存当前请求的 settled 结果，供下一个请求排队；用 catch 吞掉错误防止队列中断
+  registerLocks.set(email, run.catch(() => {}));
+  return run;
+}
+
 /**
  * 密码注册（两步：前端先校验验证码，再调用本接口写入账号）
+ * 通过按邮箱的内存锁串行化同邮箱的注册请求，杜绝并发重复注册
  * @param {string} email
  * @param {string} password
  * @returns {Promise<{success: boolean, error?: string}>}
  */
 async function register(email, password) {
-  const token = await getTenantToken();
-  const existing = await findUser(token, email);
-  if (existing) return { success: false, error: '该邮箱已注册' };
-  // 二次校验：缩小并发竞态窗口，避免同邮箱重复注册
-  const dup = await findAllUsersByEmail(token, email);
-  if (dup.length > 0) return { success: false, error: '该邮箱已注册' };
-  const salt = crypto.randomBytes(16).toString('hex');
-  const hash = hashPassword(password, salt);
-  await createUser(token, email, hash, salt);
-  return { success: true };
+  return withEmailLock(email, async () => {
+    const token = await getTenantToken();
+    const existing = await findUser(token, email);
+    if (existing) return { success: false, error: '该邮箱已注册' };
+    // 二次校验：缩小并发竞态窗口，避免同邮箱重复注册
+    const dup = await findAllUsersByEmail(token, email);
+    if (dup.length > 0) return { success: false, error: '该邮箱已注册' };
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = hashPassword(password, salt);
+    await createUser(token, email, hash, salt);
+    return { success: true };
+  });
 }
 
 /**
