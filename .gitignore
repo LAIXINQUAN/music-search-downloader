@@ -37,6 +37,9 @@ ehthumbs.db
 githubToken.txt
 githubToken*
 
+# Sensitive runtime data (ACRCloud keys, sessions, Feishu tableIds)
+data/
+
 # TRAE internal specs (may contain sensitive data)
 .trae/
 
