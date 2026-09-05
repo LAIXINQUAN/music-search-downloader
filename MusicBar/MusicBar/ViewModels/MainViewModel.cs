@@ -15,7 +15,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private readonly PlayerWindowToggleService _playerWindowToggle = new();
     private readonly LrcLyricsService _lrcParser = new();
     private readonly ManualLyricsProvider _manualLyrics = new();
-    private readonly CachedOnlineLyricsProvider _onlineLyrics;
+    private readonly QbMusicLyricsProvider _onlineLyrics;
     private readonly LyricsCoordinator _lyrics;
     private TimeSpan _latestPosition;
 
@@ -41,7 +41,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
     public MainViewModel()
     {
-        _onlineLyrics = new CachedOnlineLyricsProvider(new LrclibLyricsProvider());
+        _onlineLyrics = new QbMusicLyricsProvider();
         _lyrics = new LyricsCoordinator([
             _manualLyrics,
             _onlineLyrics
@@ -88,7 +88,6 @@ public partial class MainViewModel : ObservableObject, IDisposable
         var track = _lyrics.CurrentTrack ??
             throw new InvalidOperationException("请先播放一首歌曲，再重新搜索在线歌词。");
 
-        _onlineLyrics.Invalidate(track);
         await _lyrics.UpdateTrackAsync(track, force: true);
         CurrentLyric = _lyrics.GetDisplayLine(_latestPosition);
     }
