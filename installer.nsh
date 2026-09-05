@@ -65,3 +65,26 @@
     upgrade_confirm:
   ${EndIf}
 !macroend
+
+; ============================================================
+; 可选组件：任务栏控制器 (MusicBar)
+; 用户可在安装界面勾选是否一并安装 MusicBar
+; ============================================================
+
+; 组件选择页（插入到安装进度页之前）
+Page components
+
+Section "任务栏控制器 (MusicBar)" SecMusicBar
+  SetOutPath "$INSTDIR\MusicBar"
+  File "${BUILD_RESOURCES_DIR}\MusicBar.exe"
+
+  ; 开始菜单快捷方式
+  CreateDirectory "$SMPROGRAMS\QB音乐"
+  CreateShortCut "$SMPROGRAMS\QB音乐\MusicBar.lnk" "$INSTDIR\MusicBar\MusicBar.exe"
+
+  ; 注册到卸载列表，便于用户单独卸载 MusicBar
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MusicBar" "DisplayName" "MusicBar"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MusicBar" "DisplayIcon" "$INSTDIR\MusicBar\MusicBar.exe"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MusicBar" "UninstallString" "$INSTDIR\QB音乐.exe"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\MusicBar" "InstallLocation" "$INSTDIR\MusicBar"
+SectionEnd

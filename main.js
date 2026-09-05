@@ -13,6 +13,11 @@ const { addAuthorizedDir } = require('./services/localFileAccess'); // 本地文
 // 本地音频文件扩展名
 const LOCAL_AUDIO_EXT = ['.mp3', '.flac', '.wav', '.ogg', '.m4a', '.aac', '.wma', '.ape', '.aiff', '.opus'];
 
+// 设置稳定的应用用户模型 ID（AppUserModelId）：
+// 使 navigator.mediaSession 暴露的系统媒体会话（SMTC）使用固定标识，
+// 便于外部任务栏控制器（MusicBar）稳定识别本应用的媒体会话。
+app.setAppUserModelId('com.laixingquan.musicdownloader');
+
 let mainWindow = null;
 let tray = null;
 let isQuiting = false;
@@ -238,6 +243,8 @@ function createWindow() {
     } catch (e) {
       // 解码失败则使用原始文件名
     }
+    // 安全处理：仅保留文件名部分，防止 Content-Disposition 携带路径穿越（如 ../）
+    decodedName = path.basename(decodedName) || 'music.mp3';
     const savePath = path.join(app.getPath('downloads'), decodedName);
 
     console.log(`下载开始: ${decodedName}`);
