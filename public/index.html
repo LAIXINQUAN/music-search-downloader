@@ -39,6 +39,14 @@
             --font-display: 'Outfit', sans-serif;
             --font-body: 'DM Sans', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
+            --glass-blur: 16px;
+            --glass-blur-2: 24px;
+            --lyric-font: 22px;
+            --lyric-font-active: 24px;
+            --lyric-color: rgba(255,255,255,0.25);
+            --lyric-color-hover: rgba(255,255,255,0.5);
+            --lyric-color-active: #ffffff;
+            --lyric-glow: rgba(139,92,246,0.5);
         }
 
         /* ========== 暗色主题（Nocturne） ========== */
@@ -526,6 +534,37 @@
         }
         .account-msg.error { color: #e74c3c; }
         .account-msg.success { color: #27ae60; }
+        /* ========== 账号资料（昵称/头像） ========== */
+        .profile-label {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-secondary, #888);
+            margin: 12px 0 6px;
+        }
+        .profile-avatar-pick {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .profile-avatar-opt {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            background: var(--bg-hover, #f0f0f5);
+            transition: all 0.2s;
+        }
+        .profile-avatar-opt:hover { transform: scale(1.08); }
+        .profile-avatar-opt.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light, rgba(139,92,246,0.15));
+        }
         /* ========== 收藏夹云同步条 ========== */
         .fav-sync-bar {
             display: flex;
@@ -894,8 +933,8 @@
             background: var(--bg-card);
             border-top: 1px solid var(--border);
             box-shadow: 0 -4px 32px rgba(0,0,0,0.05), 0 -1px 0 rgba(139,92,246,0.04), 0 0 40px rgba(139,92,246,0.02);
-            backdrop-filter: blur(24px) saturate(1.5);
-            -webkit-backdrop-filter: blur(24px) saturate(1.5);
+            backdrop-filter: blur(var(--glass-blur-2)) saturate(1.5);
+            -webkit-backdrop-filter: blur(var(--glass-blur-2)) saturate(1.5);
             position: relative;
             transition: background var(--transition), box-shadow var(--transition), padding 0.3s ease;
             z-index: 5;
@@ -1344,6 +1383,94 @@
         .song-fav-btn:hover { color: #ff4757; background: var(--bg-hover); transform: scale(1.1); }
         .song-fav-btn.active { color: #ff4757; }
 
+        /* ========== 播放队列弹窗 ========== */
+        .queue-panel {
+            max-height: 58vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .queue-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-hover);
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .queue-item:hover { background: var(--accent-light); }
+        .queue-item.active {
+            background: var(--accent-light);
+            border: 1px solid var(--accent);
+        }
+        .queue-item .q-index {
+            width: 22px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+        .queue-item.active .q-index::before { content: '\25B6'; }
+        .queue-item .q-cover {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: var(--bg-hover);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+        .queue-item .q-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .queue-item .q-info { flex: 1; min-width: 0; }
+        .queue-item .q-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .queue-item.active .q-name { color: var(--accent); }
+        .queue-item .q-singer {
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .queue-item .q-ops {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .queue-item .q-ops button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: all 0.15s;
+            line-height: 1;
+        }
+        .queue-item .q-ops button:hover { color: var(--accent); background: var(--bg-hover); }
+        .queue-item .q-ops button.q-del:hover { color: #ff4757; }
+        .queue-empty {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            padding: 32px 0;
+        }
+
         /* 滚动条美化 */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -1468,8 +1595,8 @@
             align-items: center;
             justify-content: center;
             animation: fadeIn 0.3s ease;
-            backdrop-filter: blur(12px) saturate(1.3);
-            -webkit-backdrop-filter: blur(12px) saturate(1.3);
+            backdrop-filter: blur(var(--glass-blur)) saturate(1.3);
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.3);
         }
         .modal::before {
             content: '';
@@ -1613,6 +1740,102 @@
             color: var(--text-muted);
             line-height: 1.4;
         }
+        /* 自定义主题色选择器 */
+        .accent-picker {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 12px;
+            padding: 14px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+        .accent-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .accent-swatch {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        .accent-swatch:hover { transform: scale(1.18); }
+        .accent-swatch.active { border-color: var(--text); }
+        .accent-picker-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .accent-color-input {
+            width: 44px;
+            height: 32px;
+            padding: 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: transparent;
+            cursor: pointer;
+        }
+        .accent-color-input::-webkit-color-swatch-wrapper { padding: 2px; }
+        .accent-color-input::-webkit-color-swatch { border: none; border-radius: 6px; }
+        /* 毛玻璃背景调节 */
+        .glass-setting {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+        .glass-setting input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+        .glass-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .glass-presets span {
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .glass-presets span:hover { border-color: var(--accent); color: var(--accent); }
+        /* 沉浸粒子设置 */
+        .particle-setting {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 14px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+        .ps-row, .ps-color-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .ps-row input[type="range"] { flex: 1; accent-color: var(--accent); }
+        .ps-label { width: 34px; flex-shrink: 0; }
+        .ps-val { width: 42px; text-align: right; font-weight: 600; color: var(--text); font-size: 12px; }
+        .ps-mode { display: flex; gap: 12px; flex: 1; }
+        .ps-mode-item { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+        .ps-mode-item input { accent-color: var(--accent); }
         .settings-switch {
             position: relative;
             display: inline-block;
@@ -1927,8 +2150,8 @@
             border-radius: 50%;
             border: none;
             background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
             color: rgba(255,255,255,0.85);
             font-size: 18px;
             cursor: pointer;
@@ -1950,8 +2173,8 @@
             width: 480px;
             max-height: 70vh;
             background: rgba(20,20,30,0.92);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            backdrop-filter: blur(var(--glass-blur-2));
+            -webkit-backdrop-filter: blur(var(--glass-blur-2));
             border: 1px solid rgba(255,255,255,0.12);
             border-radius: 20px;
             z-index: 20;
@@ -2255,8 +2478,8 @@
             border-radius: 50%;
             border: none;
             background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
             color: rgba(255,255,255,0.8);
             font-size: 18px;
             cursor: pointer;
@@ -2277,8 +2500,8 @@
             font-weight: 500;
             letter-spacing: 1.5px;
             background: rgba(255,255,255,0.06);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
             padding: 7px 18px;
             border-radius: 20px;
             border: 1px solid rgba(255,255,255,0.06);
@@ -2294,8 +2517,8 @@
             font-weight: 500;
             letter-spacing: 1px;
             background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
             padding: 7px 16px;
             border-radius: 20px;
             border: 1px solid rgba(255,255,255,0.06);
@@ -2329,9 +2552,9 @@
             transform-style: preserve-3d;
         }
         .immersive-lyric-line {
-            font-size: 22px;
+            font-size: var(--lyric-font, 22px);
             font-weight: 500;
-            color: rgba(255,255,255,0.25);
+            color: var(--lyric-color, rgba(255,255,255,0.25));
             padding: 14px 0;
             line-height: 1.5;
             transition: color 0.5s ease, text-shadow 0.5s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease, filter 0.5s ease;
@@ -2343,36 +2566,19 @@
         }
         /* 主歌词文本 */
         .immersive-lyric-main { display: block; }
-        .immersive-lyric-line::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 0;
-            height: 0;
-            background: radial-gradient(ellipse at center, rgba(139,92,246,0.06) 0%, transparent 70%);
-            border-radius: 50%;
-            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1), height 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease;
-            opacity: 0;
-            pointer-events: none;
-        }
+        /* 移除歌词行下方的发光方框（影响美观） */
+        .immersive-lyric-line::before { display: none; }
         .immersive-lyric-line:hover {
-            color: rgba(255,255,255,0.5);
+            color: var(--lyric-color-hover, rgba(255,255,255,0.5));
             filter: blur(0);
         }
         .immersive-lyric-line.active {
-            font-size: 24px;
+            font-size: var(--lyric-font-active, 24px);
             font-weight: 700;
-            color: #fff;
-            text-shadow: 0 0 30px rgba(139,92,246,0.5), 0 0 60px rgba(139,92,246,0.2), 0 2px 8px rgba(0,0,0,0.5);
+            color: var(--lyric-color-active, #fff);
+            text-shadow: 0 0 30px var(--lyric-glow, rgba(139,92,246,0.5)), 0 0 60px rgba(139,92,246,0.2), 0 2px 8px rgba(0,0,0,0.5);
             transform: scale(1.15) translateZ(20px);
             filter: blur(0);
-        }
-        .immersive-lyric-line.active::before {
-            width: 300%;
-            height: 300%;
-            opacity: 1;
         }
         .immersive-lyric-line.inactive-down {
             filter: blur(1.5px);
@@ -2706,8 +2912,8 @@
             right: 32px;
             height: 74px;
             background: rgba(255,255,255,0.07);
-            backdrop-filter: blur(32px) saturate(1.8);
-            -webkit-backdrop-filter: blur(32px) saturate(1.8);
+            backdrop-filter: blur(var(--glass-blur-2)) saturate(1.8);
+            -webkit-backdrop-filter: blur(var(--glass-blur-2)) saturate(1.8);
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 22px;
             display: flex;
@@ -3128,8 +3334,8 @@
             width: 360px;
             max-width: calc(100vw - 32px);
             background: rgba(255,255,255,0.06);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            backdrop-filter: blur(var(--glass-blur-2));
+            -webkit-backdrop-filter: blur(var(--glass-blur-2));
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 24px;
             padding: 40px 32px;
@@ -4972,6 +5178,160 @@
             flex-shrink: 0;
             font-family: var(--font-mono);
         }
+        /* 自定义EQ预设保存 */
+        .eq-save-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .eq-save-row input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            padding: 7px 10px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-input);
+            color: var(--text);
+            outline: none;
+        }
+        .eq-save-row input[type="text"]:focus { border-color: var(--accent); }
+        .enhance-mini-btn {
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .enhance-mini-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .eq-custom-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .eq-custom-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .eq-custom-chip:hover { border-color: var(--accent); color: var(--accent); }
+        .eq-custom-chip.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+        .eq-custom-chip .chip-del { color: var(--text-muted); font-weight: 700; }
+        .eq-custom-chip .chip-del:hover { color: #ef4444; }
+        /* 音效面板小开关 */
+        .enhance-toggle.small {
+            padding: 8px 12px;
+            margin-bottom: 12px;
+        }
+        .enhance-toggle.small .toggle-switch {
+            width: 40px;
+            height: 22px;
+        }
+        .enhance-toggle.small .toggle-switch::after {
+            width: 16px;
+            height: 16px;
+            top: 3px;
+            left: 3px;
+        }
+        .enhance-toggle.small .toggle-switch.active::after { left: 21px; }
+        .enhance-toggle.small span {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        /* 歌单工具行 */
+        .playlist-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        /* 全局快捷键设置 */
+        .shortcut-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .shortcut-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text);
+        }
+        .shortcut-key {
+            min-width: 88px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            text-align: center;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-input);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .shortcut-key:hover { border-color: var(--accent); color: var(--accent); }
+        .shortcut-key.recording {
+            border-color: var(--accent);
+            color: var(--accent);
+            animation: shortcutBlink 1s infinite;
+        }
+        @keyframes shortcutBlink { 50% { opacity: 0.4; } }
+        /* 下载命名模板 */
+        .download-name-setting {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .dn-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .dn-preset {
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .dn-preset:hover { border-color: var(--accent); color: var(--accent); }
+        .dn-custom {
+            display: flex;
+            gap: 8px;
+        }
+        .dn-custom input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            padding: 7px 10px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-input);
+            color: var(--text);
+            outline: none;
+        }
+        .dn-custom input[type="text"]:focus { border-color: var(--accent); }
 
         /* ========== 相似推荐 ========== */
         .similar-section {
@@ -5287,6 +5647,15 @@
                         <button class="action-btn" onclick="deletePlaylist()" style="background:none;color:#e74c3c;border:1px solid var(--border);padding:6px 14px;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;">&#128465; 删除</button>
                     </div>
                     <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">共 <span id="plDetailCount">0</span> 首歌曲</div>
+                    <div class="playlist-tools">
+                        <button class="enhance-mini-btn" onclick="sortPlaylist('name')">按歌名</button>
+                        <button class="enhance-mini-btn" onclick="sortPlaylist('singer')">按歌手</button>
+                        <button class="enhance-mini-btn" onclick="sortPlaylist('addTime')">按添加</button>
+                        <button class="enhance-mini-btn" onclick="detectDuplicateSongs()">检测重复</button>
+                        <button class="enhance-mini-btn" onclick="exportPlaylistJson()">导出JSON</button>
+                        <button class="enhance-mini-btn" onclick="document.getElementById('playlistImportFile').click()">导入</button>
+                        <input type="file" id="playlistImportFile" accept=".json,.m3u,.txt" style="display:none;" onchange="importPlaylist(this)">
+                    </div>
                     <div class="song-list" id="playlistSongs"></div>
                 </div>
 
@@ -5306,7 +5675,9 @@
                         <span class="section-title">本地音乐</span>
                         <span id="localDirLabel" style="font-size:11px;color:var(--text-secondary);margin-right:8px;"></span>
                         <button class="action-btn" onclick="selectLocalFolder()" style="margin-left:auto;background:var(--accent-gradient);color:white;border:none;padding:6px 16px;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;">&#128193; 选择文件夹</button>
+                        <button class="action-btn" onclick="document.getElementById('fingerprintAudioFile').click()" style="background:none;color:var(--text-secondary);border:1px solid var(--border);padding:6px 16px;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;margin-left:8px;">&#128269; 识别歌曲</button>
                         <input type="file" id="localDirInput" webkitdirectory style="display:none" onchange="handleLocalDirSelect(event)">
+                        <input type="file" id="fingerprintAudioFile" accept=".mp3,.flac,.wav,.m4a,.aac,.ogg,.opus" style="display:none" onchange="recognizeAudioFile(this)">
                     </div>
                     <div class="song-list" id="localResults"><div class="empty-message">点击"选择文件夹"导入本地音乐（自动读取歌名、歌手、专辑、封面等元数据）</div></div>
                 </div>
@@ -5387,6 +5758,11 @@
                                     <span class="eq-val" id="eqVal16000">0dB</span>
                                 </div>
                             </div>
+                            <div class="eq-save-row">
+                                <input type="text" id="customEqName" placeholder="自定义预设名称" maxlength="12">
+                                <button class="enhance-mini-btn" onclick="saveCustomEq()">保存当前EQ</button>
+                            </div>
+                            <div class="eq-custom-list" id="customEqList"></div>
                             <div style="font-size:12px;color:var(--text-muted);margin:16px 0 10px;font-weight:600;">环绕效果</div>
                             <div class="eq-band">
                                 <label>宽度</label>
@@ -5397,6 +5773,32 @@
                                 <label>混响</label>
                                 <input type="range" id="reverbMix" min="0" max="100" value="0" step="1" oninput="updateSurround()">
                                 <span class="eq-val" id="reverbVal">0%</span>
+                            </div>
+                            <div style="font-size:12px;color:var(--text-muted);margin:16px 0 10px;font-weight:600;">卡拉OK 与声道</div>
+                            <div class="enhance-toggle small" onclick="toggleVocalKill()">
+                                <div class="toggle-switch" id="vocalKillToggle"></div>
+                                <span id="vocalKillLabel">人声消音</span>
+                            </div>
+                            <div class="eq-band">
+                                <label>声道平衡</label>
+                                <input type="range" id="balanceSlider" min="-100" max="100" value="0" step="1" oninput="updateBalance()">
+                                <span class="eq-val" id="balanceVal">居中</span>
+                            </div>
+                            <div class="eq-band">
+                                <label>升降调</label>
+                                <input type="range" id="pitchSlider" min="-7" max="7" value="0" step="1" oninput="setPitch(parseInt(this.value))">
+                                <span class="eq-val" id="pitchVal" style="width:56px;">0 半音</span>
+                            </div>
+                            <div style="font-size:11px;color:var(--text-muted);margin:-4px 0 10px;">升降调同时改变播放速度（升调变快、降调变慢）</div>
+                            <div style="font-size:12px;color:var(--text-muted);margin:16px 0 10px;font-weight:600;">淡入淡出</div>
+                            <div class="enhance-toggle small" onclick="toggleFade()">
+                                <div class="toggle-switch" id="fadeToggle"></div>
+                                <span id="fadeLabel">淡入淡出</span>
+                            </div>
+                            <div class="eq-band">
+                                <label>时长</label>
+                                <input type="range" id="fadeDuration" min="0" max="5" value="2" step="0.5" oninput="setFadeDuration()">
+                                <span class="eq-val" id="fadeDurVal">2s</span>
                             </div>
                         </div>
                     </div>
@@ -5460,6 +5862,7 @@
                     </div>
                 </div>
                 <div class="mpb-tools">
+                    <button class="mpb-imm-btn" onclick="openQueueModal()" title="播放队列" style="font-size:14px;">&#9776;</button>
                     <button class="mpb-imm-btn" id="mpbRateBtn" onclick="toggleRateMenu(event)" title="倍速播放" style="font-size:13px;font-weight:700;">1x</button>
                     <button class="mpb-imm-btn" id="mpbSleepBtn" onclick="toggleSleepMenu(event)" title="定时睡眠" style="font-size:14px;">&#9201;</button>
                     <button class="mpb-imm-btn" onclick="enterImmersiveFromBar()" title="进入沉浸模式">&#9974;</button>
@@ -5495,6 +5898,35 @@
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal()">&times;</button>
             <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- 隐藏的歌词导入文件选择器 -->
+    <input type="file" id="lyricsImportFile" accept=".lrc,.txt" style="display:none;" onchange="importLyricsFile(this)">
+    <!-- 隐藏的皮肤包文件选择器 -->
+    <input type="file" id="skinImportFile" accept=".json" style="display:none;" onchange="importSkinPack(this)">
+
+    <!-- 播放队列弹窗 -->
+    <div class="modal" id="queueModal">
+        <div class="modal-content" style="max-width:540px;">
+            <button class="modal-close" onclick="closeQueueModal()">&times;</button>
+            <h2 style="font-size:20px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+                <span style="font-size:22px;">&#9835;</span> 播放队列
+            </h2>
+            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;" id="queueCount">共 0 首</div>
+            <div class="queue-panel" id="queuePanel"></div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <button class="action-btn" onclick="clearQueue()" style="flex:1;">&#128465; 清空队列</button>
+                <button class="action-btn" onclick="closeQueueModal()" style="flex:1;">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 歌曲识别结果弹窗 -->
+    <div class="modal" id="fingerprintModal">
+        <div class="modal-content" style="max-width:420px;">
+            <button class="modal-close" onclick="closeFingerprintModal()">&times;</button>
+            <div id="fingerprintBody"></div>
         </div>
     </div>
 
@@ -5543,6 +5975,110 @@
                 </div>
             </div>
 
+            <!-- 自定义主题色 -->
+            <div class="settings-section">
+                <h3 class="settings-label">自定义主题色</h3>
+                <div class="settings-toggle-row">
+                    <div class="settings-toggle-text">
+                        <span>启用自定义主题色</span>
+                        <span class="settings-toggle-desc">选择主色后自动应用到按钮、高亮、渐变与氛围光效</span>
+                    </div>
+                    <label class="settings-switch">
+                        <input type="checkbox" id="customAccent">
+                        <span class="settings-switch-slider"></span>
+                    </label>
+                </div>
+                <div class="accent-picker" id="accentPicker">
+                    <div class="accent-presets">
+                        <div class="accent-swatch" style="background:#8B5CF6" data-color="#8B5CF6" onclick="setAccentColor('#8B5CF6')" title="紫"></div>
+                        <div class="accent-swatch" style="background:#3B82F6" data-color="#3B82F6" onclick="setAccentColor('#3B82F6')" title="蓝"></div>
+                        <div class="accent-swatch" style="background:#06B6D4" data-color="#06B6D4" onclick="setAccentColor('#06B6D4')" title="青"></div>
+                        <div class="accent-swatch" style="background:#10B981" data-color="#10B981" onclick="setAccentColor('#10B981')" title="绿"></div>
+                        <div class="accent-swatch" style="background:#F59E0B" data-color="#F59E0B" onclick="setAccentColor('#F59E0B')" title="橙"></div>
+                        <div class="accent-swatch" style="background:#EF4444" data-color="#EF4444" onclick="setAccentColor('#EF4444')" title="红"></div>
+                        <div class="accent-swatch" style="background:#EC4899" data-color="#EC4899" onclick="setAccentColor('#EC4899')" title="粉"></div>
+                        <div class="accent-swatch" style="background:#D4A94B" data-color="#D4A94B" onclick="setAccentColor('#D4A94B')" title="金"></div>
+                    </div>
+                    <div class="accent-picker-row">
+                        <input type="color" id="accentColorInput" class="accent-color-input" value="#8B5CF6">
+                        <span style="font-size:11px;color:var(--text-secondary);">自定义任意颜色</span>
+                        <button class="card-key-btn" onclick="resetAccentColor()" style="margin-left:auto;">恢复默认</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 毛玻璃背景 -->
+            <div class="settings-section">
+                <h3 class="settings-label">毛玻璃背景</h3>
+                <div class="glass-setting">
+                    <div class="settings-toggle-text">
+                        <span>模糊强度</span>
+                        <span class="settings-toggle-desc" id="glassBlurVal">16px</span>
+                    </div>
+                    <input type="range" id="glassBlur" min="0" max="40" value="16" step="2">
+                    <div class="glass-presets">
+                        <span onclick="setGlassBlur(0)">关闭</span>
+                        <span onclick="setGlassBlur(8)">柔和</span>
+                        <span onclick="setGlassBlur(16)">适中</span>
+                        <span onclick="setGlassBlur(28)">强烈</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 皮肤包导入/导出 -->
+            <div class="settings-section">
+                <h3 class="settings-label">皮肤包</h3>
+                <div class="settings-toggle-desc" style="margin-bottom:10px;">一键导出或导入外观配置（主题色、毛玻璃、歌词墙样式、沉浸粒子），便于分享与备份。</div>
+                <div style="display:flex;gap:10px;">
+                    <button class="card-key-btn" onclick="exportSkinPack()" style="flex:1;">&#128190; 导出皮肤包</button>
+                    <button class="card-key-btn" onclick="document.getElementById('skinImportFile').click()" style="flex:1;">&#128229; 导入皮肤包</button>
+                </div>
+            </div>
+
+            <!-- 云端设置同步 -->
+            <div class="settings-section">
+                <h3 class="settings-label">云端设置同步</h3>
+                <div class="settings-toggle-row">
+                    <div class="settings-toggle-text">
+                        <span>自动同步偏好设置</span>
+                        <span class="settings-toggle-desc">登录后自动将主题、音源、快捷键、音效等同步到云端，跨设备共享</span>
+                    </div>
+                    <label class="settings-switch">
+                        <input type="checkbox" id="cloudSettingsSync">
+                        <span class="settings-switch-slider"></span>
+                    </label>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:10px;">
+                    <button class="card-key-btn" onclick="syncPushSettings()" style="flex:1;">&#8593; 上传设置</button>
+                    <button class="card-key-btn" onclick="syncPullSettings()" style="flex:1;">&#8595; 拉取设置</button>
+                </div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;" id="cloudSettingsStatus">未登录或未开启自动同步</div>
+            </div>
+
+            <!-- 歌曲识别（ACRCloud） -->
+            <div class="settings-section">
+                <h3 class="settings-label">歌曲识别</h3>
+                <div class="settings-toggle-desc" style="margin-bottom:10px;">上传本地音频，通过 ACRCloud 在线识别自动匹配歌名与歌手（在"本地音乐"页点击"识别歌曲"使用）。</div>
+                <div class="settings-toggle-row">
+                    <div class="settings-toggle-text">
+                        <span>ACRCloud 识别凭据</span>
+                        <span class="settings-toggle-desc" id="fpKeyStatus">未配置</span>
+                    </div>
+                    <a class="card-key-btn" href="https://console.acrcloud.cn/" target="_blank" style="text-decoration:none;padding:5px 10px;font-size:12px;">&#128279; 免费注册</a>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <input type="text" class="account-input" id="fpAccessKeyInput" placeholder="access_key" autocomplete="off" style="flex:1;">
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <input type="password" class="account-input" id="fpAccessSecretInput" placeholder="access_secret" autocomplete="off" style="flex:1;">
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <input type="text" class="account-input" id="fpHostInput" placeholder="识别区域 host（可选，默认中国区）" autocomplete="off" style="flex:1;">
+                    <button class="card-key-btn" onclick="saveFingerprintConfig()" style="padding:5px 14px;">保存</button>
+                </div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:8px;">注册地址：console.acrcloud.cn 免费注册后创建项目，即可获取 access_key 与 access_secret。凭据仅保存在本机，不会上传。</div>
+            </div>
+
             <!-- 歌词设置 -->
             <div class="settings-section">
                 <h3 class="settings-label">歌词</h3>
@@ -5555,6 +6091,24 @@
                         <input type="checkbox" id="autoLyrics">
                         <span class="settings-switch-slider"></span>
                     </label>
+                </div>
+            </div>
+
+            <!-- 歌词墙样式 -->
+            <div class="settings-section">
+                <h3 class="settings-label">歌词墙样式</h3>
+                <div class="particle-setting">
+                    <div class="ps-row">
+                        <span class="ps-label">字号</span>
+                        <input type="range" id="lyricFont" min="16" max="40" value="22">
+                        <span class="ps-val" id="lyricFontVal">22px</span>
+                    </div>
+                    <div class="ps-color-row">
+                        <span class="ps-label">当前行</span>
+                        <input type="color" id="lyricActiveColor" class="accent-color-input" value="#ffffff">
+                        <span class="ps-label" style="width:44px;">发光</span>
+                        <input type="color" id="lyricGlowColor" class="accent-color-input" value="#8B5CF6">
+                    </div>
                 </div>
             </div>
 
@@ -5602,6 +6156,36 @@
                 </div>
             </div>
 
+            <!-- 沉浸粒子 -->
+            <div class="settings-section">
+                <h3 class="settings-label">沉浸粒子</h3>
+                <div class="particle-setting">
+                    <div class="ps-row">
+                        <span class="ps-label">密度</span>
+                        <input type="range" id="pDensity" min="50" max="200" value="100">
+                        <span class="ps-val" id="pDensityVal">1x</span>
+                    </div>
+                    <div class="ps-row">
+                        <span class="ps-label">速度</span>
+                        <input type="range" id="pSpeed" min="50" max="200" value="100">
+                        <span class="ps-val" id="pSpeedVal">1x</span>
+                    </div>
+                    <div class="ps-row">
+                        <span class="ps-label">亮度</span>
+                        <input type="range" id="pBright" min="30" max="150" value="100">
+                        <span class="ps-val" id="pBrightVal">100%</span>
+                    </div>
+                    <div class="ps-color-row">
+                        <span class="ps-label">颜色</span>
+                        <div class="ps-mode">
+                            <label class="ps-mode-item"><input type="radio" name="pColorMode" value="cover" checked> 封面取色</label>
+                            <label class="ps-mode-item"><input type="radio" name="pColorMode" value="custom"> 自定义</label>
+                        </div>
+                        <input type="color" id="pColorInput" class="accent-color-input" value="#8B5CF6">
+                    </div>
+                </div>
+            </div>
+
             <!-- 关闭行为 -->
             <div class="settings-section">
                 <h3 class="settings-label">关闭行为</h3>
@@ -5629,6 +6213,50 @@
                 </div>
             </div>
 
+            <!-- 全局快捷键 -->
+            <div class="settings-section">
+                <h3 class="settings-label">全局快捷键</h3>
+                <div class="shortcut-list">
+                    <div class="shortcut-row">
+                        <span>播放 / 暂停</span>
+                        <button class="shortcut-key" data-skey="playPause" onclick="recordShortcut('playPause')"><span id="skPlayPause">空格</span></button>
+                    </div>
+                    <div class="shortcut-row">
+                        <span>静音 / 取消静音</span>
+                        <button class="shortcut-key" data-skey="mute" onclick="recordShortcut('mute')"><span id="skMute">M</span></button>
+                    </div>
+                    <div class="shortcut-row">
+                        <span>进入 / 退出沉浸</span>
+                        <button class="shortcut-key" data-skey="immersive" onclick="recordShortcut('immersive')"><span id="skImmersive">I</span></button>
+                    </div>
+                    <div class="shortcut-row">
+                        <span></span>
+                        <button class="card-key-btn" onclick="resetShortcuts()">恢复默认</button>
+                    </div>
+                    <div style="font-size:11px;color:var(--text-muted);line-height:1.5;margin-top:4px;">点击按键后按下新的快捷键即可修改</div>
+                </div>
+            </div>
+
+            <!-- 下载命名 -->
+            <div class="settings-section">
+                <h3 class="settings-label">下载命名</h3>
+                <div class="download-name-setting">
+                    <div class="settings-toggle-text">
+                        <span>下载文件命名模板</span>
+                        <span class="settings-toggle-desc">用 {歌名} / {歌手} 占位符自定义下载文件名</span>
+                    </div>
+                    <div class="dn-presets">
+                        <button class="dn-preset" onclick="setNameTemplate('{歌名}')">{歌名}</button>
+                        <button class="dn-preset" onclick="setNameTemplate('{歌手} - {歌名}')">{歌手} - {歌名}</button>
+                        <button class="dn-preset" onclick="setNameTemplate('{歌名} - {歌手}')">{歌名} - {歌手}</button>
+                    </div>
+                    <div class="dn-custom">
+                        <input type="text" id="dnTemplateInput" placeholder="{歌手} - {歌名}">
+                        <button class="enhance-mini-btn" onclick="saveNameTemplate()">应用</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- 卡密管理（卡密验证版显示，本版本隐藏） -->
             <div class="settings-section" id="cardKeySettingsSection">
                 <h3 class="settings-label">卡密管理</h3>
@@ -5649,7 +6277,7 @@
                     <button class="card-key-btn" onclick="checkForUpdate()">&#128260; 检查更新</button>
                 </div>
                 <div id="updateStatus" style="font-size:11px;color:var(--text-secondary);margin-top:8px;line-height:1.5;">
-                    当前版本：3.6.6
+                    当前版本：3.7.0
                 </div>
             </div>
 
@@ -5661,7 +6289,7 @@
                         <div class="about-icon">&#9835;</div>
                         <div>
                             <div class="about-name">QB音乐</div>
-                            <div class="about-version">版本 3.6.6</div>
+                            <div class="about-version">版本 3.7.0</div>
                         </div>
                     </div>
                     <div class="about-desc">
@@ -5693,6 +6321,7 @@
                 <button class="account-tab active" data-tab="login" onclick="switchAccountTab('login')">登录</button>
                 <button class="account-tab" data-tab="register" onclick="switchAccountTab('register')">注册</button>
                 <button class="account-tab" data-tab="change" onclick="switchAccountTab('change')">修改密码</button>
+                <button class="account-tab" data-tab="profile" onclick="switchAccountTab('profile')">资料</button>
             </div>
             <div style="font-size:11px;color:var(--text-secondary,#888);margin:2px 0 10px;display:flex;align-items:center;justify-content:space-between;">
                 <span>当前账号：<span id="accCurrentEmail">未登录</span></span>
@@ -5758,6 +6387,16 @@
                     <input type="password" class="account-input" id="accChangePwd2" placeholder="确认新密码" maxlength="64">
                     <button class="account-btn" onclick="doChangePassword()">确认修改</button>
                 </div>
+            </div>
+
+            <!-- 资料 Tab（昵称/头像） -->
+            <div id="accTabProfile" style="display:none;">
+                <div class="account-step-hint">个人资料（昵称与头像会显示在侧边栏用户卡片）</div>
+                <div class="profile-label">选择头像</div>
+                <div class="profile-avatar-pick" id="profileAvatarPick"></div>
+                <div class="profile-label">昵称</div>
+                <input type="text" class="account-input" id="accProfileNickname" placeholder="昵称（默认为邮箱）" maxlength="30" autocomplete="off">
+                <button class="account-btn" onclick="saveProfile()">保存资料</button>
             </div>
 
             <div class="account-msg" id="accMsg"></div>
@@ -5869,15 +6508,17 @@
         }
 
         /**
-         * 渲染侧边栏用户卡片（未登录显示登录入口，已登录显示邮箱）
+         * 渲染侧边栏用户卡片（未登录显示登录入口，已登录显示昵称/邮箱与头像）
          */
         function renderSidebarUserCard() {
             const email = getLoginEmail();
             const avatar = document.getElementById('userCardAvatar');
             const text = document.getElementById('userCardText');
             if (email) {
-                if (avatar) avatar.textContent = (email[0] || '').toUpperCase();
-                if (text) text.textContent = email;
+                const nickname = localStorage.getItem('profileName') || email;
+                const avatarStr = localStorage.getItem('profileAvatar') || '';
+                if (avatar) avatar.textContent = avatarStr || (email[0] || '').toUpperCase();
+                if (text) text.textContent = nickname;
             } else {
                 if (avatar) avatar.textContent = '\u{1F464}';
                 if (text) text.textContent = '登录 / 注册';
@@ -5919,7 +6560,95 @@
             document.getElementById('accTabLogin').style.display = tab === 'login' ? '' : 'none';
             document.getElementById('accTabRegister').style.display = tab === 'register' ? '' : 'none';
             document.getElementById('accTabChange').style.display = tab === 'change' ? '' : 'none';
+            document.getElementById('accTabProfile').style.display = tab === 'profile' ? '' : 'none';
             setAccMsg('');
+            // 进入资料页时加载云端资料
+            if (tab === 'profile') loadProfile();
+        }
+
+        // 可选头像预设（emoji）
+        const PROFILE_AVATARS = ['\u{1F3B5}', '\u{1F3A7}', '\u{1F3A4}', '\u{1F3B6}', '\u{1F3B8}', '\u{1F3B9}', '\u{1F941}', '\u{1F308}', '\u{2B50}', '\u{1F451}', '\u{1F3A8}', '\u{1F98A}'];
+        // 当前在资料页选中的头像（未保存前暂存）
+        let pendingAvatar = '';
+
+        /**
+         * 加载账号云端资料（昵称/头像），并填充资料页 UI
+         */
+        async function loadProfile() {
+            const email = getLoginEmail();
+            const nicknameInput = document.getElementById('accProfileNickname');
+            if (!email) {
+                if (nicknameInput) nicknameInput.value = '';
+                setAccMsg('请先登录后再编辑个人资料', 'error');
+                return;
+            }
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch(`${ACCOUNT_API}/profile?token=${encodeURIComponent(token)}`);
+                const data = await res.json();
+                if (data && data.success && data.profile) {
+                    const p = data.profile;
+                    localStorage.setItem('profileName', p.nickname || p.email);
+                    if (p.avatar) localStorage.setItem('profileAvatar', p.avatar);
+                    if (nicknameInput) nicknameInput.value = p.nickname || p.email;
+                    pendingAvatar = p.avatar || '';
+                    renderProfileAvatars(pendingAvatar);
+                    renderSidebarUserCard();
+                }
+            } catch (err) {
+                setAccMsg('加载资料失败', 'error');
+            }
+        }
+
+        /**
+         * 渲染头像预设选择器
+         * @param {string} selected - 当前选中的头像
+         */
+        function renderProfileAvatars(selected) {
+            const wrap = document.getElementById('profileAvatarPick');
+            if (!wrap) return;
+            wrap.innerHTML = PROFILE_AVATARS.map(a =>
+                `<div class="profile-avatar-opt ${a === selected ? 'selected' : ''}" onclick="selectProfileAvatar('${a}')">${a}</div>`
+            ).join('');
+        }
+
+        /**
+         * 选择头像预设
+         * @param {string} emoji - 头像 emoji
+         */
+        function selectProfileAvatar(emoji) {
+            pendingAvatar = emoji;
+            renderProfileAvatars(emoji);
+        }
+
+        /**
+         * 保存账号资料（昵称/头像）
+         */
+        async function saveProfile() {
+            const email = getLoginEmail();
+            if (!email) { setAccMsg('请先登录', 'error'); return; }
+            const nickname = (document.getElementById('accProfileNickname').value || '').trim();
+            if (!nickname) { setAccMsg('昵称不能为空', 'error'); return; }
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch(`${ACCOUNT_API}/profile`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, nickname, avatar: pendingAvatar })
+                });
+                const data = await res.json();
+                if (data && data.success) {
+                    localStorage.setItem('profileName', nickname);
+                    if (pendingAvatar) localStorage.setItem('profileAvatar', pendingAvatar);
+                    renderSidebarUserCard();
+                    setAccMsg('资料已保存', 'success');
+                    showToast('资料已保存');
+                } else {
+                    setAccMsg((data && data.error) || '保存失败', 'error');
+                }
+            } catch (err) {
+                setAccMsg('保存失败，请稍后重试', 'error');
+            }
         }
 
         /**
@@ -6213,6 +6942,8 @@
             }
             localStorage.removeItem('authToken');
             localStorage.removeItem('authEmail');
+            localStorage.removeItem('profileName');
+            localStorage.removeItem('profileAvatar');
             renderSidebarUserCard();
             const cur = document.getElementById('accCurrentEmail');
             if (cur) cur.textContent = '未登录';
@@ -6401,6 +7132,7 @@
                     <div class="song-actions">
                         <button class="song-fav-btn active" onclick="event.stopPropagation();toggleFavorite('${s.id}')" title="取消收藏">&#9829;</button>
                         <button class="action-btn" onclick="event.stopPropagation();playSingleSong('${s.id}')" title="播放">&#9654;</button>
+                        <button class="action-btn" onclick="event.stopPropagation();addToQueueById('${s.id}')" title="加入播放队列">&#43; 队列</button>
                         <button class="action-btn" onclick="event.stopPropagation();showDetail('${s.id}')">详情</button>
                     </div>
                 </div>
@@ -6524,6 +7256,7 @@
                     </div>
                     <div class="song-actions">
                         <button class="action-btn" onclick="event.stopPropagation();playSingleSong('${s.id}')" title="播放">&#9654;</button>
+                        <button class="action-btn" onclick="event.stopPropagation();addToQueueById('${s.id}')" title="加入播放队列">&#43; 队列</button>
                         <button class="action-btn" onclick="event.stopPropagation();removeFromPlaylist('${s.id}')" title="移出">&#10006;</button>
                     </div>
                 </div>
@@ -6594,7 +7327,8 @@
                 name: song.name || '未知歌曲',
                 singer: song.singer || '未知歌手',
                 cover: song.cover || '',
-                playUrl: song.playUrl || ''
+                playUrl: song.playUrl || '',
+                addTime: Date.now()
             });
             savePlaylists();
             if (currentPlaylistId === pl.id) renderPlaylistDetail();
@@ -6638,6 +7372,146 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             showToast('歌单已导出为 m3u');
+        }
+
+        // ========== 歌单排序 ==========
+        /**
+         * 对当前歌单歌曲排序
+         * @param {string} criterion - 排序依据：name / singer / addTime
+         */
+        function sortPlaylist(criterion) {
+            const pl = playlists.find(p => p.id === currentPlaylistId);
+            if (!pl || !pl.songs) return;
+            pl.songs.sort((a, b) => {
+                if (criterion === 'addTime') return (b.addTime || 0) - (a.addTime || 0);
+                return String(a[criterion] || '').localeCompare(String(b[criterion] || ''), 'zh');
+            });
+            savePlaylists();
+            renderPlaylistDetail();
+            const names = { name: '歌名', singer: '歌手', addTime: '添加时间' };
+            showToast(`已按${names[criterion] || criterion}排序`);
+        }
+
+        /**
+         * 下载文本文件到本地
+         * @param {string} filename - 文件名
+         * @param {string} content - 内容
+         * @param {string} type - MIME 类型
+         */
+        function downloadTextFile(filename, content, type) {
+            const blob = new Blob([content], { type: type || 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        /**
+         * 导出当前歌单为 JSON 文件
+         */
+        function exportPlaylistJson() {
+            const pl = playlists.find(p => p.id === currentPlaylistId);
+            if (!pl) { showToast('未找到歌单'); return; }
+            downloadTextFile((pl.name || 'playlist') + '.json', JSON.stringify({ name: pl.name, songs: pl.songs }, null, 2), 'application/json');
+            showToast('歌单已导出为 JSON');
+        }
+
+        /**
+         * 导入歌单（JSON 或 m3u/txt）
+         * @param {HTMLInputElement} input - 文件输入框
+         */
+        function importPlaylist(input) {
+            const file = input && input.files && input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target.result || '';
+                try {
+                    const data = JSON.parse(text);
+                    // JSON 格式：{ name, songs: [...] }
+                    if (data && Array.isArray(data.songs)) {
+                        const name = (data.name || file.name.replace(/\.json$/i, '') || '导入歌单').trim();
+                        const songs = data.songs.map(s => ({
+                            id: s.id || 'imp_' + Math.random().toString(36).slice(2, 10),
+                            name: s.name || '未知歌曲',
+                            singer: s.singer || '未知歌手',
+                            cover: s.cover || '',
+                            playUrl: s.playUrl || '',
+                            addTime: Date.now()
+                        }));
+                        playlists.push({ id: 'pl_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, songs });
+                        savePlaylists();
+                        renderPlaylists();
+                        showToast(`已导入歌单：${name}（${songs.length}首）`);
+                    } else {
+                        showToast('JSON 格式不正确');
+                    }
+                } catch (err) {
+                    // 非 JSON，尝试解析为 m3u 播放列表
+                    importPlaylistFromM3u(text, file.name);
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        /**
+         * 从 m3u/txt 文本导入歌单（每行一个 URL 或 #EXTINF 格式）
+         * @param {string} text - 文件内容
+         * @param {string} filename - 文件名
+         */
+        function importPlaylistFromM3u(text, filename) {
+            const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+            const songs = lines.map(url => ({
+                id: 'imp_' + Math.random().toString(36).slice(2, 10),
+                name: decodeURIComponent(url.split('/').pop() || '未知歌曲').replace(/\.[^.]+$/, ''),
+                singer: '未知歌手',
+                cover: '',
+                playUrl: url,
+                addTime: Date.now()
+            })).filter(s => s.playUrl);
+            const name = (filename || '导入歌单').replace(/\.(m3u|txt)$/i, '');
+            if (songs.length > 0) {
+                playlists.push({ id: 'pl_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, songs });
+                savePlaylists();
+                renderPlaylists();
+                showToast(`已导入歌单：${name}（${songs.length}首）`);
+            } else {
+                showToast('未能从文件中解析出歌曲');
+            }
+        }
+
+        /**
+         * 检测当前歌单中的重复歌曲（按 歌手+歌名），可一键去重
+         */
+        function detectDuplicateSongs() {
+            const pl = playlists.find(p => p.id === currentPlaylistId);
+            if (!pl || !pl.songs || pl.songs.length < 2) {
+                showToast('歌单歌曲不足，无法检测重复');
+                return;
+            }
+            const seen = new Map();
+            const dups = [];
+            pl.songs.forEach((s, i) => {
+                const key = (s.singer || '') + '|' + (s.name || '');
+                if (seen.has(key)) dups.push({ index: i, name: s.name, singer: s.singer });
+                else seen.set(key, i);
+            });
+            if (dups.length === 0) {
+                showToast('未发现重复歌曲');
+                return;
+            }
+            const keepIndices = new Set(pl.songs.map((_, i) => i));
+            dups.forEach(d => keepIndices.delete(d.index));
+            const removed = dups.length;
+            pl.songs = pl.songs.filter((_, i) => keepIndices.has(i));
+            savePlaylists();
+            renderPlaylistDetail();
+            showToast(`已去除 ${removed} 首重复歌曲`);
         }
 
         // ========== 播放年度报告 ==========
@@ -6820,6 +7694,85 @@
             if (!s) return;
             playBlobSong(s);
             addToPlayHistory({ id: s.id, name: s.name, singer: s.singer, cover: s.cover });
+        }
+
+        /**
+         * 上传本地音频文件进行 ACRCloud 在线识别
+         * @param {HTMLInputElement} input - 文件选择器
+         */
+        async function recognizeAudioFile(input) {
+            const file = input.files && input.files[0];
+            input.value = '';
+            if (!file) return;
+            showToast('正在识别歌曲，请稍候...');
+            const fd = new FormData();
+            fd.append('audio', file);
+            try {
+                const res = await fetch(`${API_BASE}/api/fingerprint`, { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data && data.success && data.song) {
+                    showFingerprintResult(data.song);
+                } else {
+                    showToast((data && data.error) || '识别失败');
+                }
+            } catch (err) {
+                showToast('识别失败，请检查网络连接');
+            }
+        }
+
+        /**
+         * 展示识别结果弹窗
+         * @param {{title: string, artist: string}} song - 识别到的歌曲
+         */
+        function showFingerprintResult(song) {
+            const modal = document.getElementById('fingerprintModal');
+            const body = document.getElementById('fingerprintBody');
+            if (!modal || !body) return;
+            body.innerHTML = `
+                <div style="text-align:center;font-size:44px;margin-bottom:8px;">&#127911;</div>
+                <div class="detail-title" style="text-align:center;">${esc(song.title || '未知歌曲')}</div>
+                <div class="detail-singer" style="text-align:center;margin-bottom:16px;">${esc(song.artist || '未知歌手')}</div>
+                <div style="font-size:12px;color:var(--text-secondary);text-align:center;margin-bottom:16px;">已通过音频指纹识别到该歌曲，可在线搜索并播放</div>
+                <div style="display:flex;gap:10px;">
+                    <button class="account-btn" onclick="searchFingerprintSong('${esc(song.title)}','${esc(song.artist || '')}')" style="flex:1;">&#128269; 搜索并播放</button>
+                    <button class="account-btn" onclick="closeFingerprintModal()" style="flex:1;background:var(--bg-hover);color:var(--text);">关闭</button>
+                </div>`;
+            modal.classList.add('show');
+        }
+
+        /**
+         * 关闭识别结果弹窗
+         */
+        function closeFingerprintModal() {
+            const modal = document.getElementById('fingerprintModal');
+            if (modal) modal.classList.remove('show');
+        }
+
+        /**
+         * 用识别到的歌名/歌手发起搜索
+         * 部分音源（如歌宝库）对"歌名 + 歌手"的长关键词匹配不到，返回空；
+         * 因此先带歌手搜索，若结果为空则自动回退为只搜歌名，确保能找到歌曲。
+         * @param {string} title - 歌名
+         * @param {string} artist - 歌手
+         */
+        async function searchFingerprintSong(title, artist) {
+            closeFingerprintModal();
+            const input = document.getElementById('searchInput');
+            let keyword = (title + ' ' + artist).trim();
+            // 探测带歌手关键词是否能在当前音源命中，为空则回退纯歌名
+            try {
+                const sources = JSON.parse(localStorage.getItem('sources') || '["gequbao","toomic"]');
+                const sourceParam = sources.join(',');
+                const res = await fetchWithTimeout(`${API_BASE}/api/search?keyword=${encodeURIComponent(keyword)}&source=${sourceParam}`, 60000);
+                const data = await res.json();
+                if (!data.success || !data.data || data.data.length === 0) {
+                    keyword = (title || '').trim();
+                }
+            } catch (e) {
+                // 探测失败时保留原关键词
+            }
+            if (input) input.value = keyword;
+            handleSearch({ preventDefault() {} });
         }
 
         /**
@@ -7015,6 +7968,7 @@
                         </div>
                         <div class="song-actions">
                             <button class="action-btn" onclick="event.stopPropagation();playSingleSong('${s.id}')" title="播放">&#9654;</button>
+                            <button class="action-btn" onclick="event.stopPropagation();addToQueueById('${s.id}')" title="加入播放队列">&#43; 队列</button>
                             <button class="action-btn" onclick="event.stopPropagation();showDetail('${s.id}')">详情</button>
                         </div>
                     </div>
@@ -7031,6 +7985,7 @@
             const saved = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', saved);
             updateThemeIcon(saved);
+            initAccentColor();
         }
         /**
          * 切换亮/暗主题
@@ -7055,6 +8010,279 @@
         function updateThemeIcon(theme) {
             document.getElementById('themeIcon').innerHTML = theme === 'dark' ? '&#9790;' : '&#9728;';
             document.getElementById('themeText').textContent = theme === 'dark' ? '浅色模式' : '深色模式';
+        }
+
+        // ========== 自定义主题色 ==========
+        /**
+         * 解析十六进制颜色为 RGB 对象
+         * @param {string} hex - 十六进制颜色（支持 3 位或 6 位）
+         * @returns {{r:number,g:number,b:number}}
+         */
+        function hexToRgb(hex) {
+            const h = hex.replace('#', '');
+            const v = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+            return {
+                r: parseInt(v.substr(0, 2), 16),
+                g: parseInt(v.substr(2, 2), 16),
+                b: parseInt(v.substr(4, 2), 16)
+            };
+        }
+        /**
+         * 将颜色按百分比提亮或加深
+         * @param {string} hex - 原始颜色
+         * @param {number} percent - 正数提亮、负数加深（-100 ~ 100）
+         * @returns {string} 处理后的十六进制颜色
+         */
+        function shadeColor(hex, percent) {
+            const { r, g, b } = hexToRgb(hex);
+            const t = percent < 0 ? 0 : 255;
+            const p = Math.abs(percent) / 100;
+            const nr = Math.round((t - r) * p + r);
+            const ng = Math.round((t - g) * p + g);
+            const nb = Math.round((t - b) * p + b);
+            return '#' + [nr, ng, nb].map(x => x.toString(16).padStart(2, '0')).join('');
+        }
+        /**
+         * 为颜色添加透明度
+         * @param {string} hex - 原始颜色
+         * @param {number} alpha - 透明度 0~1
+         * @returns {string} rgba 颜色
+         */
+        function alphaColor(hex, alpha) {
+            const { r, g, b } = hexToRgb(hex);
+            return `rgba(${r},${g},${b},${alpha})`;
+        }
+        /**
+         * 应用自定义主色到全局 CSS 变量
+         * @param {string} hex - 主色
+         */
+        function applyAccentColor(hex) {
+            const root = document.documentElement;
+            root.style.setProperty('--accent', hex);
+            root.style.setProperty('--accent-hover', shadeColor(hex, -12));
+            root.style.setProperty('--accent-2', shadeColor(hex, 14));
+            root.style.setProperty('--accent-light', alphaColor(hex, 0.12));
+            root.style.setProperty('--accent-glow', alphaColor(hex, 0.28));
+            root.style.setProperty('--accent-gradient', `linear-gradient(135deg, ${shadeColor(hex, -10)} 0%, ${hex} 50%, ${shadeColor(hex, 18)} 100%)`);
+        }
+        /**
+         * 移除自定义主色，恢复默认主题变量
+         */
+        function resetAccentVars() {
+            const root = document.documentElement;
+            ['--accent', '--accent-2', '--accent-hover', '--accent-light', '--accent-gradient', '--accent-glow']
+                .forEach(v => root.style.removeProperty(v));
+        }
+        /**
+         * 初始化自定义主题色状态（需在 initTheme 中调用）
+         */
+        function initAccentColor() {
+            const enabled = localStorage.getItem('customAccent') === 'true';
+            const color = localStorage.getItem('accentColor') || '#8B5CF6';
+            const toggle = document.getElementById('customAccent');
+            const picker = document.getElementById('accentPicker');
+            const input = document.getElementById('accentColorInput');
+            if (toggle) {
+                toggle.checked = enabled;
+                toggle.addEventListener('change', (e) => toggleAccentColor(e.target.checked));
+            }
+            if (picker) picker.style.display = enabled ? 'flex' : 'none';
+            if (input) {
+                input.value = color;
+                input.addEventListener('input', (e) => {
+                    if (localStorage.getItem('customAccent') === 'true') {
+                        setAccentColor(e.target.value);
+                    }
+                });
+            }
+            document.querySelectorAll('.accent-swatch').forEach(s =>
+                s.classList.toggle('active', s.dataset.color.toLowerCase() === color.toLowerCase()));
+            if (enabled) applyAccentColor(color);
+        }
+        /**
+         * 切换自定义主题色开关
+         * @param {boolean} checked - 是否启用
+         */
+        function toggleAccentColor(checked) {
+            localStorage.setItem('customAccent', String(checked));
+            const picker = document.getElementById('accentPicker');
+            if (picker) picker.style.display = checked ? 'flex' : 'none';
+            if (checked) {
+                applyAccentColor(document.getElementById('accentColorInput').value);
+                showToast('已应用自定义主题色');
+            } else {
+                resetAccentVars();
+                showToast('已恢复默认主题色');
+            }
+        }
+        /**
+         * 设置自定义主色（预设或取色器）
+         * @param {string} color - 十六进制颜色
+         */
+        function setAccentColor(color) {
+            localStorage.setItem('accentColor', color);
+            const input = document.getElementById('accentColorInput');
+            if (input) input.value = color;
+            document.querySelectorAll('.accent-swatch').forEach(s =>
+                s.classList.toggle('active', s.dataset.color.toLowerCase() === color.toLowerCase()));
+            if (localStorage.getItem('customAccent') === 'true') applyAccentColor(color);
+        }
+        /**
+         * 重置自定义主题色为默认
+         */
+        function resetAccentColor() {
+            localStorage.removeItem('customAccent');
+            localStorage.removeItem('accentColor');
+            const toggle = document.getElementById('customAccent');
+            const picker = document.getElementById('accentPicker');
+            if (toggle) toggle.checked = false;
+            if (picker) picker.style.display = 'none';
+            resetAccentVars();
+            showToast('已恢复默认主题色');
+        }
+
+        // ========== 毛玻璃背景 ==========
+        /**
+         * 应用毛玻璃模糊强度（联动 --glass-blur 与 --glass-blur-2）
+         * @param {number} px - 模糊像素值
+         */
+        function applyGlassBlur(px) {
+            const root = document.documentElement;
+            root.style.setProperty('--glass-blur', px + 'px');
+            root.style.setProperty('--glass-blur-2', (Math.round(px * 1.5)) + 'px');
+            const label = document.getElementById('glassBlurVal');
+            if (label) label.textContent = px === 0 ? '关闭（无模糊）' : px + 'px';
+        }
+        /**
+         * 初始化毛玻璃设置（需在 initSettings 中调用）
+         */
+        function initGlass() {
+            const blur = parseFloat(localStorage.getItem('glassBlur'));
+            const value = isNaN(blur) ? 16 : Math.min(40, Math.max(0, blur));
+            applyGlassBlur(value);
+            const slider = document.getElementById('glassBlur');
+            if (slider) {
+                slider.value = value;
+                slider.addEventListener('input', (e) => {
+                    const px = parseFloat(e.target.value);
+                    applyGlassBlur(px);
+                    localStorage.setItem('glassBlur', String(px));
+                });
+            }
+        }
+        /**
+         * 设置指定模糊强度（预设按钮触发）
+         * @param {number} px - 模糊像素值
+         */
+        function setGlassBlur(px) {
+            const slider = document.getElementById('glassBlur');
+            if (slider) slider.value = px;
+            applyGlassBlur(px);
+            localStorage.setItem('glassBlur', String(px));
+        }
+
+        // ========== 沉浸粒子设置 ==========
+        /**
+         * 初始化沉浸粒子设置 UI 与事件绑定（需在 initSettings 中调用）
+         */
+        function initParticleUI() {
+            loadParticleConfig();
+            const c = particleConfig;
+            const setSlider = (id, val) => { const el = document.getElementById(id); if (el) el.value = Math.round(val * 100); };
+            setSlider('pDensity', c.density);
+            setSlider('pSpeed', c.speed);
+            setSlider('pBright', c.brightness);
+            const denV = document.getElementById('pDensityVal');
+            const spdV = document.getElementById('pSpeedVal');
+            const brV = document.getElementById('pBrightVal');
+            if (denV) denV.textContent = c.density + 'x';
+            if (spdV) spdV.textContent = c.speed + 'x';
+            if (brV) brV.textContent = Math.round(c.brightness * 100) + '%';
+            const colorInput = document.getElementById('pColorInput');
+            if (colorInput) colorInput.value = c.color;
+
+            // 颜色模式单选
+            document.querySelectorAll('input[name="pColorMode"]').forEach(r => {
+                r.checked = r.value === c.colorMode;
+                r.addEventListener('change', (e) => {
+                    if (e.target.checked) { particleConfig.colorMode = e.target.value; saveParticleConfig(); }
+                });
+            });
+            // 滑块绑定
+            const bind = (id, key, labelEl) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('input', () => {
+                    particleConfig[key] = parseFloat(el.value) / 100;
+                    saveParticleConfig();
+                    if (labelEl) labelEl.textContent = key === 'brightness' ? Math.round(particleConfig[key] * 100) + '%' : particleConfig[key] + 'x';
+                });
+            };
+            bind('pDensity', 'density', denV);
+            bind('pSpeed', 'speed', spdV);
+            bind('pBright', 'brightness', brV);
+            // 自定义颜色
+            if (colorInput) {
+                colorInput.addEventListener('input', (e) => { particleConfig.color = e.target.value; saveParticleConfig(); });
+            }
+        }
+
+        // ========== 歌词墙样式 ==========
+        /**
+         * 应用歌词墙样式到 CSS 变量
+         * @param {{fontSize:number,activeColor:string,glowColor:string}} cfg - 歌词样式配置
+         */
+        function applyLyricStyle(cfg) {
+            const root = document.documentElement;
+            root.style.setProperty('--lyric-font', cfg.fontSize + 'px');
+            root.style.setProperty('--lyric-font-active', Math.round(cfg.fontSize * 1.1) + 'px');
+            root.style.setProperty('--lyric-color-active', cfg.activeColor);
+            root.style.setProperty('--lyric-glow', alphaColor(cfg.glowColor, 0.5));
+        }
+        /**
+         * 保存歌词墙样式到 localStorage
+         * @param {{fontSize:number,activeColor:string,glowColor:string}} cfg
+         */
+        function saveLyricStyle(cfg) {
+            localStorage.setItem('lyricStyle', JSON.stringify(cfg));
+        }
+        /**
+         * 初始化歌词墙样式设置 UI（需在 initSettings 中调用）
+         */
+        function initLyricStyle() {
+            let cfg = { fontSize: 22, activeColor: '#ffffff', glowColor: '#8B5CF6' };
+            try {
+                const saved = JSON.parse(localStorage.getItem('lyricStyle') || '{}');
+                cfg = {
+                    fontSize: parseInt(saved.fontSize) || 22,
+                    activeColor: saved.activeColor || '#ffffff',
+                    glowColor: saved.glowColor || '#8B5CF6'
+                };
+            } catch (e) { /* 使用默认 */ }
+            applyLyricStyle(cfg);
+
+            const font = document.getElementById('lyricFont');
+            const fv = document.getElementById('lyricFontVal');
+            const ac = document.getElementById('lyricActiveColor');
+            const gl = document.getElementById('lyricGlowColor');
+            if (font) {
+                font.value = cfg.fontSize;
+                font.addEventListener('input', () => {
+                    cfg.fontSize = parseInt(font.value);
+                    applyLyricStyle(cfg);
+                    saveLyricStyle(cfg);
+                    if (fv) fv.textContent = cfg.fontSize + 'px';
+                });
+            }
+            if (fv) fv.textContent = cfg.fontSize + 'px';
+            if (ac) {
+                ac.value = cfg.activeColor;
+                ac.addEventListener('input', () => { cfg.activeColor = ac.value; applyLyricStyle(cfg); saveLyricStyle(cfg); });
+            }
+            if (gl) {
+                gl.value = cfg.glowColor;
+                gl.addEventListener('input', () => { cfg.glowColor = gl.value; applyLyricStyle(cfg); saveLyricStyle(cfg); });
+            }
         }
 
         // ========== 卡密校验 / 开源版授权 ==========
@@ -7191,6 +8419,14 @@
             // 启动时校验邮箱登录状态（过期自动清除）
             verifyLogin().then((email) => {
                 renderSidebarUserCard();
+                if (email) {
+                    // 加载云端资料（昵称/头像）
+                    loadProfile();
+                    // 自动同步偏好设置（仅开启时生效）
+                    if (localStorage.getItem('cloudSettingsSync') === 'true') {
+                        syncPullSettings();
+                    }
+                }
                 if (email && localStorage.getItem('cloudSync') === 'true') {
                     syncPullFavorites().then(() => syncPushFavorites());
                 }
@@ -7453,7 +8689,7 @@
                     body: JSON.stringify({
                         username: SYSTEM_USERNAME || '',
                         machineId: machineId,
-                        version: '3.6.6',
+                        version: '3.7.0',
                         signature: signature || ''
                     })
                 });
@@ -7589,6 +8825,19 @@
             const immRadio = document.querySelector(`input[name="immControls"][value="${savedImmControls}"]`);
             if (immRadio) immRadio.checked = true;
 
+            // 毛玻璃背景强度
+            initGlass();
+            // 沉浸粒子设置
+            initParticleUI();
+            // 歌词墙样式
+            initLyricStyle();
+            // 全局快捷键
+            renderShortcuts();
+            // 云端设置同步
+            initCloudSettingsSync();
+            // 歌曲识别配置
+            initFingerprintConfig();
+
             // 列表提前缓存
             const immPreload = document.getElementById('immPreload');
             if (immPreload) {
@@ -7669,7 +8918,7 @@
             if (refreshBtn) refreshBtn.classList.add('refreshing');
             body.innerHTML = '<div class="loading"><div class="loading-spinner"></div>检查更新中...</div>';
 
-            const currentVersion = '3.6.6';
+            const currentVersion = '3.7.0';
 
             try {
                 // 通过后端代理获取版本信息，避免前端直接访问 GitHub Pages 超时
@@ -8071,6 +9320,7 @@
                         ${isBatchList ? '' : `
                         <button class="song-fav-btn ${favorites.some(f => f.id === s.id) ? 'active' : ''}" onclick="event.stopPropagation();toggleFavorite('${s.id}')" title="收藏">&#9829;</button>
                         <button class="action-btn" onclick="event.stopPropagation();playSingleSong('${s.id}')" title="播放">&#9654;</button>
+                        <button class="action-btn" onclick="event.stopPropagation();addToQueueById('${s.id}')" title="加入播放队列">&#43; 队列</button>
                         <button class="action-btn" onclick="event.stopPropagation();showDetail('${s.id}')">详情</button>
                         `}
                     </div>
@@ -8349,6 +9599,12 @@
                     <button class="immersive-entry-btn" onclick="enterImmersiveFromDetail()">
                         &#127911; 沉浸模式
                     </button>
+                    <button class="immersive-entry-btn" onclick="addToQueue(currentDetailSong)">
+                        &#43; 加入队列
+                    </button>
+                    <button class="immersive-entry-btn" onclick="lyricsImportTargetId='${song.id}';document.getElementById('lyricsImportFile').click();">
+                        &#128221; 导入歌词
+                    </button>
                     <button class="immersive-entry-btn detail-fav-btn ${favorites.some(f => f.id === song.id) ? 'active' : ''}" onclick="toggleFavoriteFromDetail()" style="${favorites.some(f => f.id === song.id) ? 'border-color:#ff4757;color:#ff4757;' : ''}">
                         &#9829; ${favorites.some(f => f.id === song.id) ? '已收藏' : '收藏'}
                     </button>
@@ -8588,6 +9844,8 @@
         // 弹窗交互
         document.getElementById('detailModal').addEventListener('click', e => { if (e.target.id === 'detailModal') closeModal(); });
         document.getElementById('settingsModal').addEventListener('click', e => { if (e.target.id === 'settingsModal') closeSettings(); });
+        document.getElementById('queueModal').addEventListener('click', e => { if (e.target.id === 'queueModal') closeQueueModal(); });
+        document.getElementById('fingerprintModal').addEventListener('click', e => { if (e.target.id === 'fingerprintModal') closeFingerprintModal(); });
         document.getElementById('accountModal').addEventListener('click', e => { if (e.target.id === 'accountModal') closeAccountModal(); });
         // 点击播放条快捷菜单外部时关闭
         document.addEventListener('click', () => {
@@ -8610,6 +9868,685 @@
                 if (e.code === 'Space') { e.preventDefault(); immTogglePlay(); }
             }
         });
+
+        // ========== 全局快捷键自定义 ==========
+        const DEFAULT_SHORTCUTS = { playPause: 'Space', mute: 'KeyM', immersive: 'KeyI' };
+        let recordingShortcut = null;
+        const SHORTCUT_NAMES = { Space: '空格', KeyM: 'M', KeyI: 'I', KeyP: 'P', KeyS: 'S', KeyL: 'L', KeyB: 'B', KeyN: 'N', KeyV: 'V', KeyF: 'F', KeyA: 'A', KeyD: 'D', KeyG: 'G', KeyJ: 'J', KeyK: 'K', KeyZ: 'Z', KeyX: 'X', KeyC: 'C', KeyH: 'H', KeyU: 'U', KeyT: 'T', KeyR: 'R', KeyE: 'E', KeyW: 'W', KeyQ: 'Q', KeyO: 'O', KeyY: 'Y', Enter: 'Enter', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→' };
+        /**
+         * 读取快捷键配置
+         * @returns {Object} 快捷键映射
+         */
+        function loadShortcuts() {
+            try { return Object.assign({}, DEFAULT_SHORTCUTS, JSON.parse(localStorage.getItem('shortcuts') || '{}')); }
+            catch (e) { return Object.assign({}, DEFAULT_SHORTCUTS); }
+        }
+        /**
+         * 将键盘 code 转为可读名称
+         * @param {string} code - 键盘 code
+         * @returns {string} 显示名
+         */
+        function codeToName(code) {
+            if (SHORTCUT_NAMES[code]) return SHORTCUT_NAMES[code];
+            return code.replace(/^Key/, '').replace(/^Digit/, '').replace(/^Numpad/, '#');
+        }
+        /**
+         * 渲染快捷键按键显示
+         */
+        function renderShortcuts() {
+            const s = loadShortcuts();
+            const map = { playPause: 'skPlayPause', mute: 'skMute', immersive: 'skImmersive' };
+            Object.keys(map).forEach(k => { const el = document.getElementById(map[k]); if (el) el.textContent = codeToName(s[k]); });
+        }
+        /**
+         * 开始录制某个功能的快捷键
+         * @param {string} key - 功能键名
+         */
+        function recordShortcut(key) {
+            recordingShortcut = key;
+            document.querySelectorAll('.shortcut-key').forEach(b => b.classList.remove('recording'));
+            const btn = document.querySelector(`.shortcut-key[data-skey="${key}"]`);
+            if (btn) btn.classList.add('recording');
+            showToast('请按下新的快捷键');
+        }
+        /**
+         * 重置快捷键为默认
+         */
+        function resetShortcuts() {
+            localStorage.removeItem('shortcuts');
+            renderShortcuts();
+            showToast('快捷键已恢复默认');
+        }
+        /**
+         * 保存某个功能的快捷键
+         * @param {string} key - 功能键名
+         * @param {string} code - 键盘 code
+         */
+        function saveShortcut(key, code) {
+            const s = loadShortcuts();
+            s[key] = code;
+            localStorage.setItem('shortcuts', JSON.stringify(s));
+            renderShortcuts();
+            showToast('快捷键已更新');
+        }
+        // 全局快捷键监听（录制捕获 + 触发执行）
+        document.addEventListener('keydown', (e) => {
+            // 录制模式：捕获按键
+            if (recordingShortcut) {
+                e.preventDefault();
+                if (e.code === 'Escape') {
+                    recordingShortcut = null;
+                    document.querySelectorAll('.shortcut-key').forEach(b => b.classList.remove('recording'));
+                    showToast('已取消录制');
+                    return;
+                }
+                if (/^(Key|Digit|Numpad|F\d|Space|Arrow|Enter)/.test(e.code)) {
+                    saveShortcut(recordingShortcut, e.code);
+                    recordingShortcut = null;
+                    document.querySelectorAll('.shortcut-key').forEach(b => b.classList.remove('recording'));
+                }
+                return;
+            }
+            const s = loadShortcuts();
+            const immShown = document.getElementById('immersiveMode').classList.contains('show');
+            // 播放/暂停
+            if (e.code === s.playPause) {
+                // 默认 Space 且沉浸模式时，交给原有逻辑处理，避免重复触发
+                if (e.code === 'Space' && immShown) return;
+                if (immState.audio) { e.preventDefault(); immTogglePlay(); }
+                return;
+            }
+            // 静音
+            if (e.code === s.mute) {
+                if (immState.audio) { e.preventDefault(); immToggleMute(); }
+                return;
+            }
+            // 进入/退出沉浸
+            if (e.code === s.immersive) {
+                e.preventDefault();
+                if (immShown) exitImmersive();
+                else if (immState.audio) enterImmersiveFromBar();
+            }
+        });
+
+        // ========== 下载命名模板 ==========
+        /**
+         * 获取当前下载命名模板
+         * @returns {string} 模板字符串
+         */
+        function getNameTemplate() { return localStorage.getItem('downloadNameTemplate') || '{歌名}'; }
+        /**
+         * 根据模板与歌曲信息生成下载文件名（不含扩展名，并清理非法字符）
+         * @param {Object} song - 歌曲对象
+         * @returns {string} 生成的文件名
+         */
+        function formatDownloadName(song) {
+            const t = getNameTemplate();
+            const singer = (song.singer || '未知歌手').replace(/[\\/:*?"<>|]/g, '_');
+            const name = (song.name || '未知歌曲').replace(/[\\/:*?"<>|]/g, '_');
+            return t.replace(/\{歌手\}/g, singer).replace(/\{歌名\}/g, name).trim();
+        }
+        /**
+         * 设置命名模板（预设按钮）
+         * @param {string} t - 模板
+         */
+        function setNameTemplate(t) {
+            localStorage.setItem('downloadNameTemplate', t);
+            const input = document.getElementById('dnTemplateInput');
+            if (input) input.value = t;
+            showToast('已应用下载命名模板');
+        }
+        /**
+         * 保存自定义命名模板
+         */
+        function saveNameTemplate() {
+            const input = document.getElementById('dnTemplateInput');
+            const t = (input ? input.value : '').trim() || '{歌名}';
+            localStorage.setItem('downloadNameTemplate', t);
+            showToast('已保存下载命名模板');
+        }
+        /**
+         * 初始化下载命名模板输入框（需在 initSettings 中调用）
+         */
+        function initNameTemplate() {
+            const input = document.getElementById('dnTemplateInput');
+            if (input) input.value = getNameTemplate();
+        }
+
+        // ========== 播放队列 ==========
+        /**
+         * 将歌曲加入播放队列（按 id 去重）
+         * @param {Object} song - 歌曲对象（至少需包含 id/name/singer/cover）
+         */
+        function addToQueue(song) {
+            if (!song || !song.id) return;
+            // 去重：同一首歌不重复加入
+            if (immState.playlist.some(s => s.id === song.id)) {
+                showToast('该歌曲已在播放队列中');
+                return;
+            }
+            immState.playlist.push({
+                id: song.id,
+                name: song.name || '未知歌曲',
+                singer: song.singer || '未知歌手',
+                cover: song.cover || ''
+            });
+            showToast('已加入播放队列');
+            immUpdateMiniPlaylist();
+            // 若队列弹窗打开则刷新显示
+            if (document.getElementById('queueModal').classList.contains('show')) renderQueuePanel();
+        }
+
+        /**
+         * 按歌曲 id 加入播放队列（从缓存中取基础信息）
+         * @param {string} id - 歌曲 id
+         */
+        function addToQueueById(id) {
+            const cached = songCache.get(id) || {};
+            addToQueue({ id, name: cached.name || '', singer: cached.singer || '', cover: cached.cover || '' });
+        }
+
+        /**
+         * 打开播放队列弹窗
+         */
+        function openQueueModal() {
+            renderQueuePanel();
+            document.getElementById('queueModal').classList.add('show');
+        }
+
+        /**
+         * 关闭播放队列弹窗
+         */
+        function closeQueueModal() {
+            document.getElementById('queueModal').classList.remove('show');
+        }
+
+        /**
+         * 渲染播放队列面板
+         */
+        function renderQueuePanel() {
+            const panel = document.getElementById('queuePanel');
+            const count = document.getElementById('queueCount');
+            if (!panel) return;
+            const list = immState.playlist || [];
+            if (count) count.textContent = `共 ${list.length} 首`;
+            if (list.length === 0) {
+                panel.innerHTML = '<div class="queue-empty">播放队列为空，可在歌曲列表点击 "+ 队列" 加入</div>';
+                return;
+            }
+            const currentId = immState.currentSong && immState.currentSong.id;
+            panel.innerHTML = list.map((s, i) => {
+                const isActive = s.id === currentId;
+                return `
+                    <div class="queue-item ${isActive ? 'active' : ''}" onclick="playFromQueue(${i})" title="${esc(s.name)}">
+                        <div class="q-index">${isActive ? '' : i + 1}</div>
+                        <div class="q-cover">${s.cover ? `<img src="${s.cover}" alt="">` : '&#9835;'}</div>
+                        <div class="q-info">
+                            <div class="q-name">${esc(s.name) || '未知歌曲'}</div>
+                            <div class="q-singer">${esc(s.singer) || '未知歌手'}</div>
+                        </div>
+                        <div class="q-ops" onclick="event.stopPropagation()">
+                            <button onclick="moveQueueItem(${i}, -1)" title="上移">&#9650;</button>
+                            <button onclick="moveQueueItem(${i}, 1)" title="下移">&#9660;</button>
+                            <button class="q-del" onclick="removeQueueItem(${i})" title="移除">&#10006;</button>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        /**
+         * 移动队列中的歌曲位置（上移/下移）
+         * @param {number} index - 当前索引
+         * @param {number} dir - 移动方向（-1 上移，1 下移）
+         */
+        function moveQueueItem(index, dir) {
+            const list = immState.playlist;
+            if (!list || list.length < 2) return;
+            const target = index + dir;
+            if (target < 0 || target >= list.length) return;
+            // 交换位置
+            const tmp = list[index];
+            list[index] = list[target];
+            list[target] = tmp;
+            // 若移动的是当前播放歌曲，同步 currentIndex
+            const currentId = immState.currentSong && immState.currentSong.id;
+            if (list[index].id === currentId) immState.currentIndex = index;
+            else if (list[target].id === currentId) immState.currentIndex = target;
+            immUpdateMiniPlaylist();
+            renderQueuePanel();
+        }
+
+        /**
+         * 移除队列中的歌曲
+         * @param {number} index - 要移除的索引
+         */
+        function removeQueueItem(index) {
+            const list = immState.playlist;
+            if (!list || index < 0 || index >= list.length) return;
+            const currentId = immState.currentSong && immState.currentSong.id;
+            const removedId = list[index].id;
+            list.splice(index, 1);
+            // 若删除的是当前或当前之前的歌曲，修正 currentIndex
+            if (removedId === currentId) {
+                // 播放当前歌曲被移除，若还有歌曲则播放下一首，否则停止
+                if (list.length > 0) {
+                    immState.currentIndex = Math.min(index, list.length - 1);
+                    immPlayCurrent();
+                } else {
+                    immState.currentIndex = -1;
+                }
+            } else if (index < immState.currentIndex) {
+                immState.currentIndex = immState.currentIndex - 1;
+            }
+            immUpdateMiniPlaylist();
+            renderQueuePanel();
+            showToast('已从队列移除');
+        }
+
+        /**
+         * 清空播放队列
+         */
+        function clearQueue() {
+            if (immState.playlist.length === 0) return;
+            if (!confirm('确定清空播放队列吗？')) return;
+            immState.playlist = [];
+            immState.currentIndex = -1;
+            immUpdateMiniPlaylist();
+            renderQueuePanel();
+            showToast('播放队列已清空');
+        }
+
+        /**
+         * 从队列指定位置播放
+         * @param {number} index - 索引
+         */
+        function playFromQueue(index) {
+            if (index < 0 || index >= immState.playlist.length) return;
+            immState.currentIndex = index;
+            immPlayCurrent();
+            renderQueuePanel();
+        }
+
+        // ========== 歌词导入 ==========
+        // 导入歌词的目标歌曲 id（详情弹窗设置，沉浸模式默认当前播放歌曲）
+        let lyricsImportTargetId = null;
+
+        /**
+         * 读取某歌曲已导入的歌词
+         * @param {string} id - 歌曲 id
+         * @returns {string|undefined} 歌词文本（未导入时返回 undefined）
+         */
+        function getImportedLyrics(id) {
+            try {
+                return JSON.parse(localStorage.getItem('importedLyrics') || '{}')[id];
+            } catch (e) {
+                return undefined;
+            }
+        }
+
+        /**
+         * 保存某歌曲的导入歌词到 localStorage
+         * @param {string} id - 歌曲 id
+         * @param {string} text - 歌词文本（LRC 格式）
+         */
+        function saveImportedLyrics(id, text) {
+            let map = {};
+            try { map = JSON.parse(localStorage.getItem('importedLyrics') || '{}'); } catch (e) { map = {}; }
+            map[id] = text;
+            localStorage.setItem('importedLyrics', JSON.stringify(map));
+        }
+
+        /**
+         * 处理歌词文件导入（.lrc / .txt）
+         * @param {HTMLInputElement} input - 文件选择器
+         */
+        function importLyricsFile(input) {
+            const file = input.files && input.files[0];
+            input.value = '';
+            if (!file) return;
+            // 目标歌曲：优先详情弹窗设置的 id，否则当前播放歌曲
+            const targetId = lyricsImportTargetId || (immState.currentSong && immState.currentSong.id);
+            if (!targetId) {
+                showToast('请先播放一首歌曲，或在歌曲详情中导入歌词');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = String(e.target.result || '');
+                if (!text.trim()) { showToast('歌词文件为空'); return; }
+                saveImportedLyrics(targetId, text);
+                // 若当前正播放该歌曲则立即生效
+                if (immState.currentSong && immState.currentSong.id === targetId) {
+                    immParseLyrics(text);
+                    showToast('歌词已导入');
+                } else {
+                    showToast('歌词已导入，播放该歌曲时生效');
+                }
+            };
+            reader.onerror = () => showToast('歌词文件读取失败');
+            reader.readAsText(file, 'utf-8');
+        }
+
+        /**
+         * 移除某歌曲的导入歌词
+         * @param {string} id - 歌曲 id
+         */
+        function removeImportedLyrics(id) {
+            let map = {};
+            try { map = JSON.parse(localStorage.getItem('importedLyrics') || '{}'); } catch (e) { map = {}; }
+            if (map[id] !== undefined) {
+                delete map[id];
+                localStorage.setItem('importedLyrics', JSON.stringify(map));
+                return true;
+            }
+            return false;
+        }
+
+        // ========== 皮肤包 ==========
+        /**
+         * 收集当前外观配置，导出为皮肤包 JSON 文件
+         */
+        function exportSkinPack() {
+            let lyricStyle = null;
+            try { lyricStyle = JSON.parse(localStorage.getItem('lyricStyle') || 'null'); } catch (e) { lyricStyle = null; }
+            let particleConfig = null;
+            try { particleConfig = JSON.parse(localStorage.getItem('particleConfig') || 'null'); } catch (e) { particleConfig = null; }
+            const skin = {
+                name: 'QB音乐皮肤包',
+                type: 'qb-music-skin',
+                version: 1,
+                exportedAt: new Date().toISOString(),
+                theme: localStorage.getItem('theme') || 'light',
+                customAccent: localStorage.getItem('customAccent') === 'true',
+                accentColor: localStorage.getItem('accentColor') || '#8B5CF6',
+                glassBlur: parseFloat(localStorage.getItem('glassBlur')) || 16,
+                lyricStyle,
+                particleConfig
+            };
+            const blob = new Blob([JSON.stringify(skin, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'QB音乐皮肤包.json';
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            showToast('皮肤包已导出');
+        }
+
+        /**
+         * 处理皮肤包文件导入
+         * @param {HTMLInputElement} input - 文件选择器
+         */
+        function importSkinPack(input) {
+            const file = input.files && input.files[0];
+            input.value = '';
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                let skin;
+                try { skin = JSON.parse(e.target.result); }
+                catch (err) { showToast('皮肤包格式无效'); return; }
+                applySkinPack(skin);
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+
+        /**
+         * 应用皮肤包配置（写入 localStorage 并刷新 UI）
+         * @param {Object} skin - 皮肤包对象
+         */
+        function applySkinPack(skin) {
+            if (!skin || typeof skin !== 'object' || skin.type !== 'qb-music-skin') {
+                showToast('皮肤包格式无效');
+                return;
+            }
+            // 主题
+            if (skin.theme) {
+                localStorage.setItem('theme', skin.theme);
+                document.documentElement.setAttribute('data-theme', skin.theme);
+            }
+            // 主题色
+            if (skin.customAccent !== undefined) localStorage.setItem('customAccent', String(skin.customAccent));
+            if (skin.accentColor) localStorage.setItem('accentColor', skin.accentColor);
+            if (skin.customAccent) applyAccentColor(skin.accentColor || '#8B5CF6');
+            // 毛玻璃
+            if (skin.glassBlur !== undefined) setGlassBlur(skin.glassBlur);
+            // 歌词墙样式
+            if (skin.lyricStyle && typeof skin.lyricStyle === 'object') {
+                saveLyricStyle(skin.lyricStyle);
+                applyLyricStyle(skin.lyricStyle);
+            }
+            // 沉浸粒子
+            if (skin.particleConfig && typeof skin.particleConfig === 'object') {
+                localStorage.setItem('particleConfig', JSON.stringify(skin.particleConfig));
+                try { loadParticleConfig(); } catch (e) {}
+            }
+            refreshSkinUI(skin);
+            showToast('皮肤包已应用');
+        }
+
+        /**
+         * 应用皮肤包后刷新设置面板中的相关控件显示
+         * @param {Object} skin - 皮肤包对象
+         */
+        function refreshSkinUI(skin) {
+            const accToggle = document.getElementById('customAccent');
+            const picker = document.getElementById('accentPicker');
+            const accInput = document.getElementById('accentColorInput');
+            if (accToggle) accToggle.checked = !!skin.customAccent;
+            if (picker) picker.style.display = skin.customAccent ? '' : 'none';
+            if (accInput && skin.accentColor) accInput.value = skin.accentColor;
+            const glass = document.getElementById('glassBlur');
+            if (glass && skin.glassBlur !== undefined) glass.value = skin.glassBlur;
+            if (skin.lyricStyle) {
+                const f = document.getElementById('lyricFont'); if (f) f.value = skin.lyricStyle.fontSize || 22;
+                const fv = document.getElementById('lyricFontVal'); if (fv) fv.textContent = (skin.lyricStyle.fontSize || 22) + 'px';
+                const ac = document.getElementById('lyricActiveColor'); if (ac) ac.value = skin.lyricStyle.activeColor || '#ffffff';
+                const gl = document.getElementById('lyricGlowColor'); if (gl) gl.value = skin.lyricStyle.glowColor || '#8B5CF6';
+            }
+            if (typeof updateThemeIcon === 'function') updateThemeIcon(skin.theme || localStorage.getItem('theme') || 'light');
+        }
+
+        // ========== 云端设置同步 ==========
+        const SETTINGS_SYNC_API = `${API_BASE}/api/settings-sync`;
+        // 参与云同步的偏好设置键（值为 localStorage 字符串）
+        const SYNC_SETTING_KEYS = [
+            'theme', 'customAccent', 'accentColor', 'glassBlur', 'lyricStyle', 'particleConfig',
+            'sources', 'shortcuts', 'downloadNameTemplate', 'playRate', 'fadeEnabled', 'fadeDuration'
+        ];
+
+        /**
+         * 收集当前偏好设置为同步对象
+         * @returns {Object}
+         */
+        function collectCloudSettings() {
+            const data = {};
+            SYNC_SETTING_KEYS.forEach(k => {
+                const v = localStorage.getItem(k);
+                if (v !== null) data[k] = v;
+            });
+            return data;
+        }
+
+        /**
+         * 将云端设置应用到本地（写入 localStorage 并实时生效）
+         * @param {Object} settings - 云端设置对象
+         */
+        function applyCloudSettings(settings) {
+            if (!settings || typeof settings !== 'object') return;
+            SYNC_SETTING_KEYS.forEach(k => {
+                if (settings[k] !== undefined) localStorage.setItem(k, settings[k]);
+            });
+            // 实时生效的外观/偏好
+            try {
+                if (settings.theme) document.documentElement.setAttribute('data-theme', settings.theme);
+                if (settings.customAccent === 'true' && settings.accentColor) applyAccentColor(settings.accentColor);
+                if (settings.glassBlur !== undefined) setGlassBlur(parseFloat(settings.glassBlur));
+                if (settings.lyricStyle) applyLyricStyle(JSON.parse(settings.lyricStyle));
+                if (settings.particleConfig) { loadParticleConfig(); }
+                if (typeof updateThemeIcon === 'function') updateThemeIcon(settings.theme || 'light');
+            } catch (e) { /* 单条失败不中断 */ }
+            // 若设置弹窗打开，刷新相关控件
+            try { refreshCloudSettingsUI(); } catch (e) {}
+        }
+
+        /**
+         * 刷新云端设置同步相关 UI 控件
+         */
+        function refreshCloudSettingsUI() {
+            const toggle = document.getElementById('cloudSettingsSync');
+            if (toggle) toggle.checked = localStorage.getItem('cloudSettingsSync') === 'true';
+            const accToggle = document.getElementById('customAccent');
+            if (accToggle) accToggle.checked = localStorage.getItem('customAccent') === 'true';
+            const glass = document.getElementById('glassBlur');
+            if (glass) glass.value = localStorage.getItem('glassBlur') || 16;
+        }
+
+        /**
+         * 上传当前设置到云端
+         */
+        async function syncPushSettings() {
+            const email = getLoginEmail();
+            if (!email) { showToast('请先登录后再上传设置'); return; }
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch(SETTINGS_SYNC_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, settings: collectCloudSettings() })
+                });
+                const data = await res.json();
+                if (data && data.success) {
+                    setCloudSettingsStatus('设置已上传到云端');
+                    showToast('设置已上传');
+                } else {
+                    setCloudSettingsStatus((data && data.error) || '上传失败');
+                    showToast('设置上传失败');
+                }
+            } catch (err) {
+                setCloudSettingsStatus('上传失败，请检查网络');
+                showToast('设置上传失败');
+            }
+        }
+
+        /**
+         * 从云端拉取设置并应用到本地
+         */
+        async function syncPullSettings() {
+            const email = getLoginEmail();
+            if (!email) { showToast('请先登录后再拉取设置'); return; }
+            const token = localStorage.getItem('authToken');
+            try {
+                const res = await fetch(`${SETTINGS_SYNC_API}?token=${encodeURIComponent(token)}`);
+                const data = await res.json();
+                if (data && data.success) {
+                    const keys = Object.keys(data.settings || {});
+                    if (keys.length === 0) {
+                        setCloudSettingsStatus('云端暂无设置，可点击上传');
+                        return;
+                    }
+                    applyCloudSettings(data.settings);
+                    setCloudSettingsStatus('设置已从云端同步');
+                    showToast('设置已同步');
+                } else {
+                    setCloudSettingsStatus((data && data.error) || '拉取失败');
+                    showToast('设置拉取失败');
+                }
+            } catch (err) {
+                setCloudSettingsStatus('拉取失败，请检查网络');
+                showToast('设置拉取失败');
+            }
+        }
+
+        /**
+         * 设置云同步状态提示文本
+         * @param {string} text - 提示文本
+         */
+        function setCloudSettingsStatus(text) {
+            const el = document.getElementById('cloudSettingsStatus');
+            if (el) el.textContent = text;
+        }
+
+        /**
+         * 初始化云端设置同步（绑定开关、恢复状态）
+         */
+        function initCloudSettingsSync() {
+            const toggle = document.getElementById('cloudSettingsSync');
+            if (!toggle) return;
+            toggle.checked = localStorage.getItem('cloudSettingsSync') === 'true';
+            toggle.addEventListener('change', () => {
+                const on = toggle.checked;
+                localStorage.setItem('cloudSettingsSync', String(on));
+                if (on) {
+                    if (!getLoginEmail()) { setCloudSettingsStatus('请先登录账号'); return; }
+                    // 开启后先拉取再上传，保证合并一致
+                    syncPullSettings().then(() => syncPushSettings());
+                } else {
+                    setCloudSettingsStatus('自动同步已关闭');
+                }
+            });
+        }
+
+        // ========== 歌曲识别（ACRCloud）配置 ==========
+
+        /**
+         * 查询并刷新 ACRCloud 识别凭据配置状态
+         */
+        async function loadFingerprintConfig() {
+            const status = document.getElementById('fpKeyStatus');
+            try {
+                const res = await fetch(`${API_BASE}/api/fingerprint/config`);
+                const data = await res.json();
+                if (status) status.textContent = (data && data.hasKey) ? '已配置' : '未配置';
+            } catch (err) {
+                if (status) status.textContent = '状态获取失败';
+            }
+        }
+
+        /**
+         * 保存 ACRCloud 识别凭据（access_key / access_secret / host）
+         */
+        async function saveFingerprintConfig() {
+            const akInput = document.getElementById('fpAccessKeyInput');
+            const asInput = document.getElementById('fpAccessSecretInput');
+            const hostInput = document.getElementById('fpHostInput');
+            const accessKey = (akInput && akInput.value || '').trim();
+            const accessSecret = (asInput && asInput.value || '').trim();
+            if (!accessKey || !accessSecret) { showToast('请填写 access_key 与 access_secret'); return; }
+            try {
+                const res = await fetch(`${API_BASE}/api/fingerprint/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accessKey, accessSecret, host: (hostInput && hostInput.value || '').trim() })
+                });
+                const data = await res.json();
+                if (data && data.success) {
+                    showToast('识别凭据已保存');
+                    if (akInput) akInput.value = '';
+                    if (asInput) asInput.value = '';
+                    loadFingerprintConfig();
+                } else {
+                    showToast((data && data.error) || '保存失败');
+                }
+            } catch (err) {
+                showToast('保存失败，请检查网络');
+            }
+        }
+
+        /**
+         * 初始化歌曲识别配置（绑定输入、刷新状态）
+         */
+        function initFingerprintConfig() {
+            loadFingerprintConfig();
+            ['fpAccessKeyInput', 'fpAccessSecretInput', 'fpHostInput'].forEach((id) => {
+                const input = document.getElementById(id);
+                if (input) {
+                    // 回车保存
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') saveFingerprintConfig();
+                    });
+                }
+            });
+        }
 
         // ========== 音频可视化 ==========
         const visualizerState = {
@@ -9119,12 +11056,52 @@
          * 初始化封面粒子效果
          * @param {string} coverUrl - 封面图片URL
          */
+        // ========== 沉浸粒子自定义 ==========
+        // 粒子效果配置（密度/速度/亮度/颜色），从 localStorage 读取，initParticles 时应用
+        let particleConfig = { density: 1, speed: 1, brightness: 1, colorMode: 'cover', color: '#8B5CF6' };
+        /**
+         * 从 localStorage 加载粒子配置（需在应用启动时调用一次）
+         */
+        function loadParticleConfig() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('particleConfig') || '{}');
+                particleConfig = {
+                    density: clamp01(parseFloat(saved.density) || 1),
+                    speed: clamp01(parseFloat(saved.speed) || 1),
+                    brightness: clamp01(parseFloat(saved.brightness) || 1),
+                    colorMode: saved.colorMode === 'custom' ? 'custom' : 'cover',
+                    color: saved.color || '#8B5CF6'
+                };
+            } catch (e) { /* 配置损坏则使用默认 */ }
+        }
+        /**
+         * 将数值限制在合理范围（用于粒子配置）
+         * @param {number} v - 输入值
+         * @returns {number} 受限值
+         */
+        function clamp01(v) { return Math.min(3, Math.max(0.2, v)); }
+        /**
+         * 保存粒子配置到 localStorage，并刷新沉浸粒子
+         */
+        function saveParticleConfig() {
+            localStorage.setItem('particleConfig', JSON.stringify(particleConfig));
+            // 若当前处于沉浸模式且有粒子画布，立即重新初始化
+            const canvas = document.getElementById('immParticles');
+            if (canvas && canvas.style.display !== 'none') {
+                const cover = immState.currentSong && immState.currentSong.cover ? immState.currentSong.cover : '';
+                initParticles(cover);
+            }
+        }
+
         function initParticles(coverUrl) {
             const canvas = document.getElementById('immParticles');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
+
+            // 应用粒子配置
+            const cfg = particleConfig;
 
             // 停止之前的动画
             if (immState.particleRaf) {
@@ -9154,10 +11131,24 @@
                 }
 
                 // ========== 自然风动态雨景效果 ==========
+                // 根据粒子配置计算数量/速度/亮度与颜色
+                const density = cfg.density;
+                const speedMul = cfg.speed;
+                const brightMul = cfg.brightness;
+                // 自定义颜色模式：雨滴与光点统一使用用户颜色
+                const useCustom = cfg.colorMode === 'custom';
+                let customRGB = null;
+                if (useCustom) {
+                    const h = cfg.color.replace('#', '');
+                    const v = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+                    customRGB = parseInt(v.substr(0, 2), 16) + ',' + parseInt(v.substr(2, 2), 16) + ',' + parseInt(v.substr(4, 2), 16);
+                }
+                const glowRGB = useCustom ? customRGB : null;
+
                 const rainDrops = []; // 雨滴
                 const floatParticles = []; // 浮游光点粒子
-                const rainCount = 180; // 雨滴数量
-                const floatCount = 40; // 浮游粒子数量
+                const rainCount = Math.round(180 * density); // 雨滴数量
+                const floatCount = Math.round(40 * density); // 浮游粒子数量
                 const W = canvas.width;
                 const H = canvas.height;
                 const windAngle = 0.12; // 微风角度（弧度）
@@ -9168,8 +11159,8 @@
                         x: Math.random() * W * 1.5 - W * 0.25,
                         y: Math.random() * H * 1.2 - H * 0.2,
                         length: 8 + Math.random() * 20, // 雨丝长度
-                        speed: 6 + Math.random() * 14, // 下落速度
-                        opacity: 0.1 + Math.random() * 0.35, // 透明度
+                        speed: (6 + Math.random() * 14) * speedMul, // 下落速度
+                        opacity: Math.min(1, (0.1 + Math.random() * 0.35) * brightMul), // 透明度
                         thickness: 0.5 + Math.random() * 1.5 // 雨丝粗细
                     });
                 }
@@ -9180,11 +11171,11 @@
                         x: Math.random() * W,
                         y: Math.random() * H,
                         size: 1 + Math.random() * 3,
-                        speedX: (Math.random() - 0.5) * 0.4,
-                        speedY: -0.2 - Math.random() * 0.5,
-                        alpha: 0.2 + Math.random() * 0.5,
+                        speedX: (Math.random() - 0.5) * 0.4 * speedMul,
+                        speedY: (-0.2 - Math.random() * 0.5) * speedMul,
+                        alpha: Math.min(0.85, (0.2 + Math.random() * 0.5) * brightMul),
                         alphaDir: 1,
-                        color: colors.length > 0 ? colors[Math.floor(Math.random() * colors.length)] : 'rgba(255,255,255,',
+                        color: glowRGB ? 'rgba(' + glowRGB + ',' : (colors.length > 0 ? colors[Math.floor(Math.random() * colors.length)] : 'rgba(255,255,255,'),
                         z: Math.random() * 0.8 + 0.2
                     });
                 }
@@ -9220,7 +11211,8 @@
                     }
 
                     // 绘制雨滴
-                    ctx.strokeStyle = 'rgba(180,200,230,0.5)';
+                    const rainStroke = glowRGB ? ('rgba(' + glowRGB + ',') : 'rgba(180,200,230,';
+                    ctx.strokeStyle = rainStroke + '0.5)';
                     for (let i = 0; i < rainDrops.length; i++) {
                         const d = rainDrops[i];
                         d.y += d.speed;
@@ -9239,7 +11231,7 @@
                         ctx.moveTo(d.x, d.y);
                         ctx.lineTo(d.x - windAngle * d.length * 0.5, d.y - d.length);
                         ctx.lineWidth = d.thickness;
-                        ctx.strokeStyle = `rgba(180,200,230,${d.opacity})`;
+                        ctx.strokeStyle = rainStroke + d.opacity + ')';
                         ctx.stroke();
                     }
 
@@ -9316,8 +11308,9 @@
             // 记录播放历史
             addToPlayHistory(song);
 
-            // 解析歌词
-            immParseLyrics(song.lyrics || '');
+            // 解析歌词（优先使用用户导入的歌词，否则用歌曲自带的歌词）
+            const importedLyrics = getImportedLyrics(song.id);
+            immParseLyrics(importedLyrics !== undefined && importedLyrics !== null ? importedLyrics : (song.lyrics || ''));
 
             // 构建播放URL（优先playUrl，否则用网易云后备，最后尝试downloadUrl）
             // 外部直链需通过后端代理播放，避免浏览器被防盗链拦截
@@ -9361,6 +11354,13 @@
             immState.audio = new Audio(playUrl);
             immState.audio.playbackRate = parseFloat(localStorage.getItem('playRate') || '1');
             immState.audio.volume = parseFloat(localStorage.getItem('immVolume') || '0.8');
+            // 淡入淡出：若开启则从静音淡入
+            fadeEnabled = localStorage.getItem('fadeEnabled') === 'true';
+            fadeDuration = parseFloat(localStorage.getItem('fadeDuration') || '2');
+            if (fadeEnabled) immState.audio.volume = 0.0001;
+            immState.audio.addEventListener('play', () => {
+                if (fadeEnabled) fadeInAudio(immState.audio);
+            });
 
             // 初始化音频管线（音效+可视化一体化，MediaElementSource 只调用一次）
             if (enhanceEnabled) {
@@ -9728,11 +11728,16 @@
         function immTogglePlay() {
             if (!immState.audio) return;
             if (immState.isPlaying) {
-                immState.audio.pause();
+                // 淡出后暂停
+                fadeOutAudio(immState.audio, () => {
+                    try { immState.audio.pause(); } catch (e) {}
+                });
                 immState.isPlaying = false;
                 immUpdatePlayBtn();
                 immSyncMiniPlayer();
             } else {
+                // 恢复播放：淡出暂停后音量已为 0，需淡入恢复音量（关闭淡入淡出时则恢复目标音量）
+                fadeInAudio(immState.audio);
                 immState.audio.play().then(() => {
                     immState.isPlaying = true;
                     immUpdatePlayBtn();
@@ -9759,9 +11764,17 @@
         }
 
         /**
-         * 歌曲播放结束后的处理（始终重播当前歌曲）
+         * 歌曲播放结束后的处理（队列连播：进入下一首；单曲时循环播放当前歌曲）
          */
         function immHandleSongEnd() {
+            const list = immState.playlist;
+            // 队列中不止一首歌时顺序连播（循环到队列首）
+            if (list && list.length > 1) {
+                immState.currentIndex = (immState.currentIndex + 1) % list.length;
+                immPlayCurrent();
+                return;
+            }
+            // 单曲：循环播放当前歌曲
             if (immState.audio) {
                 immState.audio.currentTime = 0;
                 immState.audio.play().catch(() => {
@@ -9978,6 +11991,12 @@
          * 上一曲（单曲循环模式：重播当前歌曲）
          */
         function immPrev() {
+            const list = immState.playlist;
+            if (list && list.length > 1) {
+                immState.currentIndex = (immState.currentIndex - 1 + list.length) % list.length;
+                immPlayCurrent();
+                return;
+            }
             if (immState.audio) {
                 immState.audio.currentTime = 0;
                 immState.audio.play().then(() => {
@@ -9993,9 +12012,15 @@
         }
 
         /**
-         * 下一曲（单曲循环模式：重播当前歌曲）
+         * 下一曲（队列连播：进入下一首；单曲时重播当前歌曲）
          */
         function immNext() {
+            const list = immState.playlist;
+            if (list && list.length > 1) {
+                immState.currentIndex = (immState.currentIndex + 1) % list.length;
+                immPlayCurrent();
+                return;
+            }
             if (immState.audio) {
                 immState.audio.currentTime = 0;
                 immState.audio.play().then(() => {
@@ -10700,6 +12725,7 @@
                             <div class="song-actions">
                                 <button class="song-fav-btn ${favorites.some(f => f.id === s.id) ? 'active' : ''}" onclick="event.stopPropagation();toggleFavorite('${s.id}')" title="收藏">&#9829;</button>
                                 <button class="action-btn" onclick="event.stopPropagation();playSingleSong('${s.id}')" title="播放">&#9654;</button>
+                                <button class="action-btn" onclick="event.stopPropagation();addToQueueById('${s.id}')" title="加入播放队列">&#43; 队列</button>
                                 <button class="action-btn" onclick="event.stopPropagation();showDetail('${s.id}')">详情</button>
                             </div>
                         </div>
@@ -10786,6 +12812,7 @@
                 songId: song.id || '',
                 name: song.name || '未知歌曲',
                 singer: song.singer || '未知歌手',
+                fileName: formatDownloadName(song), // 按下载命名模板生成
                 url: url,
                 progress: 0,
                 status: 'downloading', // downloading | completed | error | paused
@@ -11056,6 +13083,17 @@
         let dryGainNode = null;
         let currentPreset = 'master';
         let currentQuality = 'standard';
+        // 人声消音节点组（中心声道消除）
+        let vocalSplitter = null;
+        let vocalGainL = null;
+        let vocalGainR = null;
+        let vocalMerger = null;
+        let vocalKillEnabled = false;
+        // 立体声平衡（左右声道，-1 左 ~ 1 右）
+        let balanceValue = 0;
+        // 淡入淡出配置
+        let fadeEnabled = false;
+        let fadeDuration = 2; // 秒
 
         const EQ_BANDS = [60, 250, 1000, 4000, 16000];
         const EQ_PRESETS = {
@@ -11127,6 +13165,10 @@
             gainNode = null;
             stereoPanner = null;
             compressorNode = null;
+            vocalSplitter = null;
+            vocalGainL = null;
+            vocalGainR = null;
+            vocalMerger = null;
 
             // 2. 停止旧可视化
             stopVisualizerDraw();
@@ -11180,6 +13222,14 @@
                     return filter;
                 });
 
+                // 人声消音节点组（中心声道消除：L 与 -R 叠加抵消中置人声）
+                vocalSplitter = audioCtx.createChannelSplitter(2);
+                vocalGainL = audioCtx.createGain();
+                vocalGainL.gain.value = 1;
+                vocalGainR = audioCtx.createGain();
+                vocalGainR.gain.value = vocalKillEnabled ? -1 : 1;
+                vocalMerger = audioCtx.createChannelMerger(2);
+
                 // 混响器（环绕效果）
                 reverbNode = audioCtx.createConvolver();
                 createReverbBuffer(audioCtx, reverbNode);
@@ -11195,9 +13245,13 @@
                 visualizerState.source = sourceNode;
 
                 // 8. 连接完整链路
-                // source → EQ链 → stereoPanner → compressor → dryGain → gain → analyser → destination
-                //                                            └→ reverb → reverbGain ┘
-                let lastNode = sourceNode;
+                // source → 人声消音(splitter→merger) → EQ链 → stereoPanner → compressor → dry/reverb → gain → analyser → destination
+                sourceNode.connect(vocalSplitter);
+                vocalSplitter.connect(vocalGainL, 0);
+                vocalGainL.connect(vocalMerger, 0, 0);
+                vocalSplitter.connect(vocalGainR, 1);
+                vocalGainR.connect(vocalMerger, 0, 1);
+                let lastNode = vocalMerger;
                 eqFilters.forEach(f => { lastNode.connect(f); lastNode = f; });
                 lastNode.connect(stereoPanner);
                 stereoPanner.connect(compressorNode);
@@ -11213,6 +13267,8 @@
                 if (enhanceEnabled) {
                     applyCurrentPreset();
                     updateSurround();
+                    // 应用声道平衡与立体声平衡
+                    if (stereoPanner) stereoPanner.pan.value = balanceValue;
                     if (audioCtx.state === 'suspended') {
                         audioCtx.resume();
                     }
@@ -11445,6 +13501,174 @@
         }
 
         /**
+         * 切换人声消音（中心声道消除）
+         */
+        function toggleVocalKill() {
+            vocalKillEnabled = !vocalKillEnabled;
+            const toggle = document.getElementById('vocalKillToggle');
+            const label = document.getElementById('vocalKillLabel');
+            if (toggle) toggle.classList.toggle('active', vocalKillEnabled);
+            if (label) label.textContent = vocalKillEnabled ? '人声消音（开启）' : '人声消音';
+            // 反相右声道：L 与 -R 叠加抵消中置人声
+            if (vocalGainR) vocalGainR.gain.value = vocalKillEnabled ? -1 : 1;
+            localStorage.setItem('vocalKill', String(vocalKillEnabled));
+            showToast(vocalKillEnabled ? '已开启人声消音（卡拉OK模式）' : '已关闭人声消音');
+        }
+
+        /**
+         * 更新声道平衡（左右声道）
+         */
+        function updateBalance() {
+            const slider = document.getElementById('balanceSlider');
+            const val = document.getElementById('balanceVal');
+            const raw = slider ? parseInt(slider.value) : 0;
+            balanceValue = raw / 100; // -1 ~ 1
+            if (val) val.textContent = raw === 0 ? '居中' : (raw < 0 ? `左 ${-raw}%` : `右 ${raw}%`);
+            if (stereoPanner) stereoPanner.pan.value = balanceValue;
+            localStorage.setItem('balanceValue', balanceValue.toString());
+        }
+
+        // ========== 淡入淡出 ==========
+        /**
+         * 获取当前目标音量
+         * @returns {number} 音量（0~1）
+         */
+        function getFadeTarget() {
+            return parseFloat(localStorage.getItem('immVolume') || '0.8');
+        }
+        /**
+         * 播放淡入
+         * @param {HTMLAudioElement} audio - 音频元素
+         */
+        function fadeInAudio(audio) {
+            if (!audio) return;
+            if (!fadeEnabled) { audio.volume = getFadeTarget(); return; }
+            const target = getFadeTarget();
+            const dur = Math.max(0.1, fadeDuration) * 1000;
+            const start = performance.now();
+            audio.volume = 0.0001;
+            const step = (t) => {
+                const p = Math.min(1, (t - start) / dur);
+                audio.volume = 0.0001 + (target - 0.0001) * p;
+                if (p < 1) requestAnimationFrame(step);
+                else audio.volume = target;
+            };
+            requestAnimationFrame(step);
+        }
+        /**
+         * 播放淡出
+         * @param {HTMLAudioElement} audio - 音频元素
+         * @param {Function} done - 淡出完成后回调（如暂停）
+         */
+        function fadeOutAudio(audio, done) {
+            if (!audio) { if (done) done(); return; }
+            if (!fadeEnabled) { if (done) done(); return; }
+            const startVol = audio.volume || getFadeTarget();
+            const dur = Math.max(0.1, fadeDuration) * 1000;
+            const start = performance.now();
+            const step = (t) => {
+                const p = Math.min(1, (t - start) / dur);
+                audio.volume = startVol * (1 - p);
+                if (p < 1) requestAnimationFrame(step);
+                else { audio.volume = 0; if (done) done(); }
+            };
+            requestAnimationFrame(step);
+        }
+        /**
+         * 切换淡入淡出开关
+         */
+        function toggleFade() {
+            fadeEnabled = !fadeEnabled;
+            const toggle = document.getElementById('fadeToggle');
+            const label = document.getElementById('fadeLabel');
+            if (toggle) toggle.classList.toggle('active', fadeEnabled);
+            if (label) label.textContent = fadeEnabled ? '淡入淡出（开启）' : '淡入淡出';
+            localStorage.setItem('fadeEnabled', String(fadeEnabled));
+            showToast(fadeEnabled ? '已开启淡入淡出' : '已关闭淡入淡出');
+        }
+        /**
+         * 设置淡入淡出时长
+         */
+        function setFadeDuration() {
+            const slider = document.getElementById('fadeDuration');
+            const val = document.getElementById('fadeDurVal');
+            fadeDuration = slider ? parseFloat(slider.value) : 2;
+            if (val) val.textContent = fadeDuration + 's';
+            localStorage.setItem('fadeDuration', fadeDuration.toString());
+        }
+
+        // ========== 自定义EQ预设保存 ==========
+        /**
+         * 读取已保存的自定义EQ预设列表
+         * @returns {Array<{name:string,values:number[]}>}
+         */
+        function loadCustomEqs() {
+            try {
+                return JSON.parse(localStorage.getItem('customEqs') || '[]');
+            } catch (e) { return []; }
+        }
+        /**
+         * 渲染自定义EQ预设列表
+         */
+        function renderCustomEqList() {
+            const list = document.getElementById('customEqList');
+            if (!list) return;
+            const eqs = loadCustomEqs();
+            list.innerHTML = eqs.map((eq, i) => `
+                <span class="eq-custom-chip" onclick="applyCustomEq(${i})">
+                    ${esc(eq.name)}
+                    <span class="chip-del" onclick="event.stopPropagation();deleteCustomEq(${i})">&times;</span>
+                </span>`).join('');
+        }
+        /**
+         * 保存当前EQ滑块值为自定义预设
+         */
+        function saveCustomEq() {
+            const input = document.getElementById('customEqName');
+            const name = (input ? input.value : '').trim();
+            if (!name) { showToast('请先输入预设名称'); return; }
+            const values = EQ_BANDS.map(freq => {
+                const s = document.getElementById(`eq${freq}`);
+                return s ? parseFloat(s.value) : 0;
+            });
+            const eqs = loadCustomEqs();
+            eqs.push({ name, values });
+            localStorage.setItem('customEqs', JSON.stringify(eqs));
+            if (input) input.value = '';
+            renderCustomEqList();
+            showToast(`已保存自定义EQ预设：${name}`);
+        }
+        /**
+         * 应用自定义EQ预设（加载到滑块与滤波器）
+         * @param {number} idx - 预设索引
+         */
+        function applyCustomEq(idx) {
+            const eqs = loadCustomEqs();
+            const eq = eqs[idx];
+            if (!eq) return;
+            EQ_BANDS.forEach((freq, i) => {
+                const s = document.getElementById(`eq${freq}`);
+                const v = document.getElementById(`eqVal${freq}`);
+                const val = eq.values[i] || 0;
+                if (s) s.value = val;
+                if (v) v.textContent = (val >= 0 ? '+' : '') + val + 'dB';
+                if (eqFilters[i]) eqFilters[i].gain.value = val;
+            });
+            currentPreset = 'flat'; // 应用自定义后不再归属内置预设
+            showToast(`已应用自定义EQ：${eq.name}`);
+        }
+        /**
+         * 删除自定义EQ预设
+         * @param {number} idx - 预设索引
+         */
+        function deleteCustomEq(idx) {
+            const eqs = loadCustomEqs();
+            eqs.splice(idx, 1);
+            localStorage.setItem('customEqs', JSON.stringify(eqs));
+            renderCustomEqList();
+        }
+
+        /**
          * 设置音质
          * @param {string} quality - 音质等级
          */
@@ -11478,6 +13702,41 @@
         }
 
         /**
+         * 根据半音计算播放倍速（十二平均律）
+         * @param {number} semi - 半音数（-7 ~ 7）
+         * @returns {number} 倍速
+         */
+        function semiToRate(semi) { return Math.pow(2, semi / 12); }
+        /**
+         * 同步升降调滑块显示
+         * @param {number} semi - 半音数
+         */
+        function syncPitchSlider(semi) {
+            const slider = document.getElementById('pitchSlider');
+            const val = document.getElementById('pitchVal');
+            if (slider) slider.value = semi;
+            if (val) val.textContent = (semi > 0 ? '+' : '') + semi + ' 半音';
+        }
+        /**
+         * 设置升降调（变速变调，通过 playbackRate 实现）
+         * @param {number} semi - 半音数（-7 ~ 7）
+         */
+        function setPitch(semi) {
+            const rate = semiToRate(semi);
+            const label = document.getElementById('currentRateLabel');
+            if (label) label.textContent = rate.toFixed(2) + 'x';
+            document.querySelectorAll('#rateTags .quality-tag').forEach(tag => {
+                tag.classList.toggle('active', Math.abs(parseFloat(tag.dataset.rate) - rate) < 0.01);
+            });
+            const rateBtn = document.getElementById('mpbRateBtn');
+            if (rateBtn) rateBtn.textContent = rate.toFixed(2) + 'x';
+            localStorage.setItem('playRate', String(rate));
+            if (immState.audio) immState.audio.playbackRate = rate;
+            syncPitchSlider(semi);
+            showToast(`升降调：${semi > 0 ? '+' : ''}${semi} 半音（${rate.toFixed(2)}x，变速）`);
+        }
+
+        /**
          * 设置播放倍速（0.5x - 2x）
          * 应用到当前音频并持久化，切歌后保持
          * @param {number} rate - 倍速值
@@ -11498,6 +13757,8 @@
             if (immState.audio) {
                 immState.audio.playbackRate = rate;
             }
+            // 同步升降调滑块
+            syncPitchSlider(Math.round(12 * Math.log2(rate)));
             showToast(`播放倍速切换为：${rate}x`);
         }
 
@@ -11587,6 +13848,8 @@
 
             navigator.mediaSession.setActionHandler('play', () => {
                 if (immState.currentSong && !immState.isPlaying) {
+                    // 恢复播放：淡出暂停后音量已为 0，需淡入恢复（关闭淡入淡出时则恢复目标音量）
+                    fadeInAudio(immState.audio);
                     immState.audio.play().then(() => {
                         immState.isPlaying = true;
                         immUpdatePlayBtn();
@@ -11709,6 +13972,37 @@
                     if (rSlider) rSlider.value = savedReverb;
                     if (wVal) wVal.textContent = savedWidth + '%';
                     if (rVal) rVal.textContent = savedReverb + '%';
+                    // 恢复人声消音与声道平衡
+                    vocalKillEnabled = localStorage.getItem('vocalKill') === 'true';
+                    const vkT = document.getElementById('vocalKillToggle');
+                    const vkL = document.getElementById('vocalKillLabel');
+                    if (vkT) vkT.classList.toggle('active', vocalKillEnabled);
+                    if (vkL) vkL.textContent = vocalKillEnabled ? '人声消音（开启）' : '人声消音';
+                    const savedBal = parseFloat(localStorage.getItem('balanceValue') || '0');
+                    if (!isNaN(savedBal)) {
+                        balanceValue = savedBal;
+                        const bSlider = document.getElementById('balanceSlider');
+                        const bVal = document.getElementById('balanceVal');
+                        const balPct = Math.round(savedBal * 100);
+                        if (bSlider) bSlider.value = balPct;
+                        if (bVal) bVal.textContent = balPct === 0 ? '居中' : (savedBal < 0 ? `左 ${-balPct}%` : `右 ${balPct}%`);
+                    }
+                    // 恢复自定义EQ预设列表
+                    renderCustomEqList();
+                    // 恢复淡入淡出
+                    fadeEnabled = localStorage.getItem('fadeEnabled') === 'true';
+                    fadeDuration = parseFloat(localStorage.getItem('fadeDuration') || '2');
+                    const fT = document.getElementById('fadeToggle');
+                    const fL = document.getElementById('fadeLabel');
+                    if (fT) fT.classList.toggle('active', fadeEnabled);
+                    if (fL) fL.textContent = fadeEnabled ? '淡入淡出（开启）' : '淡入淡出';
+                    const fS = document.getElementById('fadeDuration');
+                    const fV = document.getElementById('fadeDurVal');
+                    if (fS) fS.value = fadeDuration;
+                    if (fV) fV.textContent = fadeDuration + 's';
+                    // 恢复升降调滑块（从当前倍速反推半音）
+                    const pitchRate = parseFloat(localStorage.getItem('playRate') || '1');
+                    syncPitchSlider(Math.round(12 * Math.log2(pitchRate)));
                 }, 500);
             }
         } else {
@@ -11840,11 +14134,13 @@
             <!-- 右侧：工具按钮 -->
             <div class="imm-bar-tools">
                 <button class="imm-tool-btn" id="immLyricsToggle" onclick="immToggleLyrics()" title="歌词">词</button>
+                <button class="imm-tool-btn" onclick="lyricsImportTargetId=null;document.getElementById('lyricsImportFile').click();" title="导入歌词">&#128221;</button>
                 <button class="imm-tool-btn" id="immVolumeBtn" onclick="immToggleMute()" title="音量">&#128266;</button>
                 <div class="imm-volume-wrap">
                     <input type="range" class="imm-volume-slider" id="immVolume" min="0" max="1" step="0.01" value="0.8" oninput="immSetVolume(this.value)">
                 </div>
                 <button class="imm-tool-btn" onclick="immToggleFullscreen()" title="全屏">&#9974;</button>
+                <button class="imm-tool-btn" onclick="openQueueModal()" title="播放队列">&#9776;</button>
                 <button class="imm-tool-btn" id="immDesktopLyricsBtn" onclick="immToggleDesktopLyrics()" title="桌面歌词">&#9835;</button>
                 <button class="imm-tool-btn" id="immMiniPlayerBtn" onclick="immToggleMiniPlayer()" title="迷你播放器">&#9642;</button>
             </div>
