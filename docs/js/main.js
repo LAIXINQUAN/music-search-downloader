@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMouseTrail();
   initCardLighting();
   initDownloadRipple();
+  initDirectDownload();
   initElementParallax();
 });
 
@@ -1083,6 +1084,107 @@ function initDownloadRipple() {
 
   // 每2秒创建新环
   setInterval(createPulseRing, 2000);
+}
+
+// ===== 27b. 下载按钮自动解析直链并重定向 =====
+/**
+ * 点击下载时自动调用 JxPan 直链解析接口，获取临时直链并触发下载。
+ * 若解析失败或浏览器未自动下载，则弹出备用页面，提供手动下载链接。
+ */
+function initDirectDownload() {
+  const dlBtn = document.querySelector('.dl-btn');
+  if (!dlBtn) return;
+
+  // 直链解析接口（公共 JxPan 实例，返回临时直链）
+  const API_URL =
+    'https://jx.fsapk.xx.kg/?url=https://share.feijipan.com/s/c274tgA9&id=59028937404';
+  // 备用下载页（自动下载未触发时提供给用户手动点击）
+  const FALLBACK_URL = 'https://share.feijipan.com/n/OYU4TmP';
+
+  // 弹层相关 DOM
+  const fallback = document.getElementById('dlFallback');
+  const fallbackTitle = document.getElementById('dlFallbackTitle');
+  const fallbackDesc = document.getElementById('dlFallbackDesc');
+  const fallbackLink = document.getElementById('dlFallbackLink');
+
+  /**
+   * 显示备用下载弹层
+   * @param {boolean} hasDirect 是否已成功解析出直链
+   */
+  function showFallback(hasDirect) {
+    if (!fallback) return;
+    fallbackTitle.textContent = hasDirect
+      ? '如果下载没有自动开始'
+      : '直链解析失败';
+    fallbackDesc.textContent = hasDirect
+      ? '直链已经打开，若浏览器没有自动开始下载，请点击下方按钮前往下载页。'
+      : '暂时无法获取直链，请点击下方按钮前往下载页手动下载。';
+    if (fallbackLink) fallbackLink.href = FALLBACK_URL;
+    fallback.classList.add('show');
+    fallback.setAttribute('aria-hidden', 'false');
+  }
+
+  // 点击关闭弹层
+  const closeBtn = document.getElementById('dlFallbackClose');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      fallback.classList.remove('show');
+      fallback.setAttribute('aria-hidden', 'true');
+    });
+  }
+  // 点击遮罩空白处关闭
+  if (fallback) {
+    fallback.addEventListener('click', (e) => {
+      if (e.target === fallback) {
+        fallback.classList.remove('show');
+        fallback.setAttribute('aria-hidden', 'true');
+      }
+    });
+  }
+
+  dlBtn.addEventListener('click', async function (e) {
+    // 不阻止默认跳转：先尝试解析直链，失败时保留原分享链接跳转
+    e.preventDefault();
+
+    // 记录原始内容，用于恢复按钮
+    const label = this.querySelector('.dl-label');
+    const originalText = label ? label.textContent : '下载安装包';
+    const spinner = document.createElement('span');
+    spinner.className = 'spinner';
+
+    // 进入加载态
+    this.classList.add('loading');
+    if (label) {
+      label.textContent = '正在解析直链…';
+      this.insertBefore(spinner, label);
+    }
+
+    let hasDirect = false;
+    try {
+      const res = await fetch(API_URL);
+      const json = await res.json();
+      if (json && json.success && json.data && json.data.download_url) {
+        hasDirect = true;
+        // 触发直链下载（新标签页，保留当前页面显示备用弹层）
+        const a = document.createElement('a');
+        a.href = json.data.download_url;
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    } catch (err) {
+      console.error('[直链解析失败]', err);
+    }
+
+    // 恢复按钮原始状态
+    this.classList.remove('loading');
+    if (spinner && spinner.parentNode) spinner.parentNode.removeChild(spinner);
+    if (label) label.textContent = originalText;
+
+    // 弹出备用页面
+    showFallback(hasDirect);
+  });
 }
 
 // ===== 28. 多层级元素视差滚动 v3.2 =====

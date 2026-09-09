@@ -1180,6 +1180,122 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   opacity: 0.85;
 }
 
+/* ===== 下载按钮加载态 ===== */
+.dl-btn.loading {
+  pointer-events: none;
+  opacity: 0.85;
+  cursor: wait;
+}
+.dl-btn .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: dlSpin 0.7s linear infinite;
+}
+@keyframes dlSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== 下载备用页面（弹层） ===== */
+.dl-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(6, 6, 10, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.dl-fallback.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.dl-fallback-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px 28px;
+  text-align: center;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  animation: dlPop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes dlPop {
+  from { transform: translateY(16px) scale(0.96); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.dl-fallback-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  background: var(--accent-glow);
+  border-radius: 50%;
+}
+.dl-fallback-icon svg {
+  width: 30px;
+  height: 30px;
+}
+.dl-fallback-card h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.dl-fallback-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.7;
+}
+.dl-fallback-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 6px 24px rgba(255, 107, 74, 0.3);
+  transition: all var(--transition);
+}
+.dl-fallback-btn:hover {
+  background: var(--accent-light);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(255, 107, 74, 0.4);
+}
+.dl-fallback-close {
+  display: block;
+  margin: 20px auto 0;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+}
+.dl-fallback-close:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+
 /* ===== Star Badge ===== */
 .star-badge {
   display: inline-flex;

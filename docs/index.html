@@ -444,9 +444,9 @@
           <span>Windows 10 / 11</span>
           <span>~390MB</span>
         </div>
-        <a class="dl-btn" href="https://share.feijipan.com/s/c274tgA9" target="_blank" rel="noopener">
+        <a class="dl-btn" href="https://share.feijipan.com/s/c274tgA9" data-share="https://share.feijipan.com/s/c274tgA9" target="_blank" rel="noopener">
           <svg class="icon-dl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          下载安装包
+          <span class="dl-label">下载安装包</span>
         </a>
         <div class="hint">或查看 <a href="https://github.com/LAIXINQUAN/music-search-downloader/releases" target="_blank" rel="noopener">所有版本</a></div>
         <div class="direct-hint">
@@ -458,6 +458,23 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- 下载备用页面（自动下载未触发时显示） -->
+<div class="dl-fallback" id="dlFallback" aria-hidden="true">
+  <div class="dl-fallback-card">
+    <div class="dl-fallback-icon">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M24 6 L24 30"/><polyline points="16 22 24 30 32 22"/><path d="M10 38 L38 38"/>
+      </svg>
+    </div>
+    <h3 id="dlFallbackTitle">如果没有自动开始下载</h3>
+    <p id="dlFallbackDesc">请点击下方按钮前往下载页手动下载。</p>
+    <a class="dl-fallback-btn" id="dlFallbackLink" href="https://share.feijipan.com/n/OYU4TmP" target="_blank" rel="noopener">
+      点击此处下载
+    </a>
+    <button class="dl-fallback-close" id="dlFallbackClose" aria-label="关闭">继续浏览</button>
   </div>
 </div>
 
