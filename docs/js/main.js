@@ -1099,8 +1099,9 @@ const DL_API_URL =
   'https://jx.fsapk.xx.kg/?url=https://share.feijipan.com/s/c274tgA9&id=59028937404';
 // 备用下载页（自动下载未触发时提供给用户手动点击）
 const DL_FALLBACK_URL = 'https://share.feijipan.com/n/OYU4TmP';
-// 直链缓存有效期（2 小时），直链为临时地址，需定期刷新
-const DL_CACHE_TTL = 2 * 60 * 60 * 1000;
+// 直链缓存有效期（30 分钟）：飞记盘临时直链实际有效期约 1 小时，
+// 缓存设短于有效期，避免点击时用到已失效的旧直链（403/ERR_INVALID_RESPONSE）
+const DL_CACHE_TTL = 30 * 60 * 1000;
 // 实时解析超时（15 秒）
 const DL_FETCH_TIMEOUT = 15000;
 // localStorage 缓存键
