@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCardLighting();
   initDownloadRipple();
   initDirectDownload();
+  prewarmDirectUrl();
   initElementParallax();
 });
 
@@ -1088,18 +1089,112 @@ function initDownloadRipple() {
 
 // ===== 27b. 下载按钮自动解析直链并重定向 =====
 /**
- * 点击下载时自动调用 JxPan 直链解析接口，获取临时直链并触发下载。
- * 若解析失败或浏览器未自动下载，则弹出备用页面，提供手动下载链接。
+ * 直链解析模块：页面加载时后台预解析直链并缓存到 localStorage，
+ * 用户点击时直接使用缓存实现「秒开」；缓存过期或缺失时才实时解析，
+ * 并给实时解析加超时控制，避免长时间等待。
+ */
+
+// 直链解析接口（公共 JxPan 实例，返回临时直链）
+const DL_API_URL =
+  'https://jx.fsapk.xx.kg/?url=https://share.feijipan.com/s/c274tgA9&id=59028937404';
+// 备用下载页（自动下载未触发时提供给用户手动点击）
+const DL_FALLBACK_URL = 'https://share.feijipan.com/n/OYU4TmP';
+// 直链缓存有效期（2 小时），直链为临时地址，需定期刷新
+const DL_CACHE_TTL = 2 * 60 * 60 * 1000;
+// 实时解析超时（15 秒）
+const DL_FETCH_TIMEOUT = 15000;
+// localStorage 缓存键
+const DL_CACHE_KEY = 'qb_direct_url_cache';
+
+/**
+ * 读取缓存的直链；未缓存或已过期则返回 null
+ * @returns {string|null}
+ */
+function getCachedDirectUrl() {
+  try {
+    const raw = localStorage.getItem(DL_CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    if (!cached || !cached.url || Date.now() - cached.ts > DL_CACHE_TTL) return null;
+    return cached.url;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * 写入直链缓存
+ * @param {string} url 直链地址
+ */
+function setCachedDirectUrl(url) {
+  try {
+    localStorage.setItem(DL_CACHE_KEY, JSON.stringify({ url: url, ts: Date.now() }));
+  } catch (e) {
+    /* 忽略存储失败 */
+  }
+}
+
+/**
+ * 调用 JxPan 接口解析直链，带超时控制
+ * @param {boolean} force 是否强制实时解析（跳过缓存）
+ * @returns {Promise<string|null>} 成功返回直链，失败返回 null
+ */
+async function resolveDirectUrl(force) {
+  // 非强制解析时优先使用缓存
+  if (!force) {
+    const cached = getCachedDirectUrl();
+    if (cached) return cached;
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), DL_FETCH_TIMEOUT);
+  try {
+    const res = await fetch(DL_API_URL, { signal: controller.signal });
+    const json = await res.json();
+    if (json && json.success && json.data && json.data.download_url) {
+      setCachedDirectUrl(json.data.download_url);
+      return json.data.download_url;
+    }
+    return null;
+  } catch (err) {
+    console.error('[直链解析失败]', err);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * 触发直链下载（新标签页，保留当前页面显示备用弹层）
+ * @param {string} url 直链地址
+ */
+function triggerDownload(url) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+/**
+ * 页面加载后后台预解析直链，为下次点击提前准备
+ */
+function prewarmDirectUrl() {
+  // 已有未过期缓存则跳过，避免不必要的请求
+  if (getCachedDirectUrl()) return;
+  // 延迟执行，避免影响首屏加载
+  setTimeout(() => {
+    resolveDirectUrl(false).catch(() => {});
+  }, 500);
+}
+
+/**
+ * 初始化下载按钮交互
  */
 function initDirectDownload() {
   const dlBtn = document.querySelector('.dl-btn');
   if (!dlBtn) return;
-
-  // 直链解析接口（公共 JxPan 实例，返回临时直链）
-  const API_URL =
-    'https://jx.fsapk.xx.kg/?url=https://share.feijipan.com/s/c274tgA9&id=59028937404';
-  // 备用下载页（自动下载未触发时提供给用户手动点击）
-  const FALLBACK_URL = 'https://share.feijipan.com/n/OYU4TmP';
 
   // 弹层相关 DOM
   const fallback = document.getElementById('dlFallback');
@@ -1119,7 +1214,7 @@ function initDirectDownload() {
     fallbackDesc.textContent = hasDirect
       ? '直链已经打开，若浏览器没有自动开始下载，请点击下方按钮前往下载页。'
       : '暂时无法获取直链，请点击下方按钮前往下载页手动下载。';
-    if (fallbackLink) fallbackLink.href = FALLBACK_URL;
+    if (fallbackLink) fallbackLink.href = DL_FALLBACK_URL;
     fallback.classList.add('show');
     fallback.setAttribute('aria-hidden', 'false');
   }
@@ -1143,47 +1238,43 @@ function initDirectDownload() {
   }
 
   dlBtn.addEventListener('click', async function (e) {
-    // 不阻止默认跳转：先尝试解析直链，失败时保留原分享链接跳转
     e.preventDefault();
 
-    // 记录原始内容，用于恢复按钮
     const label = this.querySelector('.dl-label');
     const originalText = label ? label.textContent : '下载安装包';
     const spinner = document.createElement('span');
     spinner.className = 'spinner';
 
-    // 进入加载态
+    // 先尝试使用缓存直链（秒开，无需加载态）
+    let directUrl = getCachedDirectUrl();
+
+    if (directUrl) {
+      triggerDownload(directUrl);
+      showFallback(true);
+      // 后台静默刷新缓存，保证下次点击仍是最新直链
+      resolveDirectUrl(true).then((u) => {
+        if (u && u !== directUrl) setCachedDirectUrl(u);
+      });
+      return;
+    }
+
+    // 无缓存：进入加载态实时解析
     this.classList.add('loading');
     if (label) {
       label.textContent = '正在解析直链…';
       this.insertBefore(spinner, label);
     }
 
-    let hasDirect = false;
-    try {
-      const res = await fetch(API_URL);
-      const json = await res.json();
-      if (json && json.success && json.data && json.data.download_url) {
-        hasDirect = true;
-        // 触发直链下载（新标签页，保留当前页面显示备用弹层）
-        const a = document.createElement('a');
-        a.href = json.data.download_url;
-        a.rel = 'noopener';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }
-    } catch (err) {
-      console.error('[直链解析失败]', err);
-    }
+    directUrl = await resolveDirectUrl(false);
 
     // 恢复按钮原始状态
     this.classList.remove('loading');
     if (spinner && spinner.parentNode) spinner.parentNode.removeChild(spinner);
     if (label) label.textContent = originalText;
 
+    if (directUrl) triggerDownload(directUrl);
     // 弹出备用页面
-    showFallback(hasDirect);
+    showFallback(!!directUrl);
   });
 }
 
