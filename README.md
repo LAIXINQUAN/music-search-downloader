@@ -122,4 +122,4 @@ GitHub: [LAIXINGQUAN](https://github.com/LAIXINGQUAN)
 
 ## License
 
-ISC
+专有软件许可协议（EULA）
