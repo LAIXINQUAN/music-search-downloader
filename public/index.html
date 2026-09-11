@@ -5938,6 +5938,19 @@
                 <span style="font-size:22px;">&#9881;</span> 设置
             </h2>
 
+            <!-- 法律与隐私（合规入口） -->
+            <div class="settings-section">
+                <h3 class="settings-label">法律与隐私</h3>
+                <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">
+                    本软件仅供个人学习、研究与测试，禁止商业用途。聚合的音乐内容版权归各权利人所有，请尊重版权、支持正版；请勿用于规避版权保护或盗取付费内容。
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <a class="card-key-btn" href="https://github.com/LAIXINQUAN/music-search-downloader/blob/main/LICENSE" target="_blank" style="text-decoration:none;padding:5px 10px;font-size:12px;">&#128196; 开源协议</a>
+                    <a class="card-key-btn" href="https://github.com/LAIXINQUAN/music-search-downloader/blob/main/PRIVACY" target="_blank" style="text-decoration:none;padding:5px 10px;font-size:12px;">&#128274; 隐私政策</a>
+                    <a class="card-key-btn" href="https://github.com/LAIXINQUAN/music-search-downloader/issues" target="_blank" style="text-decoration:none;padding:5px 10px;font-size:12px;">&#128680; 侵权投诉</a>
+                </div>
+            </div>
+
             <!-- 音源选择（多选，默认全选） -->
             <div class="settings-section">
                 <h3 class="settings-label">音源选择（可多选）</h3>
@@ -12806,6 +12819,17 @@
          * @param {Object} song - 歌曲信息 { name, singer, id }
          */
         function startDownload(url, song) {
+            // 下载免责确认：仅个人学习/研究/非商业使用。首次同意后记住，不再重复询问。
+            if (!localStorage.getItem('qb_dl_agreed')) {
+                const agreed = confirm(
+                    '本软件仅供个人学习、研究与非商业使用。\n\n' +
+                    '下载的音乐内容版权归各权利人或原平台所有，请仅用于个人学习、尊重版权并支持正版；' +
+                    '请勿用于商业用途、再分发或规避版权保护。\n\n' +
+                    '是否同意以上条款并继续下载？'
+                );
+                if (!agreed) return; // 用户拒绝，不开始下载
+                localStorage.setItem('qb_dl_agreed', '1');
+            }
             const taskId = 'dl_' + Date.now();
             const task = {
                 id: taskId,
