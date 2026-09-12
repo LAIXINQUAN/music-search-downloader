@@ -46,6 +46,16 @@ const WALLPAPER_DIR = (() => {
     if (process.resourcesPath) {
         const p = path.join(process.resourcesPath, '动态壁纸');
         if (fs.existsSync(p)) return p;
+        // extraResources 未复制（如目录为空）时，回退到可写的用户数据目录，
+        // 避免在只读的 app.asar 内创建目录导致模块加载失败（ENOTDIR）
+        try {
+            const { app } = require('electron');
+            const ud = path.join(app.getPath('userData'), '动态壁纸');
+            fs.mkdirSync(ud, { recursive: true });
+            return ud;
+        } catch (e) {
+            console.warn('[壁纸] 未找到资源目录，回退到项目目录:', e.message);
+        }
     }
     // 开发环境：壁纸在项目根目录
     const devPath = path.join(__dirname, '..', '动态壁纸');
@@ -243,10 +253,15 @@ router.get('/thumbnail', (req, res) => {
  * 配置 multer 用于文件上传
  * 限制文件类型为视频格式，大小最大 500MB
  */
-// 确保 multer 临时目录存在
-const UPLOAD_TEMP_DIR = path.join(WALLPAPER_DIR, '.upload_temp');
-if (!fs.existsSync(UPLOAD_TEMP_DIR)) {
-    fs.mkdirSync(UPLOAD_TEMP_DIR, { recursive: true });
+// 确保 multer 临时目录存在（失败时回退到系统临时目录，避免模块加载崩溃）
+let UPLOAD_TEMP_DIR = path.join(WALLPAPER_DIR, '.upload_temp');
+try {
+    if (!fs.existsSync(UPLOAD_TEMP_DIR)) {
+        fs.mkdirSync(UPLOAD_TEMP_DIR, { recursive: true });
+    }
+} catch (e) {
+    console.warn('[壁纸] 创建上传临时目录失败，改用系统临时目录:', e.message);
+    UPLOAD_TEMP_DIR = require('os').tmpdir();
 }
 
 const upload = multer({
