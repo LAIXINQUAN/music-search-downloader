@@ -1096,7 +1096,7 @@ function initDownloadRipple() {
 
 // 直链解析接口（公共 JxPan 实例，返回临时直链）
 const DL_API_URL =
-  'https://jx.fsapk.xx.kg/?url=https://share.feijipan.com/s/c274tgA9&id=59028937404';
+  'https://jx.fsapk.xx.kg/?url=https://share.feijipan.com/s/c274tgA9&id=59421176768';
 // 备用下载页（自动下载未触发时提供给用户手动点击）
 const DL_FALLBACK_URL = 'https://share.feijipan.com/n/OYU4TmP';
 // 直链缓存有效期（30 分钟）：飞记盘临时直链实际有效期约 1 小时，
@@ -1150,7 +1150,9 @@ async function resolveDirectUrl(force) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), DL_FETCH_TIMEOUT);
   try {
-    const res = await fetch(DL_API_URL, { signal: controller.signal });
+    // 追加时间戳参数，绕过 JxPan 服务端缓存，确保每次解析都返回最新直链
+    const sep = DL_API_URL.includes('?') ? '&' : '?';
+    const res = await fetch(`${DL_API_URL}${sep}_=${Date.now()}`, { signal: controller.signal });
     const json = await res.json();
     if (json && json.success && json.data && json.data.download_url) {
       setCachedDirectUrl(json.data.download_url);
