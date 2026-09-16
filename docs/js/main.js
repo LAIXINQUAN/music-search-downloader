@@ -1258,21 +1258,32 @@ function initDlCharity() {
     const list = (typeof jsondata !== 'undefined' && Array.isArray(jsondata.data)) ? jsondata.data : [];
     if (!list.length) throw new Error('寻人数据为空');
 
-    // 随机取一位走失儿童
-    const child = list[Math.floor(Math.random() * list.length)];
+    // 随机取 4 位不重复的走失儿童
+    const count = 4;
+    const copy = list.slice();
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = copy[i]; copy[i] = copy[j]; copy[j] = t;
+    }
+    const children = copy.slice(0, count);
 
-    const photo = child.child_pic
-      ? '<img src="' + escapeHtml(child.child_pic) + '" alt="' + escapeHtml(child.name) + '的照片">'
-      : '';
-
-    card.innerHTML =
-      '<div class="dl-cc-photo">' + photo + '</div>' +
-      '<div class="dl-cc-info">' +
-        '<div class="dl-cc-name">' + escapeHtml(child.name) + '（' + escapeHtml(child.sex) + '）</div>' +
-        '<div class="dl-cc-meta">' + escapeHtml(child.lost_time) + ' 失踪于 ' + escapeHtml(child.lost_place) + '</div>' +
-        '<div class="dl-cc-desc">' + escapeHtml(child.child_feature) + '</div>' +
-      '</div>' +
-      '<a class="dl-cc-url" href="' + escapeHtml(child.url) + '" target="_blank" rel="noopener">详情</a>';
+    // 渲染 4 张寻人卡片（纵向排列，容器可滚轮滚动）
+    card.innerHTML = children.map(function (child) {
+      const photo = child.child_pic
+        ? '<img src="' + escapeHtml(child.child_pic) + '" alt="' + escapeHtml(child.name) + '的照片">'
+        : '';
+      return (
+        '<div class="dl-charity-card">' +
+          '<div class="dl-cc-photo">' + photo + '</div>' +
+          '<div class="dl-cc-info">' +
+            '<div class="dl-cc-name">' + escapeHtml(child.name) + '（' + escapeHtml(child.sex) + '）</div>' +
+            '<div class="dl-cc-meta">' + escapeHtml(child.lost_time) + ' 失踪于 ' + escapeHtml(child.lost_place) + '</div>' +
+            '<div class="dl-cc-desc">' + escapeHtml(child.child_feature) + '</div>' +
+          '</div>' +
+          '<a class="dl-cc-url" href="' + escapeHtml(child.url) + '" target="_blank" rel="noopener">详情</a>' +
+        '</div>'
+      );
+    }).join('');
   } catch (e) {
     card.innerHTML = '<div class="dl-charity-loading">寻人信息暂时无法加载</div>';
   }

@@ -1962,6 +1962,20 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   padding: 2px 8px;
   border-radius: 999px;
 }
+.dl-charity-list {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.dl-charity-list::-webkit-scrollbar { width: 6px; }
+.dl-charity-list::-webkit-scrollbar-track { background: transparent; }
+.dl-charity-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.dl-charity-list::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
 .dl-charity-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -1971,6 +1985,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   gap: 12px;
   align-items: center;
   text-align: left;
+  flex-shrink: 0;
 }
 .dl-cc-photo {
   width: 60px;
