@@ -11,6 +11,7 @@
    QB音乐 公益404页面 — 深色音乐风
    设计：与主页保持一致的暗色工业风 × 珊瑚橙点缀
    功能：自定义 UI + 腾讯宝贝回家公益寻人数据（自渲染，不接管整页）
+         每次随机展示 3 位走失儿童
    ============================================================ */
 :root{
   --bg:#0a0a0f;
@@ -67,20 +68,20 @@ a{color:inherit;text-decoration:none;}
 .topbar-home:hover{color:var(--text);border-color:var(--border-hover);background:rgba(255,255,255,0.04);}
 
 /* ===== 主容器 ===== */
-.wrap{max-width:960px;margin:0 auto;padding:0 24px;width:100%;flex:1;}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px;width:100%;flex:1;}
 
 /* ===== 404 标题区 ===== */
-.hero-404{text-align:center;padding:90px 0 40px;}
+.hero-404{text-align:center;padding:80px 0 36px;}
 .code-404{
-  font-size:120px;font-weight:800;line-height:1;
+  font-size:110px;font-weight:800;line-height:1;
   background:linear-gradient(135deg,var(--text) 0%,var(--accent-light) 50%,var(--accent) 100%);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   letter-spacing:-0.03em;
   animation:floatY 4s ease-in-out infinite;
 }
 @keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
-.hero-404 h1{font-size:30px;color:var(--text);margin:8px 0 12px;font-weight:700;}
-.hero-404 p{font-size:15px;color:var(--text-muted);max-width:520px;margin:0 auto 28px;}
+.hero-404 h1{font-size:28px;color:var(--text);margin:6px 0 12px;font-weight:700;}
+.hero-404 p{font-size:14.5px;color:var(--text-muted);max-width:520px;margin:0 auto 26px;}
 .btn{
   display:inline-flex;align-items:center;gap:8px;
   padding:12px 30px;border-radius:999px;font-size:15px;font-weight:700;color:#fff;
@@ -91,7 +92,7 @@ a{color:inherit;text-decoration:none;}
 .btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,107,74,0.45);filter:brightness(1.06);}
 
 /* ===== 公益寻人区 ===== */
-.charity{padding:20px 0 80px;}
+.charity{padding:16px 0 80px;}
 .charity-head{text-align:center;margin-bottom:30px;}
 .tag{
   display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.15em;
@@ -102,38 +103,51 @@ a{color:inherit;text-decoration:none;}
 .charity-head h2{font-size:26px;color:var(--text);font-weight:700;margin-bottom:6px;}
 .charity-head p{font-size:13px;color:var(--text-muted);}
 
-/* 公益卡片 */
+/* 公益卡片网格（4 列） */
+.charity-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
+
+/* 单张公益卡片（纵向：照片上 / 信息下） */
 .charity-card{
   background:var(--bg-card);
   border:1px solid var(--border);
   border-radius:16px;
   overflow:hidden;
   display:flex;
-  box-shadow:0 20px 60px rgba(0,0,0,0.35);
-  transition:border-color 0.3s,box-shadow 0.3s;
+  flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  transition:border-color 0.3s,box-shadow 0.3s,transform 0.3s;
 }
-.charity-card:hover{border-color:var(--border-hover);box-shadow:0 24px 70px rgba(0,0,0,0.45);}
+.charity-card:hover{
+  border-color:var(--border-hover);
+  box-shadow:0 24px 70px rgba(0,0,0,0.45);
+  transform:translateY(-4px);
+}
 .cc-photo{
-  width:240px;min-height:300px;flex-shrink:0;
+  width:100%;height:200px;flex-shrink:0;
   background:linear-gradient(160deg,rgba(255,107,74,0.12),transparent),var(--bg-elevated);
   display:flex;align-items:center;justify-content:center;
   position:relative;overflow:hidden;
 }
 .cc-photo img{width:100%;height:100%;object-fit:cover;}
-.cc-photo .cc-placeholder{font-size:52px;color:var(--accent);opacity:0.5;}
-.cc-info{flex:1;padding:28px 30px;display:flex;flex-direction:column;}
-.cc-name{font-size:24px;font-weight:700;color:var(--text);margin-bottom:4px;}
-.cc-meta{font-size:12px;color:var(--text-muted);margin-bottom:16px;}
-.cc-desc{font-size:14px;color:var(--text-secondary);line-height:1.75;margin-bottom:20px;}
+.cc-photo .cc-placeholder{font-size:46px;color:var(--accent);opacity:0.5;}
+.cc-info{flex:1;padding:20px 22px 24px;display:flex;flex-direction:column;}
+.cc-name{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.cc-meta{font-size:11.5px;color:var(--text-muted);margin-bottom:12px;}
+.cc-desc{font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:18px;
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
 .cc-url{
   margin-top:auto;display:inline-flex;align-items:center;gap:8px;
-  align-self:flex-start;padding:10px 22px;border-radius:999px;
-  font-size:13px;font-weight:700;color:var(--accent-light);
+  align-self:flex-start;padding:9px 20px;border-radius:999px;
+  font-size:12.5px;font-weight:700;color:var(--accent-light);
   border:1px solid rgba(255,107,74,0.3);
   transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 .cc-url:hover{background:rgba(255,107,74,0.1);border-color:var(--accent);}
-.charity-fallback{color:var(--text-muted);padding:40px;text-align:center;width:100%;}
+.charity-fallback{color:var(--text-muted);padding:40px;text-align:center;grid-column:1/-1;}
 
 /* ===== 页脚 ===== */
 .footer{
@@ -144,13 +158,15 @@ a{color:inherit;text-decoration:none;}
 .footer a:hover{color:var(--accent-light);}
 
 /* ===== 响应式 ===== */
+@media (max-width:960px){
+  .charity-grid{grid-template-columns:repeat(2,1fr);}
+}
 @media (max-width:640px){
-  .code-404{font-size:84px;}
-  .charity-card{flex-direction:column;}
-  .cc-photo{width:100%;min-height:220px;}
+  .code-404{font-size:80px;}
+  .charity-grid{grid-template-columns:1fr;}
   .topbar{padding:12px 18px;}
   .wrap{padding:0 16px;}
-  .hero-404{padding:60px 0 32px;}
+  .hero-404{padding:56px 0 28px;}
 }
 </style>
 </head>
@@ -172,7 +188,7 @@ a{color:inherit;text-decoration:none;}
     <a class="btn" href="./">回到主页</a>
   </section>
 
-  <!-- 公益寻人区 -->
+  <!-- 公益寻人区（每次随机展示 3 位） -->
   <section class="charity">
     <div class="charity-head">
       <span class="tag">公益寻人</span>
@@ -180,7 +196,7 @@ a{color:inherit;text-decoration:none;}
       <p>每多一次转发，就多一分希望</p>
     </div>
     <!-- 由脚本填充腾讯宝贝回家寻人数据 -->
-    <div id="charityCard" class="charity-card">
+    <div id="charityList" class="charity-grid">
       <div class="charity-fallback">正在加载寻人信息…</div>
     </div>
   </section>
@@ -196,10 +212,13 @@ a{color:inherit;text-decoration:none;}
 <script>
 /**
  * 公益404页面 — 寻人卡片渲染脚本
- * 从腾讯宝贝回家 data.js 提供的全局 jsondata.data 中随机取一位走失儿童，
- * 渲染进自定义 UI，避免引入 page.js（page.js 会接管并重写整页导致自定义布局丢失）。
+ * 从腾讯宝贝回家 data.js 提供的全局 jsondata.data 中随机取 3 位走失儿童，
+ * 渲染进自定义 UI 网格，避免引入 page.js（page.js 会接管并重写整页导致自定义布局丢失）。
  */
 document.addEventListener('DOMContentLoaded', initCharity);
+
+/** 每次展示的走失儿童数量 */
+var CHARITY_COUNT = 4;
 
 /**
  * HTML 转义，防止数据中的特殊字符破坏结构（安全措施）
@@ -215,34 +234,62 @@ function escapeHtml(str) {
 }
 
 /**
- * 初始化公益寻人卡片
- * 随机展示一位走失儿童信息；数据缺失或加载失败时给出兜底提示。
+ * 随机取 n 个不重复的元素
+ * @param {Array} arr 源数组
+ * @param {number} n 需要取出的数量
+ * @returns {Array} 打乱后截取前 n 个元素
  */
-function initCharity() {
-  const card = document.getElementById('charityCard');
-  if (!card) return;
+function sampleUnique(arr, n) {
+  var copy = arr.slice();
+  // Fisher–Yates 洗牌
+  for (var i = copy.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = copy[i]; copy[i] = copy[j]; copy[j] = t;
+  }
+  return copy.slice(0, n);
+}
 
-  try {
-    const list = (typeof jsondata !== 'undefined' && Array.isArray(jsondata.data)) ? jsondata.data : [];
-    if (!list.length) throw new Error('寻人数据为空');
+/**
+ * 渲染单张寻人卡片
+ * @param {Object} child 走失儿童数据对象
+ * @returns {string} 卡片 HTML
+ */
+function renderCharityCard(child) {
+  var photo = child.child_pic
+    ? '<img src="' + escapeHtml(child.child_pic) + '" alt="' + escapeHtml(child.name) + '的照片">'
+    : '<span class="cc-placeholder">♪</span>';
 
-    // 随机取一位走失儿童
-    const child = list[Math.floor(Math.random() * list.length)];
-
-    const photo = child.child_pic
-      ? '<img src="' + escapeHtml(child.child_pic) + '" alt="' + escapeHtml(child.name) + '的照片">'
-      : '<span class="cc-placeholder">♪</span>';
-
-    card.innerHTML =
+  return (
+    '<div class="charity-card">' +
       '<div class="cc-photo">' + photo + '</div>' +
       '<div class="cc-info">' +
         '<div class="cc-name">' + escapeHtml(child.name) + '（' + escapeHtml(child.sex) + '）</div>' +
         '<div class="cc-meta">' + escapeHtml(child.birth_time) + ' 出生 · ' + escapeHtml(child.lost_time) + ' 失踪</div>' +
         '<div class="cc-desc">失踪地点：' + escapeHtml(child.lost_place) + '<br>' + escapeHtml(child.child_feature) + '</div>' +
         '<a class="cc-url" href="' + escapeHtml(child.url) + '" target="_blank" rel="noopener">查看寻人详情 →</a>' +
-      '</div>';
+      '</div>' +
+    '</div>'
+  );
+}
+
+/**
+ * 初始化公益寻人卡片网格
+ * 随机展示 CHARITY_COUNT 位走失儿童；数据缺失或加载失败时给出兜底提示。
+ */
+function initCharity() {
+  var list = document.getElementById('charityList');
+  if (!list) return;
+
+  try {
+    var source = (typeof jsondata !== 'undefined' && Array.isArray(jsondata.data)) ? jsondata.data : [];
+    if (!source.length) throw new Error('寻人数据为空');
+
+    // 随机取 CHARITY_COUNT 位，若数据不足则取全部
+    var children = sampleUnique(source, CHARITY_COUNT);
+
+    list.innerHTML = children.map(renderCharityCard).join('');
   } catch (e) {
-    card.innerHTML = '<div class="charity-fallback">寻人信息暂时无法加载，请稍后再试。</div>';
+    list.innerHTML = '<div class="charity-fallback">寻人信息暂时无法加载，请稍后再试。</div>';
   }
 }
 </script>
