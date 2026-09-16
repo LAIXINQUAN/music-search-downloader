@@ -461,7 +461,7 @@
   </div>
 </div>
 
-<!-- 下载备用页面（自动下载未触发时显示） -->
+<!-- 下载弹层（点击下载按钮显示：两个下载源 + 公益寻人） -->
 <div class="dl-fallback" id="dlFallback" aria-hidden="true">
   <div class="dl-fallback-card">
     <div class="dl-fallback-icon">
@@ -469,12 +469,28 @@
         <path d="M24 6 L24 30"/><polyline points="16 22 24 30 32 22"/><path d="M10 38 L38 38"/>
       </svg>
     </div>
-    <h3 id="dlFallbackTitle">如果没有自动开始下载</h3>
-    <p id="dlFallbackDesc">请点击下方按钮前往下载页手动下载。</p>
-    <a class="dl-fallback-btn" id="dlFallbackLink" href="https://share.feijipan.com/n/OYU4TmP" target="_blank" rel="noopener">
-      点击此处下载
-    </a>
-    <button class="dl-fallback-close" id="dlFallbackClose" aria-label="关闭">继续浏览</button>
+    <h3>下载 QB音乐 Windows 客户端</h3>
+    <p class="dl-fallback-sub">v3.8.0 · 390MB · Windows 10 / 11，请选择一个下载源</p>
+    <div class="dl-links">
+      <a class="dl-link primary" href="https://share.feijipan.com/n/OYU4TmP" target="_blank" rel="noopener">
+        <span class="dl-link-tag">主要</span>
+        <span class="dl-link-text">飞记盘下载</span>
+      </a>
+      <a class="dl-link backup" href="https://aaalai.298.run/" target="_blank" rel="noopener">
+        <span class="dl-link-tag">备用</span>
+        <span class="dl-link-text">备用下载源</span>
+      </a>
+    </div>
+    <div class="dl-charity">
+      <div class="dl-charity-head">
+        <span class="dl-charity-tag">公益寻人</span>
+        <span>宝贝回家 · 帮走失的孩子回家</span>
+      </div>
+      <div id="dlCharityCard" class="dl-charity-card">
+        <div class="dl-charity-loading">正在加载寻人信息…</div>
+      </div>
+    </div>
+    <button class="dl-fallback-close" id="dlFallbackClose" aria-label="关闭">关闭</button>
   </div>
 </div>
 
@@ -504,6 +520,8 @@
 <!-- 键盘快捷键提示 -->
 <div class="kbd-hint">按 <kbd>K</kbd> 开启音乐彩蛋</div>
 
+<!-- 腾讯宝贝回家寻人数据接口（供下载弹层公益卡片渲染） -->
+<script src="https://qzone.qq.com/gy/404/data.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

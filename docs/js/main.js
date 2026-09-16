@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCardLighting();
   initDownloadRipple();
   initDirectDownload();
-  prewarmDirectUrl();
+  initDlCharity();
   initElementParallax();
 });
 
@@ -1201,84 +1201,81 @@ function initDirectDownload() {
 
   // 弹层相关 DOM
   const fallback = document.getElementById('dlFallback');
-  const fallbackTitle = document.getElementById('dlFallbackTitle');
-  const fallbackDesc = document.getElementById('dlFallbackDesc');
-  const fallbackLink = document.getElementById('dlFallbackLink');
+  if (!fallback) return;
 
-  /**
-   * 显示备用下载弹层
-   * @param {boolean} hasDirect 是否已成功解析出直链
-   */
-  function showFallback(hasDirect) {
-    if (!fallback) return;
-    fallbackTitle.textContent = hasDirect
-      ? '如果下载没有自动开始'
-      : '直链解析失败';
-    fallbackDesc.textContent = hasDirect
-      ? '直链已经打开，若浏览器没有自动开始下载，请点击下方按钮前往下载页。'
-      : '暂时无法获取直链，请点击下方按钮前往下载页手动下载。';
-    if (fallbackLink) fallbackLink.href = DL_FALLBACK_URL;
+  // 显示下载弹层（含主要/备用下载源 + 公益寻人）
+  const showFallback = () => {
     fallback.classList.add('show');
     fallback.setAttribute('aria-hidden', 'false');
-  }
+  };
+  // 关闭下载弹层
+  const hideFallback = () => {
+    fallback.classList.remove('show');
+    fallback.setAttribute('aria-hidden', 'true');
+  };
 
-  // 点击关闭弹层
+  // 点击关闭按钮
   const closeBtn = document.getElementById('dlFallbackClose');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      fallback.classList.remove('show');
-      fallback.setAttribute('aria-hidden', 'true');
-    });
-  }
+  if (closeBtn) closeBtn.addEventListener('click', hideFallback);
+
   // 点击遮罩空白处关闭
-  if (fallback) {
-    fallback.addEventListener('click', (e) => {
-      if (e.target === fallback) {
-        fallback.classList.remove('show');
-        fallback.setAttribute('aria-hidden', 'true');
-      }
-    });
-  }
-
-  dlBtn.addEventListener('click', async function (e) {
-    e.preventDefault();
-
-    const label = this.querySelector('.dl-label');
-    const originalText = label ? label.textContent : '下载安装包';
-    const spinner = document.createElement('span');
-    spinner.className = 'spinner';
-
-    // 先尝试使用缓存直链（秒开，无需加载态）
-    let directUrl = getCachedDirectUrl();
-
-    if (directUrl) {
-      triggerDownload(directUrl);
-      showFallback(true);
-      // 后台静默刷新缓存，保证下次点击仍是最新直链
-      resolveDirectUrl(true).then((u) => {
-        if (u && u !== directUrl) setCachedDirectUrl(u);
-      });
-      return;
-    }
-
-    // 无缓存：进入加载态实时解析
-    this.classList.add('loading');
-    if (label) {
-      label.textContent = '正在解析直链…';
-      this.insertBefore(spinner, label);
-    }
-
-    directUrl = await resolveDirectUrl(false);
-
-    // 恢复按钮原始状态
-    this.classList.remove('loading');
-    if (spinner && spinner.parentNode) spinner.parentNode.removeChild(spinner);
-    if (label) label.textContent = originalText;
-
-    if (directUrl) triggerDownload(directUrl);
-    // 弹出备用页面
-    showFallback(!!directUrl);
+  fallback.addEventListener('click', (e) => {
+    if (e.target === fallback) hideFallback();
   });
+
+  // 点击下载按钮：直接弹出下载界面，由用户自选主要/备用下载源
+  dlBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    showFallback();
+  });
+}
+
+// ===== 27c. HTML 转义（安全） =====
+/**
+ * HTML 转义，防止动态数据中的特殊字符破坏结构
+ * @param {string} str 原始文本
+ * @returns {string} 转义后的安全文本
+ */
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ===== 27d. 下载弹层内公益寻人卡片渲染 =====
+/**
+ * 初始化下载弹层内的宝贝回家公益寻人卡片
+ * 从腾讯 data.js 提供的全局 jsondata.data 中随机取一位走失儿童渲染；
+ * 数据缺失或加载失败时给出兜底提示。
+ */
+function initDlCharity() {
+  const card = document.getElementById('dlCharityCard');
+  if (!card) return;
+
+  try {
+    const list = (typeof jsondata !== 'undefined' && Array.isArray(jsondata.data)) ? jsondata.data : [];
+    if (!list.length) throw new Error('寻人数据为空');
+
+    // 随机取一位走失儿童
+    const child = list[Math.floor(Math.random() * list.length)];
+
+    const photo = child.child_pic
+      ? '<img src="' + escapeHtml(child.child_pic) + '" alt="' + escapeHtml(child.name) + '的照片">'
+      : '';
+
+    card.innerHTML =
+      '<div class="dl-cc-photo">' + photo + '</div>' +
+      '<div class="dl-cc-info">' +
+        '<div class="dl-cc-name">' + escapeHtml(child.name) + '（' + escapeHtml(child.sex) + '）</div>' +
+        '<div class="dl-cc-meta">' + escapeHtml(child.lost_time) + ' 失踪于 ' + escapeHtml(child.lost_place) + '</div>' +
+        '<div class="dl-cc-desc">' + escapeHtml(child.child_feature) + '</div>' +
+      '</div>' +
+      '<a class="dl-cc-url" href="' + escapeHtml(child.url) + '" target="_blank" rel="noopener">详情</a>';
+  } catch (e) {
+    card.innerHTML = '<div class="dl-charity-loading">寻人信息暂时无法加载</div>';
+  }
 }
 
 // ===== 28. 多层级元素视差滚动 v3.2 =====
