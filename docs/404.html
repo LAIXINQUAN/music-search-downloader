@@ -1,132 +1,250 @@
 <!DOCTYPE html>
-<html class="theme-next gemini use-motion" lang="zh-Hans">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<meta name="theme-color" content="#222">
-
-<meta http-equiv="Cache-Control" content="no-transform">
-<meta http-equiv="Cache-Control" content="no-siteapp">
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0f">
+<title>404 · 页面走丢啦 · QB音乐</title>
+<meta name="description" content="页面不存在。不过我们可以一起帮走失的孩子回家——腾讯宝贝回家公益寻人。">
 <style>
-html {font-family: sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;}
-body {margin:0;font-family:'Lato',"PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;line-height:2;color:#555;background:#eee;}
-.container {position:relative;min-height:100%;}
-.header-inner,.main-inner,.footer-inner{margin:0 auto;width:calc(100% - 252px);}
-.header{background:transparent;}
-.headband{height:3px;background:#222;}
-.site-brand-wrapper{position:relative;}
-.site-meta{margin:0;text-align:center;padding:20px 0;color:#fff;background:#222;}
-.brand{position:relative;display:inline-block;padding:0 40px;color:#fff;background:#222;border-bottom:none;}
-.site-title{display:inline-block;vertical-align:top;line-height:36px;font-size:20px;font-weight:normal;}
-.site-subtitle{margin-top:10px;font-size:13px;color:#ddd;}
-.site-nav-toggle{display:none;position:absolute;top:10px;left:10px;}
-.menu{margin-top:20px;padding-left:0;text-align:center;}
-.menu .menu-item{display:inline-block;margin:0 10px;list-style:none;}
-.menu .menu-item a{display:block;font-size:13px;line-height:inherit;border-bottom:1px solid transparent;text-decoration:none;color:#555;}
-.menu .menu-item a:hover{border-bottom-color:#222;color:#222;}
-.main{padding-bottom:150px;}
-.content-wrap{float:right;box-sizing:border-box;padding:40px;width:calc(100% - 252px);background:#fff;min-height:700px;box-shadow:0 2px 2px 0 rgba(0,0,0,0.12),0 3px 1px -2px rgba(0,0,0,0.06),0 1px 5px 0 rgba(0,0,0,0.12);}
-.sidebar{position:fixed;right:0;top:0;bottom:0;width:240px;z-index:1040;box-shadow:inset 0 2px 6px #000;background:#222;color:#999;text-align:center;padding:20px 10px;}
-.site-author-name{margin:0;text-align:center;color:#fff;font-weight:600;}
-.site-description{margin-top:0;text-align:center;font-size:13px;color:#999;}
-.site-state{overflow:hidden;line-height:1.4;white-space:nowrap;text-align:center;margin-top:20px;}
-.site-state-item{display:inline-block;padding:0 15px;border-left:1px solid #555;}
-.site-state-item:first-child{border-left:none;}
-.site-state-item-count{display:block;text-align:center;color:inherit;font-weight:600;font-size:16px;}
-.site-state-item-name{font-size:13px;color:#999;}
-.links-of-author{margin-top:20px;}
-.links-of-author a{color:#999;border-bottom:none;margin:0 6px;text-decoration:none;}
-.links-of-author a:hover{color:#eee;}
-.post-block{padding:40px;background:#fff;box-shadow:0 2px 2px 0 rgba(0,0,0,0.12),0 3px 1px -2px rgba(0,0,0,0.06),0 1px 5px 0 rgba(0,0,0,0.12);}
-.post-title{text-align:center;font-size:28px;font-weight:bold;}
-.footer{position:absolute;left:0;bottom:0;width:100%;min-height:50px;font-size:14px;color:#999;}
-.footer-inner{text-align:center;margin:20px auto;width:calc(100% - 252px);}
-.back-to-top{display:none;margin:20px -10px -20px;background:#eee;font-size:12px;opacity:0.6;cursor:pointer;text-align:center;}
-.back-to-top.back-to-top-on{display:block;}
-.github-corner>svg{fill:#151513;color:#fff;position:absolute;top:0;border:0;right:0;}
-@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}
-.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}
-@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}
-@media(max-width:767px){.sidebar{display:none}.content-wrap{width:100%;padding:12px}.header-inner,.main-inner,.footer-inner{width:auto}}
+/* ============================================================
+   QB音乐 公益404页面 — 深色音乐风
+   设计：与主页保持一致的暗色工业风 × 珊瑚橙点缀
+   功能：自定义 UI + 腾讯宝贝回家公益寻人数据（自渲染，不接管整页）
+   ============================================================ */
+:root{
+  --bg:#0a0a0f;
+  --bg-card:#14141e;
+  --bg-elevated:#111118;
+  --border:#1e1e2e;
+  --border-hover:#2a2a40;
+  --text:#e2e2ea;
+  --text-secondary:#8686a0;
+  --text-muted:#585870;
+  --accent:#ff6b4a;
+  --accent-glow:rgba(255,107,74,0.16);
+  --accent-light:#ff8a6f;
+  --radius:12px;
+  --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--font-sans);
+  background:var(--bg);
+  color:var(--text-secondary);
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+a{color:inherit;text-decoration:none;}
+
+/* ===== 顶部导航 ===== */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 32px;
+  background:rgba(10,10,15,0.85);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.topbar-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:var(--text);}
+.topbar-logo i{
+  width:30px;height:30px;border-radius:7px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-light));
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-style:normal;font-size:15px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.3);
+}
+.topbar-home{
+  font-size:13px;font-weight:600;color:var(--text-secondary);
+  padding:8px 18px;border:1px solid var(--border);border-radius:999px;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.topbar-home:hover{color:var(--text);border-color:var(--border-hover);background:rgba(255,255,255,0.04);}
+
+/* ===== 主容器 ===== */
+.wrap{max-width:960px;margin:0 auto;padding:0 24px;width:100%;flex:1;}
+
+/* ===== 404 标题区 ===== */
+.hero-404{text-align:center;padding:90px 0 40px;}
+.code-404{
+  font-size:120px;font-weight:800;line-height:1;
+  background:linear-gradient(135deg,var(--text) 0%,var(--accent-light) 50%,var(--accent) 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:-0.03em;
+  animation:floatY 4s ease-in-out infinite;
+}
+@keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.hero-404 h1{font-size:30px;color:var(--text);margin:8px 0 12px;font-weight:700;}
+.hero-404 p{font-size:15px;color:var(--text-muted);max-width:520px;margin:0 auto 28px;}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 30px;border-radius:999px;font-size:15px;font-weight:700;color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent-light));
+  box-shadow:0 6px 24px rgba(255,107,74,0.32);
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,107,74,0.45);filter:brightness(1.06);}
+
+/* ===== 公益寻人区 ===== */
+.charity{padding:20px 0 80px;}
+.charity-head{text-align:center;margin-bottom:30px;}
+.tag{
+  display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.15em;
+  color:var(--accent-light);border:1px solid rgba(255,107,74,0.25);
+  background:rgba(255,107,74,0.07);padding:4px 14px;border-radius:999px;
+  margin-bottom:12px;text-transform:uppercase;
+}
+.charity-head h2{font-size:26px;color:var(--text);font-weight:700;margin-bottom:6px;}
+.charity-head p{font-size:13px;color:var(--text-muted);}
+
+/* 公益卡片 */
+.charity-card{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  display:flex;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  transition:border-color 0.3s,box-shadow 0.3s;
+}
+.charity-card:hover{border-color:var(--border-hover);box-shadow:0 24px 70px rgba(0,0,0,0.45);}
+.cc-photo{
+  width:240px;min-height:300px;flex-shrink:0;
+  background:linear-gradient(160deg,rgba(255,107,74,0.12),transparent),var(--bg-elevated);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.cc-photo img{width:100%;height:100%;object-fit:cover;}
+.cc-photo .cc-placeholder{font-size:52px;color:var(--accent);opacity:0.5;}
+.cc-info{flex:1;padding:28px 30px;display:flex;flex-direction:column;}
+.cc-name{font-size:24px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.cc-meta{font-size:12px;color:var(--text-muted);margin-bottom:16px;}
+.cc-desc{font-size:14px;color:var(--text-secondary);line-height:1.75;margin-bottom:20px;}
+.cc-url{
+  margin-top:auto;display:inline-flex;align-items:center;gap:8px;
+  align-self:flex-start;padding:10px 22px;border-radius:999px;
+  font-size:13px;font-weight:700;color:var(--accent-light);
+  border:1px solid rgba(255,107,74,0.3);
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.cc-url:hover{background:rgba(255,107,74,0.1);border-color:var(--accent);}
+.charity-fallback{color:var(--text-muted);padding:40px;text-align:center;width:100%;}
+
+/* ===== 页脚 ===== */
+.footer{
+  text-align:center;padding:32px 0;border-top:1px solid var(--border);
+  font-size:12px;color:var(--text-muted);
+}
+.footer a{color:var(--text-secondary);font-weight:600;transition:color 0.2s;}
+.footer a:hover{color:var(--accent-light);}
+
+/* ===== 响应式 ===== */
+@media (max-width:640px){
+  .code-404{font-size:84px;}
+  .charity-card{flex-direction:column;}
+  .cc-photo{width:100%;min-height:220px;}
+  .topbar{padding:12px 18px;}
+  .wrap{padding:0 16px;}
+  .hero-404{padding:60px 0 32px;}
+}
 </style>
-
-<title>404 | Page Not Found</title>
 </head>
-<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
-  <div class="container sidebar-position-left page-post-detail">
-    <div class="headband"></div>
-<a href="https://github.com/LAIXINQUAN" class="github-corner" aria-label="View source on GitHub" rel="external nofollow noopener noreferrer" target="_blank">
-<svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+<body>
 
-    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta ">
-    <div class="custom-logo-site-title">
-      <a href="./" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">My Project</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-        <p class="site-subtitle">Page Not Found</p>
-  </div>
-  <div class="site-nav-toggle">
-    <button>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-    </button>
-  </div>
-</div>
-<nav class="site-nav">
-    <ul id="menu" class="menu">
-        <li class="menu-item menu-item-home"><a href="./"><i class="fa fa-fw fa-home"></i> 首页</a></li>
-    </ul>
+<!-- 顶部导航 -->
+<nav class="topbar">
+  <div class="topbar-logo"><i>♪</i>QB音乐</div>
+  <a class="topbar-home" href="./">回到主页</a>
 </nav>
- </div>
-    </header>
-    <main id="main" class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          <div id="content" class="content">
-            <div class="post-block page">
-              <header class="post-header">
-	            <h1 class="post-title">404</h1>
-              </header>
-              <div class="post-body">
-<!-- 腾讯宝贝回家公益404 -->
-<script type="text/plain" src="https://qzone.qq.com/gy/404/search_children.js" charset="utf-8" homePageUrl="./" homePageName="回到项目首页"></script>
-<script src="https://qzone.qq.com/gy/404/data.js" charset="utf-8"></script>
-<script src="https://qzone.qq.com/gy/404/page.js" charset="utf-8"></script>
-              </div>
-            </div>
-          </div>
-        </div>
 
-  <aside id="sidebar" class="sidebar">
-    <div class="sidebar-inner">
-        <div class="site-author motion-element">
-            <p class="site-author-name">Visitor</p>
-            <p class="site-description">页面走丢啦</p>
-        </div>
-        <div class="links-of-author">
-            <a href="https://github.com/LAIXINQUAN/music-search-downloader" target="_blank"><i class="fa fa-github"></i> Github</a>
-        </div>
+<!-- 主内容 -->
+<main class="wrap">
+  <!-- 404 标题区 -->
+  <section class="hero-404">
+    <div class="code-404">404</div>
+    <h1>页面走丢啦</h1>
+    <p>你访问的页面不存在或已被移除。不过没关系，这里还有一件更有意义的事——帮走失的孩子回家。</p>
+    <a class="btn" href="./">回到主页</a>
+  </section>
+
+  <!-- 公益寻人区 -->
+  <section class="charity">
+    <div class="charity-head">
+      <span class="tag">公益寻人</span>
+      <h2>宝贝回家</h2>
+      <p>每多一次转发，就多一分希望</p>
     </div>
-  </aside>
-      </div>
-    </main>
-    <footer id="footer" class="footer">
-      <div class="footer-inner">
-        <div class="copyright">&copy; 2026</div>
-      </div>
-    </footer>
-  </div>
+    <!-- 由脚本填充腾讯宝贝回家寻人数据 -->
+    <div id="charityCard" class="charity-card">
+      <div class="charity-fallback">正在加载寻人信息…</div>
+    </div>
+  </section>
+</main>
+
+<!-- 页脚 -->
+<footer class="footer">
+  &copy; 2026 QB音乐 · 宝贝回家公益合作 · <a href="https://github.com/LAIXINQUAN/music-search-downloader" target="_blank" rel="noopener">GitHub</a>
+</footer>
+
+<!-- 腾讯宝贝回家寻人数据接口（仅提供数据，不接管页面） -->
+<script src="https://qzone.qq.com/gy/404/data.js"></script>
+<script>
+/**
+ * 公益404页面 — 寻人卡片渲染脚本
+ * 从腾讯宝贝回家 data.js 提供的全局 jsondata.data 中随机取一位走失儿童，
+ * 渲染进自定义 UI，避免引入 page.js（page.js 会接管并重写整页导致自定义布局丢失）。
+ */
+document.addEventListener('DOMContentLoaded', initCharity);
+
+/**
+ * HTML 转义，防止数据中的特殊字符破坏结构（安全措施）
+ * @param {string} str 原始文本
+ * @returns {string} 转义后的安全文本
+ */
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
+ * 初始化公益寻人卡片
+ * 随机展示一位走失儿童信息；数据缺失或加载失败时给出兜底提示。
+ */
+function initCharity() {
+  const card = document.getElementById('charityCard');
+  if (!card) return;
+
+  try {
+    const list = (typeof jsondata !== 'undefined' && Array.isArray(jsondata.data)) ? jsondata.data : [];
+    if (!list.length) throw new Error('寻人数据为空');
+
+    // 随机取一位走失儿童
+    const child = list[Math.floor(Math.random() * list.length)];
+
+    const photo = child.child_pic
+      ? '<img src="' + escapeHtml(child.child_pic) + '" alt="' + escapeHtml(child.name) + '的照片">'
+      : '<span class="cc-placeholder">♪</span>';
+
+    card.innerHTML =
+      '<div class="cc-photo">' + photo + '</div>' +
+      '<div class="cc-info">' +
+        '<div class="cc-name">' + escapeHtml(child.name) + '（' + escapeHtml(child.sex) + '）</div>' +
+        '<div class="cc-meta">' + escapeHtml(child.birth_time) + ' 出生 · ' + escapeHtml(child.lost_time) + ' 失踪</div>' +
+        '<div class="cc-desc">失踪地点：' + escapeHtml(child.lost_place) + '<br>' + escapeHtml(child.child_feature) + '</div>' +
+        '<a class="cc-url" href="' + escapeHtml(child.url) + '" target="_blank" rel="noopener">查看寻人详情 →</a>' +
+      '</div>';
+  } catch (e) {
+    card.innerHTML = '<div class="charity-fallback">寻人信息暂时无法加载，请稍后再试。</div>';
+  }
+}
+</script>
 </body>
 </html>
-<!-- （注：内容由AI生成） -->
