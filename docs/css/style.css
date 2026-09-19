@@ -326,6 +326,61 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   background: rgba(255, 255, 255, 0.03);
 }
 
+/* ===== 语言切换控件 ===== */
+.lang-switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 14px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--transition);
+}
+.lang-switch:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.03);
+}
+.lang-icon { width: 15px; height: 15px; flex: none; }
+.lang-arrow { width: 11px; height: 11px; flex: none; transition: transform 0.2s; }
+.lang-switch.open .lang-arrow { transform: rotate(180deg); }
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 128px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  z-index: 200;
+}
+.lang-switch.open .lang-menu { display: flex; }
+.lang-menu button {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.lang-menu button:hover { background: var(--bg-hover); color: var(--text); }
+.lang-menu button.active { color: var(--accent-light); }
+
 /* ===== Hero Section ===== */
 .hero {
   padding: 160px 0 100px;

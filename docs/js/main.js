@@ -6,6 +6,177 @@
  *       鼠标轨迹粒子、3D卡片光照、下载脉冲波纹、元素视差、Hero粒子交互等
  */
 
+// ===== 多语言 (i18n) =====
+// 当前语言：zh 简体中文 / en English（默认中文，选择结果保存在 localStorage 'qb_lang'）
+let currentLang = 'zh';
+// 打字机文本池（切换语言时更新，供 initTypewriter 读取）
+let __TW_TEXTS = [];
+
+/**
+ * 中英文翻译字典
+ * zh 为默认中文文案，en 为英文翻译；
+ * 含 HTML 的键（heroTitle/a1/dlHint/ftCopy/kbd）配合 data-i18n-html 使用 innerHTML 渲染。
+ */
+const I18N = {
+  zh: {
+    langName: '中文',
+    navFeatures: '功能', navTech: '技术', navChangelog: '更新', navFaq: '常见问题',
+    navInstall: '安装', navDocs: '文档', navDownload: '下载',
+    heroVer: 'Windows · v3.8.0',
+    heroTitle: '在桌面<em>听歌</em>，<br>就这么简单',
+    heroSub: '一个免费开源的 Windows 音乐客户端，聚合多个音乐平台，搜歌、播放、下载全搞定。',
+    typewriter: ['聚合搜索，一键下载', '多平台音源，想听就听', '免费开源，持续更新', 'Windows 桌面音乐客户端'],
+    heroDownload: '下载 v3.8.0', heroDocs: '查看文档', heroSource: '查看源码',
+    wtSearch: '搜索', wtHot: '热门', wtDl: '下载', wtLocal: '本地',
+    featTitle: '能做什么', featDesc: '一个客户端，覆盖你日常听歌的所有需求。',
+    f1Title: '多源聚合搜索', f1Desc: '接入了歌曲宝、酷我、酷狗、QQ音乐、网易云等平台，一首歌能搜出多个来源的结果，不怕找不到。',
+    f2Title: '在线播放 + 音效增强', f2Desc: '搜到直接听，支持 5 段均衡器、母带处理、环绕声效果，还有个炫酷的 3D 粒子频谱可视化。',
+    f3Title: '多音质下载', f3Desc: '标准、高清、无损三种音质随心选，下载列表管理，进度实时显示，缓存到本地随时听。',
+    f4Title: '明暗主题切换', f4Desc: '浅色 / 深色一键切换，晚上听歌不刺眼，白天也清晰。',
+    f5Title: '桌面歌词 + 迷你模式', f5Desc: '悬浮歌词窗口 + 迷你播放器，挂后台也能跟着唱，不占地方。',
+    f6Title: '后台播放 + 通知栏控制', f6Desc: '关了窗口照样放，系统通知栏直接切歌暂停，不打断你的工作流。',
+    s1Label: '音乐平台接入', s2Label: '音质可选', s3Label: 'MB 安装包',
+    techTitle: '技术栈', techDesc: '基于这些技术构建，欢迎贡献代码。',
+    clTitle: '更新日志', clDesc: '每次迭代，都让体验更好一点。',
+    clv38: '任务栏播放 · 全新集成', clv37: '文档与版本发布', clv366: '内容与云 · 全面升级',
+    clv365: '功能修复 & 体验优化', clv360: '音效引擎 & 沉浸模式', clv350: '多平台支持 & 明暗主题', clv300: '首个正式发布',
+    faqTitle: '常见问题', faqDesc: '你可能想知道的。',
+    q1: 'QB音乐收费吗？',
+    a1: '免费版完全免费，基于专有许可发布（仅限非商业用途）。个人使用、学习研究、修改与自用分发均免费；但禁止将本软件或衍生版本用于商业用途。详见 <a href="LICENSE" target="_blank" rel="noopener">许可证</a>。',
+    q2: '支持哪些音乐平台？', a2: '目前接入歌曲宝、酷我音乐、酷狗音乐、QQ音乐、网易云音乐共 5 个平台，搜索结果会聚合展示。',
+    q3: '需要登录或注册吗？', a3: '不需要。打开即用，无需注册账号，不收集任何个人信息。',
+    q4: '下载的音乐在哪？', a4: '默认保存在我的文档下的 QB音乐/downloads 文件夹，可以在设置里修改下载路径。',
+    q5: '支持哪些系统？', a5: '目前仅支持 Windows 10 / 11 桌面端。也可以通过源代码在任意安装了 Node.js 的系统上运行 Web 版本。',
+    instTitle: '开发者上手', instDesc: '克隆仓库，装依赖，跑起来。', copy: '复制', cmtElectron: '# 或者启动桌面客户端',
+    dlTitle: '拿走去用', dlBtn: '下载安装包',
+    dlHint: '或查看 <a href="https://github.com/LAIXINQUAN/music-search-downloader/releases" target="_blank" rel="noopener">所有版本</a>',
+    dlDirect: '直链解析', dlDirectNote: '（供下载工具 / 程序化调用，返回临时直链）：',
+    dlExpire: '直链为临时地址，过期后请重新访问此入口解析。',
+    fbTitle: '下载 QB音乐 Windows 客户端',
+    fbSub: 'v3.8.0 · 390MB · Windows 10 / 11，请选择一个下载源',
+    fbMain: '主要', fbMainName: '飞机盘下载', fbBackup: '备用', fbBackupName: '备用下载源',
+    fbCharity: '公益寻人', fbCharitySub: '宝贝回家 · 帮走失的孩子回家', fbLoading: '正在加载寻人信息…', fbClose: '关闭',
+    ftReleases: 'Releases', ftDocs: '使用与开发文档', ft404: '公益 404',
+    ftCopy: 'QB音乐 专有许可（仅限非商业使用）&copy; LAIXINGQUAN &middot; <a href="LICENSE" target="_blank" rel="noopener">许可证</a>',
+    kbd: '按 <kbd>K</kbd> 开启音乐彩蛋',
+    copied: '已复制', copyFailed: '失败',
+    dlPhoto: '的照片', dlDetail: '详情', dlMissing: '寻人信息暂时无法加载', dlLostAt: '失踪于'
+  },
+  en: {
+    langName: 'English',
+    navFeatures: 'Features', navTech: 'Tech', navChangelog: 'Changelog', navFaq: 'FAQ',
+    navInstall: 'Install', navDocs: 'Docs', navDownload: 'Download',
+    heroVer: 'Windows · v3.8.0',
+    heroTitle: 'Music at your <em>fingertips</em>,<br>right on your desktop',
+    heroSub: 'A free and open-source Windows music client that aggregates multiple platforms. Search, play and download — all in one place.',
+    typewriter: ['Aggregated search, one-click download', 'Multiple sources, listen anytime', 'Free, open source, always updated', 'Windows desktop music client'],
+    heroDownload: 'Download v3.8.0', heroDocs: 'Docs', heroSource: 'Source',
+    wtSearch: 'Search', wtHot: 'Trending', wtDl: 'Downloads', wtLocal: 'Library',
+    featTitle: 'What it does', featDesc: 'One client to cover all your daily listening needs.',
+    f1Title: 'Aggregated Search', f1Desc: 'Integrated with Gequbao, Kuwo, Kugou, QQ Music, NetEase Cloud and more. One song, multiple sources — you will never miss it.',
+    f2Title: 'Streaming + Audio FX', f2Desc: 'Listen on the spot. Supports a 5-band EQ, mastering, surround effects and a cool 3D particle spectrum visualizer.',
+    f3Title: 'Multi-quality Downloads', f3Desc: 'Standard, HD and lossless quality. Manage your download list with real-time progress and cached local playback.',
+    f4Title: 'Light / Dark Themes', f4Desc: 'Switch between light and dark in one tap. Easy on the eyes at night, crisp during the day.',
+    f5Title: 'Desktop Lyrics + Mini Mode', f5Desc: 'Floating lyrics window and a mini player. Keep singing along in the background without taking up space.',
+    f6Title: 'Background Play + Notifications', f6Desc: 'Keeps playing even when the window is closed. Skip or pause right from the system notification.',
+    s1Label: 'Platforms integrated', s2Label: 'Quality options', s3Label: 'MB installer',
+    techTitle: 'Tech Stack', techDesc: 'Built on these technologies — contributions welcome.',
+    clTitle: 'Changelog', clDesc: 'Every iteration makes it a little better.',
+    clv38: 'Taskbar Player · New Integration', clv37: 'Docs & Releases', clv366: 'Content & Cloud · Major Upgrade',
+    clv365: 'Fixes & Polish', clv360: 'Audio Engine & Immersive Mode', clv350: 'More Platforms & Themes', clv300: 'First Release',
+    faqTitle: 'FAQ', faqDesc: 'Questions you might have.',
+    q1: 'Is QB Music free?',
+    a1: 'The free version is completely free, released under a proprietary license (non-commercial use only). Personal use, learning, modification and self-distribution are free; commercial use of the software or its derivatives is prohibited. See <a href="LICENSE" target="_blank" rel="noopener">the license</a>.',
+    q2: 'Which platforms are supported?', a2: 'Currently integrated with 5 platforms: Gequbao, Kuwo, Kugou, QQ Music and NetEase Cloud. Search results are aggregated in one view.',
+    q3: 'Do I need an account?', a3: 'No. Open and use it right away — no registration, and no personal data is collected.',
+    q4: 'Where do downloaded songs go?', a4: 'By default they are saved in the QB音乐/downloads folder under My Documents. You can change the download path in settings.',
+    q5: 'Which systems are supported?', a5: 'Currently Windows 10 / 11 desktop only. You can also run the web version from source on any system with Node.js installed.',
+    instTitle: 'Developer Quick Start', instDesc: 'Clone the repo, install deps, run it.', copy: 'Copy', cmtElectron: '# Or launch the desktop client',
+    dlTitle: 'Get it now', dlBtn: 'Download installer',
+    dlHint: 'or view <a href="https://github.com/LAIXINQUAN/music-search-downloader/releases" target="_blank" rel="noopener">all releases</a>',
+    dlDirect: 'Direct link', dlDirectNote: ' (for download tools / programmatic use, returns a temporary direct link):',
+    dlExpire: 'Direct links are temporary — revisit this page to resolve a new one when it expires.',
+    fbTitle: 'Download QB Music Windows Client',
+    fbSub: 'v3.8.0 · 390MB · Windows 10 / 11, choose a source',
+    fbMain: 'Primary', fbMainName: 'Feijipan', fbBackup: 'Backup', fbBackupName: 'Backup source',
+    fbCharity: 'Charity', fbCharitySub: 'Baobei Huijia · Help lost children return home', fbLoading: 'Loading missing-child info…', fbClose: 'Close',
+    ftReleases: 'Releases', ftDocs: 'Docs', ft404: 'Charity 404',
+    ftCopy: 'QB音乐 Proprietary License (non-commercial use only) &copy; LAIXINGQUAN &middot; <a href="LICENSE" target="_blank" rel="noopener">License</a>',
+    kbd: 'Press <kbd>K</kbd> for a music easter egg',
+    copied: 'Copied', copyFailed: 'Failed',
+    dlPhoto: "'s photo", dlDetail: 'Details', dlMissing: 'Unable to load missing-child info', dlLostAt: 'missing since'
+  }
+};
+
+/**
+ * 应用指定语言到页面
+ * @param {string} lang 语言代码（zh / en）
+ */
+function applyLang(lang) {
+  currentLang = I18N[lang] ? lang : 'zh';
+  const dict = I18N[currentLang];
+  document.documentElement.lang = currentLang === 'en' ? 'en' : 'zh-CN';
+
+  // 遍历所有带 data-i18n 的元素并替换文本（带 data-i18n-html 的用 innerHTML）
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    const key = el.getAttribute('data-i18n');
+    const val = dict[key];
+    if (val == null) return;
+    if (el.hasAttribute('data-i18n-html')) el.innerHTML = val;
+    else el.textContent = val;
+  });
+
+  // 控件上的当前语言名称
+  const cur = document.querySelector('.lang-current');
+  if (cur) cur.textContent = dict.langName;
+
+  // 高亮菜单中当前语言选项
+  document.querySelectorAll('.lang-menu [data-lang]').forEach(function (opt) {
+    opt.classList.toggle('active', opt.getAttribute('data-lang') === currentLang);
+  });
+
+  // 更新打字机文本池并重置打字机
+  if (Array.isArray(dict.typewriter)) {
+    __TW_TEXTS = dict.typewriter.slice();
+    resetTypewriter();
+  }
+
+  // 重新渲染下载弹层公益卡片（刷新详情/失踪于等动态文案）
+  initDlCharity();
+
+  localStorage.setItem('qb_lang', currentLang);
+}
+
+/**
+ * 初始化语言切换控件（右上角 language）
+ * 绑定菜单展开/选择，并应用已保存的语言
+ */
+function initLang() {
+  const sw = document.getElementById('language');
+  if (!sw) return;
+
+  // 选择语言
+  sw.querySelectorAll('.lang-menu [data-lang]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      applyLang(this.getAttribute('data-lang'));
+      sw.classList.remove('open');
+    });
+  });
+
+  // 点击控件主体：展开/收起菜单
+  sw.addEventListener('click', function (e) {
+    if (!e.target.closest('.lang-menu')) sw.classList.toggle('open');
+  });
+
+  // 点击页面其他区域：收起菜单
+  document.addEventListener('click', function (e) {
+    if (!sw.contains(e.target)) sw.classList.remove('open');
+  });
+
+  // 应用本地保存的语言（默认中文）
+  applyLang(localStorage.getItem('qb_lang') || 'zh');
+}
+
 // ===== DOM Ready =====
 document.addEventListener('DOMContentLoaded', () => {
   initPreloader();
@@ -40,6 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initDirectDownload();
   initDlCharity();
   initElementParallax();
+  // 多语言切换（放在最后：应用已保存语言并覆盖动态文本）
+  initLang();
 });
 
 // ===== 0. 预加载动画 =====
@@ -121,39 +294,53 @@ function initBackToTop() {
 }
 
 // ===== 4. 打字机效果 =====
+// 打字机内部状态（全局，供 resetTypewriter 在切换语言时重置）
+let __twEl = null;
+let __twTextIdx = 0, __twCharIdx = 0, __twDeleting = false;
+let __twTimer = null;
+
 function initTypewriter() {
-  const el = document.querySelector('.typewriter-text');
-  if (!el) return;
+  __twEl = document.querySelector('.typewriter-text');
+  if (!__twEl) return;
+  if (!__TW_TEXTS.length) __TW_TEXTS = I18N.zh.typewriter.slice();
+  __twTimer = setTimeout(__twTick, 800);
+}
 
-  const texts = ['聚合搜索，一键下载', '多平台音源，想听就听', '免费开源，持续更新', 'Windows 桌面音乐客户端'];
-  let textIdx = 0, charIdx = 0, isDeleting = false;
+/** 重置打字机（切换语言时调用），从第一条文本重新开始 */
+function resetTypewriter() {
+  clearTimeout(__twTimer);
+  __twTextIdx = 0; __twCharIdx = 0; __twDeleting = false;
+  if (__twEl) {
+    __twEl.textContent = '';
+    __twTimer = setTimeout(__twTick, 800);
+  }
+}
+
+/** 打字机逐字动画循环 */
+function __twTick() {
+  if (!__twEl || !__TW_TEXTS.length) return;
   const typeSpeed = 60, deleteSpeed = 30, pauseTime = 2500;
-
-  function tick() {
-    const current = texts[textIdx];
-    if (isDeleting) {
-      el.textContent = current.substring(0, charIdx - 1);
-      charIdx--;
-    } else {
-      el.textContent = current.substring(0, charIdx + 1);
-      charIdx++;
-    }
-
-    if (!isDeleting && charIdx === current.length) {
-      setTimeout(tick, pauseTime);
-      isDeleting = true;
-      return;
-    }
-    if (isDeleting && charIdx === 0) {
-      isDeleting = false;
-      textIdx = (textIdx + 1) % texts.length;
-      setTimeout(tick, 400);
-      return;
-    }
-    setTimeout(tick, isDeleting ? deleteSpeed : typeSpeed);
+  const current = __TW_TEXTS[__twTextIdx];
+  if (__twDeleting) {
+    __twEl.textContent = current.substring(0, __twCharIdx - 1);
+    __twCharIdx--;
+  } else {
+    __twEl.textContent = current.substring(0, __twCharIdx + 1);
+    __twCharIdx++;
   }
 
-  setTimeout(tick, 800);
+  if (!__twDeleting && __twCharIdx === current.length) {
+    __twTimer = setTimeout(__twTick, pauseTime);
+    __twDeleting = true;
+    return;
+  }
+  if (__twDeleting && __twCharIdx === 0) {
+    __twDeleting = false;
+    __twTextIdx = (__twTextIdx + 1) % __TW_TEXTS.length;
+    __twTimer = setTimeout(__twTick, 400);
+    return;
+  }
+  __twTimer = setTimeout(__twTick, __twDeleting ? deleteSpeed : typeSpeed);
 }
 
 // ===== 5. 数字滚动动画 =====
@@ -239,15 +426,15 @@ function initCopyCode() {
 
   btn.addEventListener('click', () => {
     navigator.clipboard.writeText(rawCommands).then(() => {
-      btn.textContent = '已复制';
+      btn.textContent = I18N[currentLang].copied;
       btn.classList.add('copied');
       setTimeout(() => {
-        btn.textContent = '复制';
+        btn.textContent = I18N[currentLang].copy;
         btn.classList.remove('copied');
       }, 2000);
     }).catch(() => {
-      btn.textContent = '失败';
-      setTimeout(() => { btn.textContent = '复制'; }, 1500);
+      btn.textContent = I18N[currentLang].copyFailed;
+      setTimeout(() => { btn.textContent = I18N[currentLang].copy; }, 1500);
     });
   });
 }
@@ -1270,22 +1457,22 @@ function initDlCharity() {
     // 渲染 4 张寻人卡片（纵向排列，容器可滚轮滚动）
     card.innerHTML = children.map(function (child) {
       const photo = child.child_pic
-        ? '<img src="' + escapeHtml(child.child_pic) + '" alt="' + escapeHtml(child.name) + '的照片">'
+        ? '<img src="' + escapeHtml(child.child_pic) + '" alt="' + escapeHtml(child.name) + I18N[currentLang].dlPhoto + '">'
         : '';
       return (
         '<div class="dl-charity-card">' +
           '<div class="dl-cc-photo">' + photo + '</div>' +
           '<div class="dl-cc-info">' +
             '<div class="dl-cc-name">' + escapeHtml(child.name) + '（' + escapeHtml(child.sex) + '）</div>' +
-            '<div class="dl-cc-meta">' + escapeHtml(child.lost_time) + ' 失踪于 ' + escapeHtml(child.lost_place) + '</div>' +
+            '<div class="dl-cc-meta">' + escapeHtml(child.lost_time) + ' ' + I18N[currentLang].dlLostAt + ' ' + escapeHtml(child.lost_place) + '</div>' +
             '<div class="dl-cc-desc">' + escapeHtml(child.child_feature) + '</div>' +
           '</div>' +
-          '<a class="dl-cc-url" href="' + escapeHtml(child.url) + '" target="_blank" rel="noopener">详情</a>' +
+          '<a class="dl-cc-url" href="' + escapeHtml(child.url) + '" target="_blank" rel="noopener">' + I18N[currentLang].dlDetail + '</a>' +
         '</div>'
       );
     }).join('');
   } catch (e) {
-    card.innerHTML = '<div class="dl-charity-loading">寻人信息暂时无法加载</div>';
+    card.innerHTML = '<div class="dl-charity-loading">' + I18N[currentLang].dlMissing + '</div>';
   }
 }
 

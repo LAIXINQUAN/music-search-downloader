@@ -51,13 +51,25 @@
     <span></span><span></span><span></span>
   </button>
   <div class="topbar-links">
-    <a href="#features" data-section="features">功能</a>
-    <a href="#tech" data-section="tech">技术</a>
-    <a href="#changelog" data-section="changelog">更新</a>
-    <a href="#faq" data-section="faq">常见问题</a>
-    <a href="#install" data-section="install">安装</a>
-    <a href="https://laixinqb.feishu.cn/docx/B3j6dplwFohsFYxI9yQcT9KFnQd" target="_blank" rel="noopener">文档</a>
-    <a href="#download" data-section="download">下载</a>
+    <a href="#features" data-section="features" data-i18n="navFeatures">功能</a>
+    <a href="#tech" data-section="tech" data-i18n="navTech">技术</a>
+    <a href="#changelog" data-section="changelog" data-i18n="navChangelog">更新</a>
+    <a href="#faq" data-section="faq" data-i18n="navFaq">常见问题</a>
+    <a href="#install" data-section="install" data-i18n="navInstall">安装</a>
+    <a href="https://laixinqb.feishu.cn/docx/B3j6dplwFohsFYxI9yQcT9KFnQd" target="_blank" rel="noopener" data-i18n="navDocs">文档</a>
+    <a href="#download" data-section="download" data-i18n="navDownload">下载</a>
+  </div>
+  <!-- 语言切换控件 -->
+  <div class="lang-switch" id="language">
+    <svg class="lang-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+    <span class="lang-current">中文</span>
+    <svg class="lang-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    <div class="lang-menu">
+      <button type="button" data-lang="zh">简体中文</button>
+      <button type="button" data-lang="en">English</button>
+    </div>
   </div>
   <a class="topbar-gh" href="https://github.com/LAIXINQUAN/music-search-downloader" target="_blank" rel="noopener">GitHub</a>
 </nav>
@@ -68,24 +80,24 @@
     <!-- Hero 粒子画布 -->
     <canvas id="heroParticles"></canvas>
     <div class="hero-left reveal">
-      <div class="ver">Windows · v3.8.0</div>
-      <h1>在桌面<em>听歌</em>，<br>就这么简单</h1>
-      <p class="subtitle">一个免费开源的 Windows 音乐客户端，聚合多个音乐平台，搜歌、播放、下载全搞定。</p>
+      <div class="ver" data-i18n="heroVer">Windows · v3.8.0</div>
+      <h1 data-i18n="heroTitle" data-i18n-html>在桌面<em>听歌</em>，<br>就这么简单</h1>
+      <p class="subtitle" data-i18n="heroSub">一个免费开源的 Windows 音乐客户端，聚合多个音乐平台，搜歌、播放、下载全搞定。</p>
       <div class="typewriter-wrap">
         <span class="typewriter-text"></span><span class="cursor"></span>
       </div>
       <div class="hero-btns">
         <a class="btn-primary" href="#download">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          下载 v3.8.0
+          <span data-i18n="heroDownload">下载 v3.8.0</span>
         </a>
         <a class="btn-secondary" href="https://laixinqb.feishu.cn/docx/B3j6dplwFohsFYxI9yQcT9KFnQd" target="_blank" rel="noopener">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
-          查看文档
+          <span data-i18n="heroDocs">查看文档</span>
         </a>
         <a class="btn-secondary" href="https://github.com/LAIXINQUAN/music-search-downloader" target="_blank" rel="noopener">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-          查看源码
+          <span data-i18n="heroSource">查看源码</span>
         </a>
       </div>
     </div>
@@ -98,10 +110,10 @@
           </div>
           <div class="window-body">
             <div class="win-tabs" id="winTabs">
-              <div class="win-tab on" data-tab="search">搜索</div>
-              <div class="win-tab" data-tab="hot">热门</div>
-              <div class="win-tab" data-tab="downloads">下载</div>
-              <div class="win-tab" data-tab="local">本地</div>
+              <div class="win-tab on" data-tab="search" data-i18n="wtSearch">搜索</div>
+              <div class="win-tab" data-tab="hot" data-i18n="wtHot">热门</div>
+              <div class="win-tab" data-tab="downloads" data-i18n="wtDl">下载</div>
+              <div class="win-tab" data-tab="local" data-i18n="wtLocal">本地</div>
             </div>
             <!-- 搜索面板 -->
             <div class="win-panel active" data-panel="search">
@@ -145,8 +157,8 @@
 <div class="section" id="features">
   <div class="wrap">
     <div class="section-label reveal">Features</div>
-    <h2 class="reveal reveal-d1">能做什么</h2>
-    <p class="section-desc reveal reveal-d1">一个客户端，覆盖你日常听歌的所有需求。</p>
+    <h2 class="reveal reveal-d1" data-i18n="featTitle">能做什么</h2>
+    <p class="section-desc reveal reveal-d1" data-i18n="featDesc">一个客户端，覆盖你日常听歌的所有需求。</p>
     <div class="features-grid">
       <div class="feature-card reveal reveal-d1">
         <span class="fc-icon">
@@ -156,8 +168,8 @@
           </svg>
         </span>
         <div class="fc-num">01</div>
-        <h3>多源聚合搜索</h3>
-        <p>接入了歌曲宝、酷我、酷狗、QQ音乐、网易云等平台，一首歌能搜出多个来源的结果，不怕找不到。</p>
+        <h3 data-i18n="f1Title">多源聚合搜索</h3>
+        <p data-i18n="f1Desc">接入了歌曲宝、酷我、酷狗、QQ音乐、网易云等平台，一首歌能搜出多个来源的结果，不怕找不到。</p>
       </div>
       <div class="feature-card reveal reveal-d2">
         <span class="fc-icon">
@@ -167,8 +179,8 @@
           </svg>
         </span>
         <div class="fc-num">02</div>
-        <h3>在线播放 + 音效增强</h3>
-        <p>搜到直接听，支持 5 段均衡器、母带处理、环绕声效果，还有个炫酷的 3D 粒子频谱可视化。</p>
+        <h3 data-i18n="f2Title">在线播放 + 音效增强</h3>
+        <p data-i18n="f2Desc">搜到直接听，支持 5 段均衡器、母带处理、环绕声效果，还有个炫酷的 3D 粒子频谱可视化。</p>
       </div>
       <div class="feature-card reveal reveal-d3">
         <span class="fc-icon">
@@ -178,8 +190,8 @@
           </svg>
         </span>
         <div class="fc-num">03</div>
-        <h3>多音质下载</h3>
-        <p>标准、高清、无损三种音质随心选，下载列表管理，进度实时显示，缓存到本地随时听。</p>
+        <h3 data-i18n="f3Title">多音质下载</h3>
+        <p data-i18n="f3Desc">标准、高清、无损三种音质随心选，下载列表管理，进度实时显示，缓存到本地随时听。</p>
       </div>
       <div class="feature-card reveal reveal-d4">
         <span class="fc-icon">
@@ -189,8 +201,8 @@
           </svg>
         </span>
         <div class="fc-num">04</div>
-        <h3>明暗主题切换</h3>
-        <p>浅色 / 深色一键切换，晚上听歌不刺眼，白天也清晰。</p>
+        <h3 data-i18n="f4Title">明暗主题切换</h3>
+        <p data-i18n="f4Desc">浅色 / 深色一键切换，晚上听歌不刺眼，白天也清晰。</p>
       </div>
       <div class="feature-card reveal reveal-d5">
         <span class="fc-icon">
@@ -200,8 +212,8 @@
           </svg>
         </span>
         <div class="fc-num">05</div>
-        <h3>桌面歌词 + 迷你模式</h3>
-        <p>悬浮歌词窗口 + 迷你播放器，挂后台也能跟着唱，不占地方。</p>
+        <h3 data-i18n="f5Title">桌面歌词 + 迷你模式</h3>
+        <p data-i18n="f5Desc">悬浮歌词窗口 + 迷你播放器，挂后台也能跟着唱，不占地方。</p>
       </div>
       <div class="feature-card reveal reveal-d6">
         <span class="fc-icon">
@@ -212,23 +224,23 @@
           </svg>
         </span>
         <div class="fc-num">06</div>
-        <h3>后台播放 + 通知栏控制</h3>
-        <p>关了窗口照样放，系统通知栏直接切歌暂停，不打断你的工作流。</p>
+        <h3 data-i18n="f6Title">后台播放 + 通知栏控制</h3>
+        <p data-i18n="f6Desc">关了窗口照样放，系统通知栏直接切歌暂停，不打断你的工作流。</p>
       </div>
     </div>
     <!-- 统计数据 -->
     <div class="stats-row reveal reveal-d3">
       <div class="stat-item">
         <div class="stat-num" data-count="6">0</div>
-        <div class="stat-label">音乐平台接入</div>
+        <div class="stat-label" data-i18n="s1Label">音乐平台接入</div>
       </div>
       <div class="stat-item">
         <div class="stat-num" data-count="3">0</div>
-        <div class="stat-label">音质可选</div>
+        <div class="stat-label" data-i18n="s2Label">音质可选</div>
       </div>
       <div class="stat-item">
         <div class="stat-num" data-count="390">0</div>
-        <div class="stat-label">MB 安装包</div>
+        <div class="stat-label" data-i18n="s3Label">MB 安装包</div>
       </div>
     </div>
   </div>
@@ -240,8 +252,8 @@
 <div class="section" id="tech">
   <div class="wrap">
     <div class="section-label reveal">Tech Stack</div>
-    <h2 class="reveal reveal-d1">技术栈</h2>
-    <p class="section-desc reveal reveal-d1">基于这些技术构建，欢迎贡献代码。</p>
+    <h2 class="reveal reveal-d1" data-i18n="techTitle">技术栈</h2>
+    <p class="section-desc reveal reveal-d1" data-i18n="techDesc">基于这些技术构建，欢迎贡献代码。</p>
     <div class="tech-tags reveal reveal-d2">
       <span class="tech-tag">Electron</span>
       <span class="tech-tag">Node.js</span>
@@ -264,12 +276,12 @@
 <div class="section" id="changelog">
   <div class="wrap">
     <div class="section-label reveal">Changelog</div>
-    <h2 class="reveal reveal-d1">更新日志</h2>
-    <p class="section-desc reveal reveal-d1">每次迭代，都让体验更好一点。</p>
+    <h2 class="reveal reveal-d1" data-i18n="clTitle">更新日志</h2>
+    <p class="section-desc reveal reveal-d1" data-i18n="clDesc">每次迭代，都让体验更好一点。</p>
     <div class="changelog-timeline">
       <div class="changelog-item reveal reveal-d1">
         <div class="cl-ver">v3.8.0 <span class="cl-date">2026-09</span></div>
-        <div class="cl-title">任务栏播放 · 全新集成</div>
+        <div class="cl-title" data-i18n="clv38">任务栏播放 · 全新集成</div>
         <ul class="cl-changes">
           <li><span class="cl-tag feat">新增</span> 任务栏播放控制器（MusicBar）深度集成，仅控制 QB 音乐</li>
           <li><span class="cl-tag feat">新增</span> 在线歌词改走 QB 音乐本地 API，不再依赖外部歌词服务</li>
@@ -277,7 +289,7 @@
       </div>
       <div class="changelog-item reveal reveal-d1">
         <div class="cl-ver">v3.7.0 <span class="cl-date">2026-09</span></div>
-        <div class="cl-title">文档与版本发布</div>
+        <div class="cl-title" data-i18n="clv37">文档与版本发布</div>
         <ul class="cl-changes">
           <li><span class="cl-tag feat">新增</span> 在线索引文档：完整使用说明、进阶玩法、开发者说明与详细 API 调用文档（飞书）</li>
           <li><span class="cl-tag feat">新增</span> API 调用字段级说明与 Python / JavaScript 双语言示例</li>
@@ -286,7 +298,7 @@
       </div>
       <div class="changelog-item reveal reveal-d1">
         <div class="cl-ver">v3.6.6 <span class="cl-date">2026-09</span></div>
-        <div class="cl-title">内容与云 · 全面升级</div>
+        <div class="cl-title" data-i18n="clv366">内容与云 · 全面升级</div>
         <ul class="cl-changes">
           <li><span class="cl-tag feat">新增</span> 歌词导入：支持 .lrc / .txt，播放时优先使用导入歌词</li>
           <li><span class="cl-tag feat">新增</span> 皮肤包：一键导出/导入外观配置（主题色、毛玻璃、歌词墙、粒子）</li>
@@ -299,7 +311,7 @@
       </div>
       <div class="changelog-item reveal reveal-d2">
         <div class="cl-ver">v3.6.5 <span class="cl-date">2026-09</span></div>
-        <div class="cl-title">功能修复 & 体验优化</div>
+        <div class="cl-title" data-i18n="clv365">功能修复 & 体验优化</div>
         <ul class="cl-changes">
           <li><span class="cl-tag feat">新增</span> 自动识别歌词：本地歌曲按「歌手 + 歌名」自动匹配（可在设置中关闭）</li>
           <li><span class="cl-tag fix">修复</span> 新建歌单在桌面端无法弹出的问题</li>
@@ -311,7 +323,7 @@
       </div>
       <div class="changelog-item reveal reveal-d2">
         <div class="cl-ver">v3.6.0 <span class="cl-date">2026-07</span></div>
-        <div class="cl-title">音效引擎 & 沉浸模式</div>
+        <div class="cl-title" data-i18n="clv360">音效引擎 & 沉浸模式</div>
         <ul class="cl-changes">
           <li><span class="cl-tag feat">新增</span> 5 段均衡器 + 母带处理 + 环绕声效果</li>
           <li><span class="cl-tag feat">新增</span> 3D 粒子频谱沉浸模式</li>
@@ -321,7 +333,7 @@
       </div>
       <div class="changelog-item reveal reveal-d3">
         <div class="cl-ver">v3.5.0 <span class="cl-date">2026-06</span></div>
-        <div class="cl-title">多平台支持 & 明暗主题</div>
+        <div class="cl-title" data-i18n="clv350">多平台支持 & 明暗主题</div>
         <ul class="cl-changes">
           <li><span class="cl-tag feat">新增</span> 酷狗、网易云音乐平台接入</li>
           <li><span class="cl-tag feat">新增</span> 浅色/深色主题一键切换</li>
@@ -331,7 +343,7 @@
       </div>
       <div class="changelog-item reveal reveal-d4">
         <div class="cl-ver">v3.0.0 <span class="cl-date">2026-05</span></div>
-        <div class="cl-title">首个正式发布</div>
+        <div class="cl-title" data-i18n="clv300">首个正式发布</div>
         <ul class="cl-changes">
           <li><span class="cl-tag feat">新增</span> 歌曲宝、酷我、QQ音乐三平台聚合搜索</li>
           <li><span class="cl-tag feat">新增</span> 标准/高清/无损多音质下载</li>
@@ -349,52 +361,52 @@
 <div class="section" id="faq">
   <div class="wrap">
     <div class="section-label reveal">FAQ</div>
-    <h2 class="reveal reveal-d1">常见问题</h2>
-    <p class="section-desc reveal reveal-d1">你可能想知道的。</p>
+    <h2 class="reveal reveal-d1" data-i18n="faqTitle">常见问题</h2>
+    <p class="section-desc reveal reveal-d1" data-i18n="faqDesc">你可能想知道的。</p>
     <div class="faq-list reveal reveal-d2">
       <div class="faq-item">
         <button class="faq-question">
-          <span>QB音乐收费吗？</span>
+          <span data-i18n="q1">QB音乐收费吗？</span>
           <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="faq-answer">
-          <div class="faq-answer-inner">免费版完全免费，基于专有许可发布（仅限非商业用途）。个人使用、学习研究、修改与自用分发均免费；但禁止将本软件或衍生版本用于商业用途。详见 <a href="LICENSE" target="_blank" rel="noopener">许可证</a>。</div>
+          <div class="faq-answer-inner" data-i18n="a1" data-i18n-html>免费版完全免费，基于专有许可发布（仅限非商业用途）。个人使用、学习研究、修改与自用分发均免费；但禁止将本软件或衍生版本用于商业用途。详见 <a href="LICENSE" target="_blank" rel="noopener">许可证</a>。</div>
         </div>
       </div>
       <div class="faq-item">
         <button class="faq-question">
-          <span>支持哪些音乐平台？</span>
+          <span data-i18n="q2">支持哪些音乐平台？</span>
           <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="faq-answer">
-          <div class="faq-answer-inner">目前接入歌曲宝、酷我音乐、酷狗音乐、QQ音乐、网易云音乐共 5 个平台，搜索结果会聚合展示。</div>
+          <div class="faq-answer-inner" data-i18n="a2">目前接入歌曲宝、酷我音乐、酷狗音乐、QQ音乐、网易云音乐共 5 个平台，搜索结果会聚合展示。</div>
         </div>
       </div>
       <div class="faq-item">
         <button class="faq-question">
-          <span>需要登录或注册吗？</span>
+          <span data-i18n="q3">需要登录或注册吗？</span>
           <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="faq-answer">
-          <div class="faq-answer-inner">不需要。打开即用，无需注册账号，不收集任何个人信息。</div>
+          <div class="faq-answer-inner" data-i18n="a3">不需要。打开即用，无需注册账号，不收集任何个人信息。</div>
         </div>
       </div>
       <div class="faq-item">
         <button class="faq-question">
-          <span>下载的音乐在哪？</span>
+          <span data-i18n="q4">下载的音乐在哪？</span>
           <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="faq-answer">
-          <div class="faq-answer-inner">默认保存在我的文档下的 QB音乐/downloads 文件夹，可以在设置里修改下载路径。</div>
+          <div class="faq-answer-inner" data-i18n="a4">默认保存在我的文档下的 QB音乐/downloads 文件夹，可以在设置里修改下载路径。</div>
         </div>
       </div>
       <div class="faq-item">
         <button class="faq-question">
-          <span>支持哪些系统？</span>
+          <span data-i18n="q5">支持哪些系统？</span>
           <svg class="faq-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="faq-answer">
-          <div class="faq-answer-inner">目前仅支持 Windows 10 / 11 桌面端。也可以通过源代码在任意安装了 Node.js 的系统上运行 Web 版本。</div>
+          <div class="faq-answer-inner" data-i18n="a5">目前仅支持 Windows 10 / 11 桌面端。也可以通过源代码在任意安装了 Node.js 的系统上运行 Web 版本。</div>
         </div>
       </div>
     </div>
@@ -407,10 +419,10 @@
 <div class="section" id="install">
   <div class="wrap">
     <div class="section-label reveal">Get Started</div>
-    <h2 class="reveal reveal-d1">开发者上手</h2>
-    <p class="section-desc reveal reveal-d1">克隆仓库，装依赖，跑起来。</p>
+    <h2 class="reveal reveal-d1" data-i18n="instTitle">开发者上手</h2>
+    <p class="section-desc reveal reveal-d1" data-i18n="instDesc">克隆仓库，装依赖，跑起来。</p>
     <div class="code-block reveal reveal-d2">
-      <button class="copy-btn">复制</button>
+      <button class="copy-btn" data-i18n="copy">复制</button>
       <div class="cb-header"><span></span><span></span><span></span><div class="cbt">Terminal</div></div>
       <div class="cb-body">
         <div><span class="prompt">$</span> <span class="cmd">git clone https://github.com/LAIXINQUAN/music-search-downloader.git</span></div>
@@ -424,7 +436,7 @@
         <div><span class="prompt">$</span> <span class="cmd">npm start</span></div>
         <div><span class="out">服务已启动: http://localhost:3000</span></div>
         <div>&nbsp;</div>
-        <div><span class="comment"># 或者启动桌面客户端</span></div>
+        <div><span class="comment" data-i18n="cmtElectron"># 或者启动桌面客户端</span></div>
         <div><span class="prompt">$</span> <span class="cmd">npm run electron</span></div>
       </div>
     </div>
@@ -436,7 +448,7 @@
   <div class="wrap">
     <div class="download-center">
       <div class="section-label reveal">Download</div>
-      <h2 class="reveal reveal-d1" style="margin-bottom:40px">拿走去用</h2>
+      <h2 class="reveal reveal-d1" style="margin-bottom:40px" data-i18n="dlTitle">拿走去用</h2>
       <div class="download-box reveal reveal-d2">
         <div class="ver">v3.8.0</div>
         <h3>QB音乐 Windows 客户端</h3>
@@ -446,15 +458,15 @@
         </div>
         <a class="dl-btn" href="https://share.feijipan.com/s/c274tgA9" data-share="https://share.feijipan.com/s/c274tgA9" target="_blank" rel="noopener">
           <svg class="icon-dl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span class="dl-label">下载安装包</span>
+          <span class="dl-label" data-i18n="dlBtn">下载安装包</span>
         </a>
-        <div class="hint">或查看 <a href="https://github.com/LAIXINQUAN/music-search-downloader/releases" target="_blank" rel="noopener">所有版本</a></div>
+        <div class="hint" data-i18n="dlHint" data-i18n-html>或查看 <a href="https://github.com/LAIXINQUAN/music-search-downloader/releases" target="_blank" rel="noopener">所有版本</a></div>
         <div class="direct-hint">
-          <strong>直链解析</strong>（供下载工具 / 程序化调用，返回临时直链）：
+          <strong data-i18n="dlDirect">直链解析</strong><span data-i18n="dlDirectNote">（供下载工具 / 程序化调用，返回临时直链）：</span>
           <br>
           <code>https://jx.fsapk.xx.kg/?url=https://share.feijipan.com/s/c274tgA9&amp;id=59470337199</code>
           <br>
-          <span class="direct-note">直链为临时地址，过期后请重新访问此入口解析。</span>
+          <span class="direct-note" data-i18n="dlExpire">直链为临时地址，过期后请重新访问此入口解析。</span>
         </div>
       </div>
     </div>
@@ -469,28 +481,28 @@
         <path d="M24 6 L24 30"/><polyline points="16 22 24 30 32 22"/><path d="M10 38 L38 38"/>
       </svg>
     </div>
-    <h3>下载 QB音乐 Windows 客户端</h3>
-    <p class="dl-fallback-sub">v3.8.0 · 390MB · Windows 10 / 11，请选择一个下载源</p>
+    <h3 data-i18n="fbTitle">下载 QB音乐 Windows 客户端</h3>
+    <p class="dl-fallback-sub" data-i18n="fbSub">v3.8.0 · 390MB · Windows 10 / 11，请选择一个下载源</p>
     <div class="dl-links">
       <a class="dl-link primary" href="https://share.feijipan.com/n/OYU4TmP" target="_blank" rel="noopener">
-        <span class="dl-link-tag">主要</span>
-        <span class="dl-link-text">飞机盘下载</span>
+        <span class="dl-link-tag" data-i18n="fbMain">主要</span>
+        <span class="dl-link-text" data-i18n="fbMainName">飞机盘下载</span>
       </a>
       <a class="dl-link backup" href="https://aaalai.298.run/" target="_blank" rel="noopener">
-        <span class="dl-link-tag">备用</span>
-        <span class="dl-link-text">备用下载源</span>
+        <span class="dl-link-tag" data-i18n="fbBackup">备用</span>
+        <span class="dl-link-text" data-i18n="fbBackupName">备用下载源</span>
       </a>
     </div>
     <div class="dl-charity">
       <div class="dl-charity-head">
-        <span class="dl-charity-tag">公益寻人</span>
-        <span>宝贝回家 · 帮走失的孩子回家</span>
+        <span class="dl-charity-tag" data-i18n="fbCharity">公益寻人</span>
+        <span data-i18n="fbCharitySub">宝贝回家 · 帮走失的孩子回家</span>
       </div>
       <div id="dlCharityCard" class="dl-charity-list">
-        <div class="dl-charity-loading">正在加载寻人信息…</div>
+        <div class="dl-charity-loading" data-i18n="fbLoading">正在加载寻人信息…</div>
       </div>
     </div>
-    <button class="dl-fallback-close" id="dlFallbackClose" aria-label="关闭">关闭</button>
+    <button class="dl-fallback-close" id="dlFallbackClose" aria-label="关闭" data-i18n="fbClose">关闭</button>
   </div>
 </div>
 
@@ -500,11 +512,11 @@
     <div class="footer-links">
       <a href="https://github.com/LAIXINQUAN" target="_blank" rel="noopener">LAIXINQUAN</a>
       <a href="https://github.com/LAIXINQUAN/music-search-downloader" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://github.com/LAIXINQUAN/music-search-downloader/releases" target="_blank" rel="noopener">Releases</a>
-      <a href="https://laixinqb.feishu.cn/docx/B3j6dplwFohsFYxI9yQcT9KFnQd" target="_blank" rel="noopener">使用与开发文档</a>
-      <a href="./404" rel="noopener">公益 404</a>
+      <a href="https://github.com/LAIXINQUAN/music-search-downloader/releases" target="_blank" rel="noopener" data-i18n="ftReleases">Releases</a>
+      <a href="https://laixinqb.feishu.cn/docx/B3j6dplwFohsFYxI9yQcT9KFnQd" target="_blank" rel="noopener" data-i18n="ftDocs">使用与开发文档</a>
+      <a href="./404" rel="noopener" data-i18n="ft404">公益 404</a>
     </div>
-    <div class="footer-copy">QB音乐 专有许可（仅限非商业使用）&copy; LAIXINGQUAN &middot; <a href="LICENSE" target="_blank" rel="noopener">许可证</a></div>
+    <div class="footer-copy" data-i18n="ftCopy" data-i18n-html>QB音乐 专有许可（仅限非商业使用）&copy; LAIXINGQUAN &middot; <a href="LICENSE" target="_blank" rel="noopener">许可证</a></div>
   </div>
 </div>
 
@@ -518,7 +530,7 @@
 <div class="cursor-ring"></div>
 
 <!-- 键盘快捷键提示 -->
-<div class="kbd-hint">按 <kbd>K</kbd> 开启音乐彩蛋</div>
+<div class="kbd-hint" data-i18n="kbd">按 <kbd>K</kbd> 开启音乐彩蛋</div>
 
 <!-- 腾讯宝贝回家寻人数据接口（供下载弹层公益卡片渲染） -->
 <script src="https://qzone.qq.com/gy/404/data.js"></script>
