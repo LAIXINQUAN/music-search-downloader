@@ -31,7 +31,8 @@
 }
 
 /* ===== Font Imports ===== */
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@400;600;700&display=swap');
+/* 说明：不使用外部字体 CDN（Google Fonts 在国内不可用，会导致部分电脑加载卡顿），
+   直接回退到系统字体栈，保证任何网络环境下都能秒开。 */
 
 /* ===== Reset ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
