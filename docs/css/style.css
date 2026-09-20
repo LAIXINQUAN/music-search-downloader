@@ -335,6 +335,79 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   background: rgba(255, 255, 255, 0.03);
 }
 
+/* ===== 镜像站提示横幅（仅 Cloudflare Pages 镜像显示） ===== */
+.mirror-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 101;               /* 高于 topbar 的 100 */
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 48px;            /* 左右留出关闭按钮与边缘间距 */
+  background: linear-gradient(90deg, #ff6b4a, #a78bfa);
+  color: #fff;
+  font-size: 13px;
+}
+.mirror-banner[hidden] { display: none; }
+/* 横幅出现时，将固定导航整体下移，避免互相遮挡 */
+body.has-mirror-banner .topbar { top: 40px; }
+.mirror-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  min-width: 0;
+}
+.mirror-badge {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+.mirror-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mirror-link {
+  flex: none;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.2s;
+}
+.mirror-link:hover { opacity: 0.85; }
+.mirror-close {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.mirror-close:hover { background: rgba(255, 255, 255, 0.32); }
+/* 移动端：横幅文字收紧 */
+@media (max-width: 560px) {
+  .mirror-banner { padding: 0 40px; font-size: 12px; }
+  .mirror-text { max-width: 46vw; }
+}
+
 /* ===== 语言切换控件 ===== */
 .lang-switch {
   position: relative;

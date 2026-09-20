@@ -59,6 +59,7 @@ const I18N = {
     ftReleases: 'Releases', ftDocs: '使用与开发文档', ft404: '公益 404',
     ftCopy: 'QB音乐 专有许可（仅限非商业使用）&copy; LAIXINGQUAN &middot; <a href="LICENSE" target="_blank" rel="noopener">许可证</a>',
     kbd: '按 <kbd>K</kbd> 开启音乐彩蛋',
+    mirrorBadge: '镜像', mirrorText: '您正在访问 Cloudflare 镜像站，内容与 GitHub 源站同步。', mirrorLink: '前往 GitHub 源站', mirrorClose: '关闭提示',
     copied: '已复制', copyFailed: '失败',
     dlPhoto: '的照片', dlDetail: '详情', dlMissing: '寻人信息暂时无法加载', dlLostAt: '失踪于'
   },
@@ -103,6 +104,7 @@ const I18N = {
     ftReleases: 'Releases', ftDocs: 'Docs', ft404: 'Charity 404',
     ftCopy: 'QB音乐 Proprietary License (non-commercial use only) &copy; LAIXINGQUAN &middot; <a href="LICENSE" target="_blank" rel="noopener">License</a>',
     kbd: 'Press <kbd>K</kbd> for a music easter egg',
+    mirrorBadge: 'Mirror', mirrorText: 'You are viewing a Cloudflare mirror — content is synced with the GitHub origin.', mirrorLink: 'Visit GitHub origin', mirrorClose: 'Dismiss',
     copied: 'Copied', copyFailed: 'Failed',
     dlPhoto: "'s photo", dlDetail: 'Details', dlMissing: 'Unable to load missing-child info', dlLostAt: 'missing since'
   }
@@ -177,6 +179,34 @@ function initLang() {
   applyLang(localStorage.getItem('qb_lang') || 'zh');
 }
 
+/**
+ * 镜像站提示横幅：检测当前域名是否为 Cloudflare Pages 镜像（music-search-downloader.pages.dev 及其子域），
+ * 是则显示「镜像站」提示并提供 GitHub 源站跳转链接；
+ * 用户点击关闭后记住状态（localStorage 'qb_mirror_banner_closed'），下次不再显示。
+ */
+function initMirrorBanner() {
+  const banner = document.getElementById('mirrorBanner');
+  if (!banner) return;
+
+  // 仅 Cloudflare Pages 镜像域名显示（含部署哈希子域，如 e2396949.music-search-downloader.pages.dev）
+  const isMirror = /(^|\.)music-search-downloader\.pages\.dev$/i.test(location.hostname);
+  if (!isMirror) return;
+  if (localStorage.getItem('qb_mirror_banner_closed') === '1') return;
+
+  // 显示横幅，并将顶部导航下移避免遮挡
+  banner.hidden = false;
+  document.body.classList.add('has-mirror-banner');
+
+  const closeBtn = document.getElementById('mirrorClose');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function () {
+      banner.hidden = true;
+      document.body.classList.remove('has-mirror-banner');
+      localStorage.setItem('qb_mirror_banner_closed', '1');
+    });
+  }
+}
+
 // ===== DOM Ready =====
 document.addEventListener('DOMContentLoaded', () => {
   initPreloader();
@@ -211,6 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initDirectDownload();
   initDlCharity();
   initElementParallax();
+  // 镜像站提示横幅（需在 initLang 前检测域名，文案由 initLang 统一填充）
+  initMirrorBanner();
   // 多语言切换（放在最后：应用已保存语言并覆盖动态文本）
   initLang();
 });

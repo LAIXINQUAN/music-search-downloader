@@ -45,6 +45,16 @@
 </head>
 <body>
 
+<!-- 镜像站提示横幅（仅 Cloudflare Pages 镜像域名显示，GitHub 源站不显示） -->
+<div class="mirror-banner" id="mirrorBanner" hidden>
+  <div class="mirror-banner-inner">
+    <span class="mirror-badge" data-i18n="mirrorBadge">镜像</span>
+    <span class="mirror-text" data-i18n="mirrorText">您正在访问 Cloudflare 镜像站，内容与 GitHub 源站同步。</span>
+    <a class="mirror-link" href="https://laixinquan.github.io/music-search-downloader/" data-i18n="mirrorLink">前往 GitHub 源站</a>
+    <button class="mirror-close" id="mirrorClose" type="button" aria-label="关闭提示" data-i18n="mirrorClose">×</button>
+  </div>
+</div>
+
 <!-- 滚动进度条 -->
 <div class="scroll-progress-bar"></div>
 
