@@ -182,6 +182,7 @@ function initLang() {
 /**
  * 镜像站提示横幅：检测当前域名是否为 Cloudflare Pages 镜像（music-search-downloader.pages.dev 及其子域），
  * 是则显示「镜像站」提示并提供 GitHub 源站跳转链接；
+ * 同时将 canonical / og:url 切换为镜像站自身地址（源站保持 GitHub 地址），便于搜索引擎收录两端；
  * 用户点击关闭后记住状态（localStorage 'qb_mirror_banner_closed'），下次不再显示。
  */
 function initMirrorBanner() {
@@ -191,6 +192,14 @@ function initMirrorBanner() {
   // 仅 Cloudflare Pages 镜像域名显示（含部署哈希子域，如 e2396949.music-search-downloader.pages.dev）
   const isMirror = /(^|\.)music-search-downloader\.pages\.dev$/i.test(location.hostname);
   if (!isMirror) return;
+
+  // 镜像域名下，将 canonical 与 og:url 指向镜像站自身地址（SEO 按域名差异化）
+  const MIRROR_URL = 'https://music-search-downloader.pages.dev/';
+  const canonical = document.getElementById('canonicalLink');
+  if (canonical) canonical.href = MIRROR_URL;
+  const ogUrl = document.getElementById('ogUrl');
+  if (ogUrl) ogUrl.content = MIRROR_URL;
+
   if (localStorage.getItem('qb_mirror_banner_closed') === '1') return;
 
   // 显示横幅，并将顶部导航下移避免遮挡
