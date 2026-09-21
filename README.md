@@ -16,7 +16,7 @@
 | 源代码 | [GitHub 仓库](https://github.com/LAIXINGQUAN/music-search-downloader) | 克隆后自行构建 |
 
 > 安装包约 390~400MB，包含完整 Electron 运行时，下载后双击即可安装。
-
+2026-9-21-github page总访问量10473584次
 ## 功能特性
 
 - 🔍 **多源搜索** - 支持歌曲宝、酷我、酷狗、QQ音乐、网易云音乐等多平台搜索
