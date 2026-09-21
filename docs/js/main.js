@@ -59,6 +59,7 @@ const I18N = {
     ftReleases: 'Releases', ftDocs: '使用与开发文档', ft404: '公益 404',
     ftCopy: 'QB音乐 专有许可（仅限非商业使用）&copy; LAIXINGQUAN &middot; <a href="LICENSE" target="_blank" rel="noopener">许可证</a>',
     kbd: '按 <kbd>K</kbd> 开启音乐彩蛋',
+    ftStats: '访问统计',
     mirrorBadge: '镜像', mirrorText: '您正在访问 Cloudflare 镜像站，内容与 GitHub 源站同步。', mirrorLink: '前往 GitHub 源站', mirrorClose: '关闭提示',
     copied: '已复制', copyFailed: '失败',
     dlPhoto: '的照片', dlDetail: '详情', dlMissing: '寻人信息暂时无法加载', dlLostAt: '失踪于'
@@ -104,6 +105,7 @@ const I18N = {
     ftReleases: 'Releases', ftDocs: 'Docs', ft404: 'Charity 404',
     ftCopy: 'QB音乐 Proprietary License (non-commercial use only) &copy; LAIXINGQUAN &middot; <a href="LICENSE" target="_blank" rel="noopener">License</a>',
     kbd: 'Press <kbd>K</kbd> for a music easter egg',
+    ftStats: 'Site Stats',
     mirrorBadge: 'Mirror', mirrorText: 'You are viewing a Cloudflare mirror — content is synced with the GitHub origin.', mirrorLink: 'Visit GitHub origin', mirrorClose: 'Dismiss',
     copied: 'Copied', copyFailed: 'Failed',
     dlPhoto: "'s photo", dlDetail: 'Details', dlMissing: 'Unable to load missing-child info', dlLostAt: 'missing since'

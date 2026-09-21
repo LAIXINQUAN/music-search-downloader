@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>访问统计 · QB音乐</title>
+<meta name="description" content="QB音乐 项目主页访问统计">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  /* ============================================================
+     访问统计二级页 — 暗色风格，与主站一致
+     ============================================================ */
+  :root {
+    --bg: #0a0a0f;
+    --bg-card: #14141e;
+    --border: #1e1e2e;
+    --border-hover: #2a2a40;
+    --text: #e2e2ea;
+    --text-secondary: #8686a0;
+    --text-muted: #585870;
+    --accent: #ff6b4a;
+    --accent-light: #ff8a6f;
+    --accent-glow: rgba(255, 107, 74, 0.15);
+    --radius-lg: 16px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI Variable Text', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text-secondary);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 镜像提示条（与主站横幅一致） */
+  .mirror-bar {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #fff;
+    background: linear-gradient(90deg, #ff6b4a, #a78bfa);
+  }
+  .mirror-bar.show { display: flex; }
+  .mirror-bar .tag { font-weight: 700; }
+
+  /* 顶栏 */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar .back {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+  .topbar .back:hover { color: var(--accent-light); }
+  .topbar h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .wrap {
+    flex: 1;
+    width: 100%;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 34px 24px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 30px 34px;
+  }
+  .card h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card h2::before {
+    content: "";
+    width: 4px;
+    height: 16px;
+    border-radius: 2px;
+    background: var(--accent);
+  }
+
+  /* 总访问量 */
+  .total-num {
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .total-num em {
+    font-style: normal;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-left: 10px;
+  }
+  .card .sub { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
+
+  /* 位置统计 */
+  .loc-frame {
+    position: relative;
+    min-height: 340px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #0e0e16;
+    overflow: hidden;
+  }
+  .loc-iframe {
+    display: block;
+    width: 100%;
+    height: 420px;
+    border: none;
+  }
+  .loc-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .loc-placeholder .small { font-size: 12px; opacity: 0.75; max-width: 380px; }
+
+  .page-foot {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding-top: 8px;
+  }
+
+  @media (max-width: 640px) {
+    .total-num { font-size: 46px; }
+    .card { padding: 22px 20px; }
+    .loc-iframe { height: 360px; }
+    .topbar h1 { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 镜像站提示条（仅镜像域名显示） -->
+<div class="mirror-bar" id="mirrorBar">
+  <span class="tag">镜像</span>
+  <span>您正在访问 Cloudflare 镜像站，内容与 GitHub 源站同步。</span>
+</div>
+
+<header class="topbar">
+  <a class="back" href="./">← 返回主页</a>
+  <h1>访问统计</h1>
+</header>
+
+<main class="wrap">
+
+  <section class="card">
+    <h2>总访问量</h2>
+    <div class="total-num"><span id="busuanzi_value_site_pv">—</span><em>次</em></div>
+    <p class="sub">自统计启用之日起的累计页面访问次数（由不蒜子提供）</p>
+  </section>
+
+  <section class="card">
+    <h2>访问位置分布</h2>
+    <div class="loc-frame" id="locFrame">
+      <div class="loc-placeholder" id="locPlaceholder">
+        <p>位置统计尚未启用</p>
+        <p class="small">注册 StatCounter（statcounter.com，免费）后将统计项目编号填入本页脚本常量，即可显示按地区分布的访问图表。</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="page-foot">© LAIXINGQUAN · QB音乐 专有许可（仅限非商业使用）</div>
+
+</main>
+
+<!-- 不蒜子：总访问量统计 -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<script>
+  /* ============================================================
+     位置统计（StatCounter，可选）
+     使用步骤：
+       1. 注册 https://statcounter.com 免费账号，添加本项目网站；
+       2. 把统计项目 id 填入 STATCOUNTER_PROJECT（形如 "12345678"），
+          把安全码填入 STATCOUNTER_SECURITY（形如 "abcd1234"）；
+       3. 保存并重新部署，统计页即可显示访问位置分布图表。
+     留空则仅显示总访问量。
+     ============================================================ */
+  var STATCOUNTER_PROJECT = "13356075";   // ← StatCounter project id
+  var STATCOUNTER_SECURITY = "785e18fe";  // ← StatCounter security code
+
+  (function () {
+    // 镜像站提示
+    var isMirror = /(^|\.)music-search-downloader\.pages\.dev$/i.test(location.hostname);
+    if (isMirror) document.getElementById("mirrorBar").classList.add("show");
+
+    // 位置统计
+    if (!STATCOUNTER_PROJECT) return;
+    // 埋点脚本
+    window.sc_project = STATCOUNTER_PROJECT;
+    window.sc_invisible = 1;
+    window.sc_security = STATCOUNTER_SECURITY;
+    var s = document.createElement("script");
+    s.type = "text/javascript";
+    s.src = "https://www.statcounter.com/counter/counter.js";
+    document.head.appendChild(s);
+    // 公开统计图表（含按地区分布，guest 免登录访问）
+    var frame = document.createElement("iframe");
+    frame.className = "loc-iframe";
+    frame.src = "https://statcounter.com/p" + STATCOUNTER_PROJECT + "/summary/?guest=1";
+    frame.title = "访问位置统计";
+    document.getElementById("locFrame").appendChild(frame);
+    var ph = document.getElementById("locPlaceholder");
+    if (ph) ph.style.display = "none";
+  })();
+</script>
+
+</body>
+</html>
