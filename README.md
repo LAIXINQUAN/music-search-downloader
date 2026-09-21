@@ -5,6 +5,9 @@
 
 一款基于 Electron + Express 的 Windows 桌面音乐搜索与下载客户端，支持多平台音乐源搜索、在线播放和下载。
 
+#更新页面github page:[GitHub 仓库](https://laixinquan.github.io/music-search-downloader/)
+
+#镜像站:[链接](https://music-search-downloader.pages.dev/)
 ## 下载安装
 
 | 版本 | 下载链接 | 说明 |
