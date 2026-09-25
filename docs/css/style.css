@@ -2178,3 +2178,12 @@ body.has-mirror-banner .topbar { top: 40px; }
   .dl-charity-card { flex-wrap: wrap; }
   .dl-cc-url { margin-left: 0; width: 100%; text-align: center; }
 }
+
+/* ===== 触屏设备：可点击元素最小命中区 48px（SEO 移动友好性） ===== */
+@media (pointer: coarse) {
+  .footer-links a,
+  .footer-btn,
+  .nav-links a,
+  .topbar-gh { min-height: 48px; display: inline-flex; align-items: center; }
+  .footer-links a { padding: 8px 2px; }
+}
