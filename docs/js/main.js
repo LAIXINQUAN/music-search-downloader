@@ -1500,7 +1500,7 @@ function initDlCharity() {
     // 渲染 4 张寻人卡片（纵向排列，容器可滚轮滚动）
     card.innerHTML = children.map(function (child) {
       const photo = child.child_pic
-        ? '<img src="' + escapeHtml(child.child_pic) + '" alt="' + escapeHtml(child.name) + I18N[currentLang].dlPhoto + '">'
+        ? '<img loading="lazy" src="' + escapeHtml(child.child_pic) + '" alt="' + escapeHtml(child.name) + I18N[currentLang].dlPhoto + '">'
         : '';
       return (
         '<div class="dl-charity-card">' +
