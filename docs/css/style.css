@@ -1290,32 +1290,6 @@ body.has-mirror-banner .topbar { top: 40px; }
   color: var(--accent-light);
   font-weight: 500;
 }
-.download-box .direct-hint {
-  margin-top: 14px;
-  padding: 12px 14px;
-  font-size: 12px;
-  line-height: 1.7;
-  color: var(--text-muted);
-  text-align: left;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-}
-.download-box .direct-hint code {
-  font-family: Consolas, "Courier New", monospace;
-  font-size: 11px;
-  word-break: break-all;
-  color: var(--accent-light);
-  background: var(--bg-code, rgba(127,127,127,0.12));
-  padding: 2px 6px;
-  border-radius: 5px;
-}
-.download-box .direct-hint .direct-note {
-  display: inline-block;
-  margin-top: 4px;
-  color: var(--text-muted);
-  opacity: 0.85;
-}
 
 /* ===== 下载按钮加载态 ===== */
 .dl-btn.loading {
