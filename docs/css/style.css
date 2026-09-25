@@ -2179,11 +2179,25 @@ body.has-mirror-banner .topbar { top: 40px; }
   .dl-cc-url { margin-left: 0; width: 100%; text-align: center; }
 }
 
-/* ===== 触屏设备：可点击元素最小命中区 48px（SEO 移动友好性） ===== */
-@media (pointer: coarse) {
-  .footer-links a,
-  .footer-btn,
-  .nav-links a,
-  .topbar-gh { min-height: 48px; display: inline-flex; align-items: center; }
-  .footer-links a { padding: 8px 2px; }
+/* ===== 可点击元素最小命中区 48×48px（SEO 移动友好性，全设备生效） =====
+   说明：将最小点击区域从「仅触屏设备」提升为所有设备统一生效，
+   确保 SEO 工具的移动友好性检测（默认桌面 UA 无 pointer:coarse）也能通过。 */
+.footer-links a,
+.footer-btn,
+.nav-links a,
+.topbar-gh,
+.lang-switch,
+.copy-btn,
+.back-top,
+.mobile-menu-btn {
+  min-height: 48px;
+  min-width: 48px;
+  display: inline-flex;
+  align-items: center;
 }
+.topbar-links a {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+}
+.footer-links a { padding: 8px 2px; }
