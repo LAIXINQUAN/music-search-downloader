@@ -248,6 +248,41 @@
     var ph = document.getElementById("locPlaceholder");
     if (ph) ph.style.display = "none";
   })();
+
+  /* ============================================================
+     统计服务降级处理（第三方服务故障时避免无限加载）
+     1) 不蒜子 API 不可用时，10 秒后把"总访问量"提示为暂不可用；
+     2) 位置统计 iframe 加载完成前显示"加载中"，超时显示提示。
+     ============================================================ */
+  (function () {
+    // 总访问量：不蒜子 10 秒内未填充数据则提示服务不可用
+    var pv = document.getElementById("busuanzi_value_site_pv");
+    var sub = document.querySelector(".card .sub");
+    setTimeout(function () {
+      if (pv && pv.textContent.replace(/\s/g, "") === "—") {
+        if (sub) sub.textContent = "统计服务（不蒜子）暂时不可用，请稍后刷新页面重试。";
+      }
+    }, 10000);
+  })();
+
+  (function () {
+    // 位置统计：iframe 加载完成前显示"加载中"，15 秒未完成则提示超时
+    var frame = document.querySelector(".loc-iframe");
+    var loc = document.getElementById("locFrame");
+    if (!frame || !loc) return;
+    var tip = document.createElement("div");
+    tip.className = "loc-placeholder";
+    tip.innerHTML = "<p>位置统计加载中…</p>";
+    loc.insertBefore(tip, frame);
+    frame.addEventListener("load", function () {
+      if (tip.parentNode) tip.parentNode.removeChild(tip);
+    });
+    setTimeout(function () {
+      if (tip.parentNode) {
+        tip.innerHTML = "<p>位置统计加载超时</p><p class=\"small\">StatCounter 服务响应较慢，请稍后刷新重试。</p>";
+      }
+    }, 15000);
+  })();
 </script>
 
 </body>
